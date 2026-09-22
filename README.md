@@ -1,11 +1,8 @@
-# LunchRoute: Smart Rider Dispatch
+# LunchRoute
 
-เว็บจำลองระบบจัดเส้นทางและแบ่งงานไรเดอร์สำหรับร้านข้าวกล่องเดลิเวอรี ออกแบบจากโจทย์ `Project.pdf` และเนื้อหาที่เรียนใน Obsidian vault:
+ระบบจัดการออเดอร์และวางแผนเส้นทางส่งอาหารกลางวันสำหรับร้านข้าวกล่อง รองรับการจัดข้อมูลลูกค้า รับออเดอร์ แบ่งงานไรเดอร์ไม่เกิน 3 จุดต่อรอบ และบันทึกสถานะส่งสำเร็จ
 
-- TypeScript: types, arrays, functions, class/model, control statements
-- Angular/UI concepts: component-style sections, data binding, conditional display, routing-like tabs
-- Data sharing: local state and localStorage persistence
-- NodeJS Web API concepts: CRUD, request/response shape, status, CORS/JWT/deployment vocabulary
+ข้อมูลทั้งหมดบันทึกผ่าน Node.js API ลงใน `data/store.json` โดยอัตโนมัติ
 
 ## Run
 
@@ -14,8 +11,11 @@ npm install
 npm run dev
 ```
 
+เปิด `http://127.0.0.1:5173`
+
 ## Build
 
 ```bash
 npm run build
+npm start
 ```

@@ -1,571 +1,308 @@
 import './styles.css';
+import { createIcons, Bike, Check, ChevronRight, CircleDollarSign, Clock3, LayoutDashboard, Map, MapPin, Menu, PackageCheck, Phone, Plus, Route, Search, Trash2, Users, Utensils, X } from 'lucide';
+import type { Customer, Order, Store, Trip } from './types.ts';
 
-type Customer = {
-  id: number;
-  name: string;
-  phone: string;
-  x: number;
-  y: number;
-  zone: string;
-};
-
-type Order = {
-  id: number;
-  customerId: number;
-  boxes: number;
-  note: string;
-};
-
-type RiderRoute = {
-  id: number;
-  code: string;
-  color: string;
-  orders: Order[];
-  stops: Customer[];
-  distanceKm: number;
-  minutes: number;
-  deliveryCost: number;
-  revenue: number;
-  profit: number;
-};
-
-type AppState = {
-  customers: Customer[];
-  orders: Order[];
-  selected: 'dashboard' | 'customers' | 'orders' | 'routes' | 'rider' | 'api';
-  activeCode: string;
-  routeVersion: number;
-};
-
-const shop = { x: 50, y: 52 };
-const pricePerBox = 65;
-const foodCostPerBox = 40;
-const riderBaseFee = 15;
-const riderSpeedKmH = 30;
-const colors = ['#ef4444', '#16a34a', '#2563eb', '#f59e0b', '#7c3aed', '#0891b2'];
-
-const seedCustomers: Customer[] = [
-  { id: 1, name: 'คุณเอ', phone: '081-234-1001', x: 18, y: 25, zone: 'หอพักหน้ามอ' },
-  { id: 2, name: 'คุณบี', phone: '081-234-1002', x: 32, y: 18, zone: 'คณะวิทย์' },
-  { id: 3, name: 'คุณซี', phone: '081-234-1003', x: 70, y: 20, zone: 'ตลาดน้อย' },
-  { id: 4, name: 'คุณดี', phone: '081-234-1004', x: 82, y: 42, zone: 'หอใน' },
-  { id: 5, name: 'คุณอี', phone: '081-234-1005', x: 68, y: 74, zone: 'คณะบัญชี' },
-  { id: 6, name: 'คุณเอฟ', phone: '081-234-1006', x: 42, y: 82, zone: 'ประตู 2' },
-  { id: 7, name: 'คุณจี', phone: '081-234-1007', x: 20, y: 68, zone: 'กังสดาล' },
-  { id: 8, name: 'คุณเอช', phone: '081-234-1008', x: 56, y: 28, zone: 'หอพักหลังมอ' },
-  { id: 9, name: 'คุณไอ', phone: '081-234-1009', x: 88, y: 66, zone: 'ศูนย์อาหาร' }
-];
-
-const seedOrders: Order[] = [
-  { id: 101, customerId: 1, boxes: 2, note: 'ไม่ใส่ผัก' },
-  { id: 102, customerId: 2, boxes: 3, note: 'เผ็ดน้อย' },
-  { id: 103, customerId: 3, boxes: 1, note: 'โทรก่อนถึง' },
-  { id: 104, customerId: 4, boxes: 2, note: 'รับที่ล็อบบี้' },
-  { id: 105, customerId: 5, boxes: 3, note: 'เพิ่มช้อน' },
-  { id: 106, customerId: 6, boxes: 2, note: 'จอดหน้าตึก' },
-  { id: 107, customerId: 7, boxes: 1, note: 'จ่ายเงินสด' },
-  { id: 108, customerId: 8, boxes: 2, note: 'ฝาก รปภ.' }
-];
+type Page = 'dashboard' | 'orders' | 'customers' | 'routes' | 'rider';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
+let store: Store = { customers: [], orders: [], riders: [], trips: [] };
+let page: Page = 'dashboard';
+let riderTripId = '';
+let loading = true;
+let toastTimer = 0;
 
-let state: AppState = loadState();
-let routes: RiderRoute[] = optimizeRoutes(state.orders, state.customers, state.routeVersion);
+const money = new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', maximumFractionDigits: 0 });
+const formatTime = new Intl.DateTimeFormat('th-TH', { hour: '2-digit', minute: '2-digit' });
 
-function loadState(): AppState {
-  const saved = localStorage.getItem('lunch-route-state');
-  if (saved) {
-    return JSON.parse(saved) as AppState;
-  }
-  return {
-    customers: seedCustomers,
-    orders: seedOrders,
-    selected: 'dashboard',
-    activeCode: 'R-001',
-    routeVersion: 0
-  };
-}
-
-function saveState() {
-  localStorage.setItem('lunch-route-state', JSON.stringify(state));
-}
-
-function customerOf(order: Order) {
-  return state.customers.find((customer) => customer.id === order.customerId)!;
-}
-
-function pointDistance(a: { x: number; y: number }, b: { x: number; y: number }) {
-  return Math.hypot(a.x - b.x, a.y - b.y) * 0.045;
-}
-
-function routeDistance(stops: Customer[]) {
-  let distance = 0;
-  let current = shop;
-  for (const stop of stops) {
-    distance += pointDistance(current, stop);
-    current = stop;
-  }
-  distance += pointDistance(current, shop);
-  return distance;
-}
-
-function nearestOrderList(orders: Order[], customers: Customer[]) {
-  const remaining = [...orders];
-  const sorted: Order[] = [];
-  let current = shop;
-
-  while (remaining.length) {
-    remaining.sort((a, b) => {
-      const ca = customers.find((customer) => customer.id === a.customerId)!;
-      const cb = customers.find((customer) => customer.id === b.customerId)!;
-      return pointDistance(current, ca) - pointDistance(current, cb);
-    });
-    const next = remaining.shift()!;
-    sorted.push(next);
-    current = customers.find((customer) => customer.id === next.customerId)!;
-  }
-
-  return sorted;
-}
-
-function optimizeRoutes(orders: Order[], customers: Customer[], version: number) {
-  const ordered = nearestOrderList(orders, customers);
-  if (version % 2 === 1) ordered.reverse();
-
-  const groups: Order[][] = [];
-  for (let i = 0; i < ordered.length; i += 3) {
-    groups.push(ordered.slice(i, i + 3));
-  }
-
-  return groups.map((group, index) => {
-    const orderedGroup = nearestOrderList(group, customers);
-    const stops = orderedGroup.map((order) => customers.find((customer) => customer.id === order.customerId)!);
-    const distanceKm = routeDistance(stops);
-    const boxes = orderedGroup.reduce((sum, order) => sum + order.boxes, 0);
-    const minutes = Math.ceil((distanceKm / riderSpeedKmH) * 60 + stops.length * 4);
-    const deliveryCost = Math.ceil(riderBaseFee + distanceKm * 2 * boxes);
-    const revenue = boxes * pricePerBox;
-    const profit = revenue - boxes * foodCostPerBox - deliveryCost;
-
-    return {
-      id: index + 1,
-      code: `R-${String(index + 1).padStart(3, '0')}`,
-      color: colors[index % colors.length],
-      orders: orderedGroup,
-      stops,
-      distanceKm,
-      minutes,
-      deliveryCost,
-      revenue,
-      profit
-    };
+async function api<T>(path: string, options?: RequestInit): Promise<T> {
+  const response = await fetch(path, {
+    ...options,
+    headers: { 'Content-Type': 'application/json', ...options?.headers }
   });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({ message: 'เกิดข้อผิดพลาด กรุณาลองใหม่' }));
+    throw new Error(payload.message);
+  }
+  return response.status === 204 ? undefined as T : response.json();
 }
 
-function totals() {
-  return routes.reduce(
-    (sum, route) => ({
-      boxes: sum.boxes + route.orders.reduce((n, order) => n + order.boxes, 0),
-      revenue: sum.revenue + route.revenue,
-      cost: sum.cost + route.deliveryCost,
-      profit: sum.profit + route.profit,
-      minutes: Math.max(sum.minutes, route.minutes)
-    }),
-    { boxes: 0, revenue: 0, cost: 0, profit: 0, minutes: 0 }
-  );
+async function refresh(): Promise<void> {
+  store = await api<Store>('/api/state');
+  riderTripId ||= store.trips.find((trip) => trip.status !== 'completed')?.id ?? store.trips[0]?.id ?? '';
 }
 
-function render() {
-  routes = optimizeRoutes(state.orders, state.customers, state.routeVersion);
-  saveState();
-  const total = totals();
+function customerOf(order: Order): Customer | undefined {
+  return store.customers.find((customer) => customer.id === order.customerId);
+}
+
+function orderOf(id: string): Order | undefined {
+  return store.orders.find((order) => order.id === id);
+}
+
+function safe(value: unknown): string {
+  return String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]!);
+}
+
+function statusLabel(status: Order['status']): string {
+  return { pending: 'รอจัดส่ง', assigned: 'กำลังจัดส่ง', delivered: 'ส่งสำเร็จ' }[status];
+}
+
+function tripStatus(status: Trip['status']): string {
+  return { ready: 'พร้อมออกส่ง', 'on-route': 'กำลังนำส่ง', completed: 'เสร็จสิ้น' }[status];
+}
+
+function icon(name: string, size = 18): string {
+  return `<i data-lucide="${name}" width="${size}" height="${size}"></i>`;
+}
+
+function render(): void {
+  if (loading) {
+    app.innerHTML = `<div class="boot"><div class="brand-mark">LR</div><p>กำลังเปิดระบบจัดส่ง...</p></div>`;
+    return;
+  }
+
   app.innerHTML = `
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">Angular + TypeScript + NodeJS Web API Concept</p>
-        <h1>LunchRoute</h1>
+    <div class="shell">
+      <aside class="sidebar" id="sidebar">
+        <div class="brand"><div class="brand-mark">LR</div><div><strong>LunchRoute</strong><span>Delivery operations</span></div></div>
+        <nav class="nav-list">
+          ${navItem('dashboard', 'layout-dashboard', 'ภาพรวมวันนี้')}
+          ${navItem('orders', 'utensils', 'ออเดอร์')}
+          ${navItem('customers', 'users', 'ลูกค้า')}
+          ${navItem('routes', 'route', 'รอบจัดส่ง')}
+          ${navItem('rider', 'bike', 'หน้าไรเดอร์')}
+        </nav>
+        <div class="service-card"><span class="online-dot"></span><div><strong>ระบบพร้อมใช้งาน</strong><small>อัปเดตข้อมูลล่าสุดแล้ว</small></div></div>
+      </aside>
+      <div class="workspace">
+        <header class="topbar">
+          <button class="icon-button mobile-menu" data-menu aria-label="เปิดเมนู">${icon('menu')}</button>
+          <div><p class="date-label">${new Intl.DateTimeFormat('th-TH', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())}</p><h1>${pageTitle()}</h1></div>
+          <div class="top-actions"><div class="cutoff"><span>เวลาปิดรอบ</span><strong>11:30 น.</strong></div><button class="button primary" data-new-order>${icon('plus')} รับออเดอร์</button></div>
+        </header>
+        <main>${renderPage()}</main>
       </div>
-      <nav>
-        ${navButton('dashboard', 'ภาพรวม')}
-        ${navButton('customers', 'ลูกค้า')}
-        ${navButton('orders', 'ออเดอร์')}
-        ${navButton('routes', 'เส้นทาง')}
-        ${navButton('rider', 'ไรเดอร์')}
-        ${navButton('api', 'API')}
-      </nav>
-    </header>
-    <main>
-      ${hero(total)}
-      ${renderSelected()}
-    </main>
+    </div>
+    <div class="modal-root" id="modal-root"></div>
+    <div class="toast" id="toast"></div>
   `;
+  createIcons({ icons: { Bike, Check, ChevronRight, CircleDollarSign, Clock3, LayoutDashboard, Map, MapPin, Menu, PackageCheck, Phone, Plus, Route, Search, Trash2, Users, Utensils, X } });
   bindEvents();
 }
 
-function navButton(key: AppState['selected'], label: string) {
-  return `<button class="nav ${state.selected === key ? 'active' : ''}" data-nav="${key}">${label}</button>`;
+function navItem(key: Page, iconName: string, label: string): string {
+  return `<button class="nav-item ${page === key ? 'active' : ''}" data-page="${key}">${icon(iconName)}<span>${label}</span></button>`;
 }
 
-function hero(total: ReturnType<typeof totals>) {
-  return `
-    <section class="hero">
-      <div class="hero-copy">
-        <span>ส่งด่วนมื้อเที่ยง</span>
-        <h2>จัดงานไรเดอร์ให้ทัน 12:30 น. โดยคุมต้นทุนและกำไรในจอเดียว</h2>
-        <p>ระบบนี้จำลองการทำงานจากโจทย์ร้านข้าวกล่อง: รับออเดอร์จำนวนมากตอน 11:30 น., แบ่งงานไม่เกิน 3 จุดต่อไรเดอร์, แสดงเส้นทางสีแยกคน และคำนวณค่าใช้จ่ายทันที</p>
-      </div>
-      <div class="map-preview">${mapSvg(routes)}</div>
-    </section>
-    <section class="metrics">
-      ${metric('กล่องทั้งหมด', `${total.boxes}`, 'จากออเดอร์ที่เปิดอยู่')}
-      ${metric('รายรับ', baht(total.revenue), '65 บาทต่อกล่อง')}
-      ${metric('ค่าส่งรวม', baht(total.cost), '15 บาทต่อรอบ + ระยะทาง')}
-      ${metric('กำไรสุทธิ', baht(total.profit), total.profit >= 0 ? 'ยังมีกำไร' : 'ควรคำนวณใหม่')}
-      ${metric('เวลาสูงสุด', `${total.minutes} นาที`, total.minutes <= 60 ? 'ทันกรอบ 1 ชั่วโมง' : 'เสี่ยงส่งเลท')}
-    </section>
-  `;
+function pageTitle(): string {
+  return { dashboard: 'ภาพรวมการจัดส่ง', orders: 'จัดการออเดอร์', customers: 'ข้อมูลลูกค้า', routes: 'รอบและเส้นทางจัดส่ง', rider: 'ใบงานไรเดอร์' }[page];
 }
 
-function metric(label: string, value: string, caption: string) {
-  return `<article class="metric"><p>${label}</p><strong>${value}</strong><span>${caption}</span></article>`;
-}
-
-function renderSelected() {
-  if (state.selected === 'customers') return customersView();
-  if (state.selected === 'orders') return ordersView();
-  if (state.selected === 'routes') return routesView();
-  if (state.selected === 'rider') return riderView();
-  if (state.selected === 'api') return apiView();
+function renderPage(): string {
+  if (page === 'orders') return ordersView();
+  if (page === 'customers') return customersView();
+  if (page === 'routes') return routesView();
+  if (page === 'rider') return riderView();
   return dashboardView();
 }
 
-function dashboardView() {
+function dashboardView(): string {
+  const pending = store.orders.filter((order) => order.status === 'pending');
+  const assigned = store.orders.filter((order) => order.status === 'assigned');
+  const delivered = store.orders.filter((order) => order.status === 'delivered');
+  const boxes = store.orders.reduce((sum, order) => sum + order.boxes, 0);
+  const revenue = boxes * 65;
+  const activeTrips = store.trips.filter((trip) => trip.status !== 'completed');
+
   return `
-    <section class="grid two">
-      <article class="panel">
-        <div class="panel-title">
-          <h3>สิ่งที่เว็บนี้ใช้จากบทเรียน</h3>
-          <span>Learning coverage</span>
-        </div>
-        <div class="learning-grid">
-          ${chip('TypeScript', 'types, array, function, class/model')}
-          ${chip('UI & Styling', 'layout, card, input, responsive design')}
-          ${chip('Data Binding', 'แสดงผลจาก state และอัปเดตจาก form')}
-          ${chip('Routing Concept', 'ใช้แท็บแทนหน้า Owner/Rider/API')}
-          ${chip('Data Sharing', 'บันทึก state ลง localStorage')}
-          ${chip('NodeJS API', 'จำลอง CRUD endpoint และ response JSON')}
-        </div>
+    <section class="summary-grid">
+      ${summaryCard('ออเดอร์ทั้งหมด', store.orders.length, `${boxes} กล่อง`, 'utensils', 'rust')}
+      ${summaryCard('รอจัดรอบ', pending.length, pending.length ? 'ควรจัดรอบก่อน 11:30' : 'จัดรอบครบแล้ว', 'clock-3', 'amber')}
+      ${summaryCard('กำลังนำส่ง', assigned.length, `${activeTrips.length} รอบที่เปิดอยู่`, 'bike', 'teal')}
+      ${summaryCard('ยอดขายวันนี้', money.format(revenue), `${delivered.length} ออเดอร์ส่งสำเร็จ`, 'circle-dollar-sign', 'blue')}
+    </section>
+    <section class="dashboard-grid">
+      <article class="surface dispatch-panel">
+        <div class="section-head"><div><span class="kicker">ศูนย์ควบคุม</span><h2>สถานะรอบส่งวันนี้</h2></div><button class="button ${pending.length ? 'primary' : 'secondary'}" data-dispatch ${pending.length ? '' : 'disabled'}>${icon('route')} ${pending.length ? `จัดรอบ ${pending.length} ออเดอร์` : 'จัดรอบครบแล้ว'}</button></div>
+        ${activeTrips.length ? `<div class="trip-progress">${activeTrips.map(tripProgress).join('')}</div>` : emptyState('package-check', 'ยังไม่มีรอบส่ง', 'เมื่อมีออเดอร์ กดจัดรอบเพื่อแบ่งงานให้ไรเดอร์')}
       </article>
-      <article class="panel">
-        <div class="panel-title">
-          <h3>กติกาธุรกิจ</h3>
-          <span>Business rules</span>
-        </div>
-        <ul class="rules">
-          <li>เริ่มส่ง 11:30 น. และต้องเสร็จภายใน 12:30 น.</li>
-          <li>ไรเดอร์หนึ่งคนรับงานได้ไม่เกิน 3 ออเดอร์</li>
-          <li>ค่าอาหารกล่องละ 65 บาท ต้นทุนอาหารกล่องละ 40 บาท</li>
-          <li>ค่าไรเดอร์เริ่มต้น 15 บาทต่อรอบ และคิดตามระยะทางกับจำนวนกล่อง</li>
-        </ul>
+      <article class="surface map-surface">
+        <div class="section-head"><div><span class="kicker">พื้นที่ให้บริการ</span><h2>เส้นทางปัจจุบัน</h2></div><button class="text-button" data-page="routes">ดูรายละเอียด ${icon('chevron-right', 16)}</button></div>
+        ${routeMap(activeTrips)}
       </article>
     </section>
-    ${routesView()}
-  `;
-}
-
-function chip(title: string, desc: string) {
-  return `<div class="chip"><strong>${title}</strong><span>${desc}</span></div>`;
-}
-
-function customersView() {
-  return `
-    <section class="panel">
-      <div class="panel-title">
-        <h3>จัดการข้อมูลลูกค้า</h3>
-        <span>CRUD + พิกัดบนแผนที่</span>
-      </div>
-      <form class="form" id="customer-form">
-        <input name="name" placeholder="ชื่อลูกค้า" required />
-        <input name="phone" placeholder="เบอร์โทร" required />
-        <input name="zone" placeholder="โซน/จุดสังเกต" required />
-        <input name="x" type="number" min="5" max="95" placeholder="พิกัด X" required />
-        <input name="y" type="number" min="5" max="95" placeholder="พิกัด Y" required />
-        <button class="primary" type="submit">เพิ่มลูกค้า</button>
-      </form>
-      <div class="table">
-        ${state.customers.map((customer) => `
-          <div class="row">
-            <strong>${customer.name}</strong>
-            <span>${customer.phone}</span>
-            <span>${customer.zone}</span>
-            <span>(${customer.x}, ${customer.y})</span>
-            <button class="icon danger" data-delete-customer="${customer.id}" title="ลบลูกค้า">ลบ</button>
-          </div>
-        `).join('')}
-      </div>
+    <section class="surface recent-orders">
+      <div class="section-head"><div><span class="kicker">รายการล่าสุด</span><h2>ออเดอร์วันนี้</h2></div><button class="text-button" data-page="orders">ดูทั้งหมด ${icon('chevron-right', 16)}</button></div>
+      ${orderTable(store.orders.slice(0, 6))}
     </section>
   `;
 }
 
-function ordersView() {
-  return `
-    <section class="panel">
-      <div class="panel-title">
-        <h3>จำลองและจัดการออเดอร์</h3>
-        <span>Insert / Update / Delete</span>
-      </div>
-      <form class="form" id="order-form">
-        <select name="customerId" required>
-          ${state.customers.map((customer) => `<option value="${customer.id}">${customer.name} - ${customer.zone}</option>`).join('')}
-        </select>
-        <input name="boxes" type="number" min="1" max="3" placeholder="จำนวนกล่อง" required />
-        <input name="note" placeholder="หมายเหตุ" />
-        <button class="primary" type="submit">เพิ่มออเดอร์</button>
-      </form>
-      <div class="table">
-        ${state.orders.map((order) => {
-          const customer = customerOf(order);
-          return `
-            <div class="row">
-              <strong>#${order.id}</strong>
-              <span>${customer.name}</span>
-              <span>${order.boxes} กล่อง</span>
-              <span>${order.note || '-'}</span>
-              <button class="icon danger" data-delete-order="${order.id}" title="ลบออเดอร์">ลบ</button>
-            </div>
-          `;
-        }).join('')}
-      </div>
-    </section>
-  `;
+function summaryCard(label: string, value: string | number, detail: string, iconName: string, tone: string): string {
+  return `<article class="summary-card"><div class="summary-icon ${tone}">${icon(iconName, 20)}</div><div><span>${label}</span><strong>${value}</strong><small>${detail}</small></div></article>`;
 }
 
-function routesView() {
-  return `
-    <section class="grid route-layout">
-      <article class="panel map-panel">
-        <div class="panel-title">
-          <h3>แผนที่เส้นทางจัดส่ง</h3>
-          <button class="primary" data-recalculate>คำนวณเส้นทางใหม่</button>
-        </div>
-        ${mapSvg(routes)}
-      </article>
-      <article class="panel">
-        <div class="panel-title">
-          <h3>ใบงานไรเดอร์</h3>
-          <span>${routes.length} คน</span>
-        </div>
-        <div class="route-list">
-          ${routes.map(routeCard).join('')}
-        </div>
-      </article>
-    </section>
-  `;
+function tripProgress(trip: Trip): string {
+  const rider = store.riders.find((item) => item.id === trip.riderId);
+  const delivered = trip.orderIds.filter((id) => orderOf(id)?.status === 'delivered').length;
+  const percentage = Math.round((delivered / trip.orderIds.length) * 100);
+  return `<button class="trip-row" data-trip="${trip.id}" data-page="rider"><span class="rider-avatar" style="--rider:${rider?.color}">${safe(rider?.name.charAt(0))}</span><span class="trip-main"><strong>${trip.code} · ${safe(rider?.name)}</strong><small>${tripStatus(trip.status)} · ${trip.orderIds.length} จุด · ${trip.distanceKm} กม.</small><i><b style="width:${percentage}%"></b></i></span><span class="progress-count">${delivered}/${trip.orderIds.length}</span>${icon('chevron-right', 18)}</button>`;
 }
 
-function routeCard(route: RiderRoute) {
-  const boxes = route.orders.reduce((sum, order) => sum + order.boxes, 0);
-  return `
-    <div class="route-card" style="--route:${route.color}">
-      <div>
-        <strong>${route.code}</strong>
-        <span>${boxes} กล่อง / ${route.stops.length} จุด</span>
-      </div>
-      <ol>
-        ${route.orders.map((order) => `<li>${customerOf(order).name} (${order.boxes} กล่อง)</li>`).join('')}
-      </ol>
-      <div class="route-stats">
-        <span>${route.distanceKm.toFixed(2)} กม.</span>
-        <span>${route.minutes} นาที</span>
-        <span>${baht(route.profit)}</span>
-      </div>
-    </div>
-  `;
+function ordersView(): string {
+  return `<section class="surface"><div class="section-head"><div><span class="kicker">${store.orders.length} รายการ</span><h2>ออเดอร์ทั้งหมด</h2></div><div class="toolbar"><label class="search">${icon('search', 17)}<input id="order-search" placeholder="ค้นหาชื่อหรือเลขออเดอร์"></label><button class="button primary" data-new-order>${icon('plus')} เพิ่มออเดอร์</button></div></div><div id="order-table">${orderTable(store.orders)}</div></section>`;
 }
 
-function riderView() {
-  const route = routes.find((item) => item.code === state.activeCode) ?? routes[0];
-  return `
-    <section class="grid rider-layout">
-      <article class="panel">
-        <div class="panel-title">
-          <h3>หน้าไรเดอร์บนมือถือ</h3>
-          <span>กรอกเลขใบงาน</span>
-        </div>
-        <form class="form compact" id="rider-form">
-          <input name="code" value="${state.activeCode}" placeholder="เช่น R-001" />
-          <button class="primary" type="submit">ดูใบงาน</button>
-        </form>
-        ${route ? riderTicket(route) : '<p class="empty">ไม่พบใบงาน</p>'}
-      </article>
-      <article class="phone">
-        ${route ? riderTicket(route, true) : '<p class="empty">ไม่พบใบงาน</p>'}
-      </article>
-    </section>
-  `;
+function orderTable(orders: Order[]): string {
+  if (!orders.length) return emptyState('utensils', 'ยังไม่มีออเดอร์', 'เพิ่มออเดอร์แรกเพื่อเริ่มจัดส่ง');
+  return `<div class="data-table"><div class="table-head"><span>ออเดอร์</span><span>ลูกค้า / จุดส่ง</span><span>รายการ</span><span>ชำระเงิน</span><span>สถานะ</span><span></span></div>${orders.map((order) => {
+    const customer = customerOf(order);
+    return `<div class="table-row"><span><strong>${safe(order.id)}</strong><small>${formatTime.format(new Date(order.createdAt))} น.</small></span><span><strong>${safe(customer?.name)}</strong><small>${safe(customer?.zone)}</small></span><span><strong>${safe(order.menu)}</strong><small>${order.boxes} กล่อง${order.note ? ` · ${safe(order.note)}` : ''}</small></span><span><strong>${order.payment === 'paid' ? 'โอนแล้ว' : 'เงินสด'}</strong><small>${money.format(order.boxes * 65)}</small></span><span><b class="status ${order.status}">${statusLabel(order.status)}</b></span><span>${order.status === 'pending' ? `<button class="icon-button danger" data-delete-order="${order.id}" title="ลบออเดอร์">${icon('trash-2', 17)}</button>` : ''}</span></div>`;
+  }).join('')}</div>`;
 }
 
-function riderTicket(route: RiderRoute, mobile = false) {
-  const boxes = route.orders.reduce((sum, order) => sum + order.boxes, 0);
-  return `
-    <div class="${mobile ? 'ticket mobile' : 'ticket'}" style="--route:${route.color}">
-      <p class="eyebrow">ใบงาน ${route.code}</p>
-      <h3>หยิบข้าวทั้งหมด ${boxes} กล่อง</h3>
-      <ol>
-        ${route.orders.map((order, index) => {
-          const customer = customerOf(order);
-          return `<li><strong>จุดที่ ${index + 1}</strong> ส่งบ้าน${customer.name} - ${customer.zone}<span>${customer.phone}</span></li>`;
-        }).join('')}
-      </ol>
-      <button class="map-link" type="button">เปิดแผนที่นำทาง</button>
-    </div>
-  `;
+function customersView(): string {
+  return `<section class="surface"><div class="section-head"><div><span class="kicker">ฐานข้อมูลลูกค้า</span><h2>ลูกค้า ${store.customers.length} ราย</h2></div><button class="button primary" data-new-customer>${icon('plus')} เพิ่มลูกค้า</button></div><div class="customer-grid">${store.customers.map((customer) => {
+    const orderCount = store.orders.filter((order) => order.customerId === customer.id).length;
+    return `<article class="customer-card"><div class="customer-top"><span class="customer-avatar">${safe(customer.name.charAt(0))}</span><span><strong>${safe(customer.name)}</strong><small>${safe(customer.zone)}</small></span>${!orderCount ? `<button class="icon-button danger" data-delete-customer="${customer.id}" title="ลบลูกค้า">${icon('trash-2', 16)}</button>` : ''}</div><p>${icon('map-pin', 16)} ${safe(customer.address)}</p><p>${icon('phone', 16)} ${safe(customer.phone)}</p><div class="customer-foot"><span>${orderCount} ออเดอร์</span><a href="https://www.google.com/maps?q=${customer.lat},${customer.lng}" target="_blank" rel="noreferrer">เปิดแผนที่ ${icon('chevron-right', 14)}</a></div></article>`;
+  }).join('')}</div></section>`;
 }
 
-function apiView() {
-  const sample = {
-    status: 200,
-    message: 'Route calculated',
-    data: routes.map((route) => ({
-      riderCode: route.code,
-      orderIds: route.orders.map((order) => order.id),
-      distanceKm: Number(route.distanceKm.toFixed(2)),
-      etaMinutes: route.minutes,
-      profit: route.profit
-    }))
-  };
-
-  return `
-    <section class="grid two">
-      <article class="panel">
-        <div class="panel-title">
-          <h3>API Design ที่ใช้ในระบบ</h3>
-          <span>NodeJS / Express / MySQL concept</span>
-        </div>
-        <div class="endpoint-list">
-          ${endpoint('GET', '/api/customers', 'ดึงข้อมูลลูกค้าทั้งหมด')}
-          ${endpoint('POST', '/api/orders', 'เพิ่มออเดอร์ใหม่')}
-          ${endpoint('PUT', '/api/orders/:id', 'แก้ไขจำนวนกล่องหรือหมายเหตุ')}
-          ${endpoint('DELETE', '/api/orders/:id', 'ลบออเดอร์')}
-          ${endpoint('POST', '/api/routes/calculate', 'คำนวณเส้นทางและแบ่งงานไรเดอร์')}
-          ${endpoint('GET', '/api/riders/:code/jobs', 'ไรเดอร์เปิดดูใบงานของตัวเอง')}
-        </div>
-      </article>
-      <article class="panel">
-        <div class="panel-title">
-          <h3>Response ตัวอย่าง</h3>
-          <span>JSON + status code</span>
-        </div>
-        <pre>${JSON.stringify(sample, null, 2)}</pre>
-      </article>
-    </section>
-  `;
+function routesView(): string {
+  return `<section class="route-page"><article class="surface route-map-panel"><div class="section-head"><div><span class="kicker">วางแผนอัตโนมัติ</span><h2>แผนที่รอบส่ง</h2></div><button class="button primary" data-dispatch ${store.orders.some((order) => order.status === 'pending') ? '' : 'disabled'}>${icon('route')} จัดออเดอร์ค้างรอบ</button></div>${routeMap(store.trips)}</article><aside class="surface trip-list"><div class="section-head"><div><span class="kicker">${store.trips.length} รอบ</span><h2>งานไรเดอร์</h2></div></div>${store.trips.length ? store.trips.map(tripCard).join('') : emptyState('route', 'ยังไม่มีรอบส่ง', 'เพิ่มออเดอร์และกดจัดรอบ')}</aside></section>`;
 }
 
-function endpoint(method: string, path: string, desc: string) {
-  return `<div class="endpoint"><b>${method}</b><code>${path}</code><span>${desc}</span></div>`;
+function tripCard(trip: Trip): string {
+  const rider = store.riders.find((item) => item.id === trip.riderId);
+  return `<button class="trip-card" style="--rider:${rider?.color}" data-trip="${trip.id}" data-page="rider"><div><span class="rider-avatar">${safe(rider?.name.charAt(0))}</span><span><strong>${trip.code}</strong><small>${safe(rider?.name)} · ${tripStatus(trip.status)}</small></span><b>${trip.orderIds.length} จุด</b></div><div class="trip-meta"><span>${trip.distanceKm} กม.</span><span>ประมาณ ${trip.etaMinutes} นาที</span></div></button>`;
 }
 
-function mapSvg(routeItems: RiderRoute[]) {
-  const lines = routeItems.flatMap((route) => {
-    const points = [shop, ...route.stops, shop];
-    return points.slice(1).map((point, index) => {
-      const from = points[index];
-      return `<line x1="${from.x}" y1="${from.y}" x2="${point.x}" y2="${point.y}" stroke="${route.color}" />`;
-    }).join('');
+function routeMap(trips: Trip[]): string {
+  const customers = trips.flatMap((trip) => trip.orderIds.map((id) => orderOf(id)).filter(Boolean).map((order) => customerOf(order!)).filter(Boolean)) as Customer[];
+  if (!customers.length) return `<div class="map-empty">${icon('map', 28)}<span>เส้นทางจะแสดงหลังจัดรอบส่ง</span></div>`;
+  const minLat = Math.min(...customers.map((item) => item.lat), 16.4732) - .004;
+  const maxLat = Math.max(...customers.map((item) => item.lat), 16.4732) + .004;
+  const minLng = Math.min(...customers.map((item) => item.lng), 102.8217) - .004;
+  const maxLng = Math.max(...customers.map((item) => item.lng), 102.8217) + .004;
+  const point = (lat: number, lng: number) => ({ x: 8 + ((lng - minLng) / (maxLng - minLng)) * 84, y: 92 - ((lat - minLat) / (maxLat - minLat)) * 84 });
+  const shop = point(16.4732, 102.8217);
+  const routes = trips.map((trip) => {
+    const rider = store.riders.find((item) => item.id === trip.riderId);
+    const points = [shop, ...trip.orderIds.map((id) => customerOf(orderOf(id)!)).filter(Boolean).map((customer) => point(customer!.lat, customer!.lng))];
+    return `<polyline points="${points.map((item) => `${item.x},${item.y}`).join(' ')}" style="--route:${rider?.color}"/><circle cx="${points.at(-1)?.x}" cy="${points.at(-1)?.y}" r="2.2" fill="${rider?.color}"/>`;
   }).join('');
-
-  const stops = routeItems.flatMap((route) => route.stops.map((stop, index) => `
-    <g>
-      <circle cx="${stop.x}" cy="${stop.y}" r="3.6" fill="${route.color}" />
-      <text x="${stop.x + 4}" y="${stop.y - 2}">${index + 1}</text>
-    </g>
-  `)).join('');
-
-  return `
-    <svg class="route-map" viewBox="0 0 100 100" role="img" aria-label="แผนที่เส้นทางไรเดอร์">
-      <defs>
-        <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-          <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(15,23,42,.08)" stroke-width=".5" />
-        </pattern>
-      </defs>
-      <rect width="100" height="100" rx="4" fill="#eef7f3" />
-      <rect width="100" height="100" fill="url(#grid)" />
-      <path d="M10,36 C22,30 34,40 45,34 S72,20 92,31" class="road" />
-      <path d="M12,74 C28,62 40,80 54,68 S77,66 91,80" class="road" />
-      ${lines}
-      <circle cx="${shop.x}" cy="${shop.y}" r="5" fill="#0f172a" />
-      <text x="${shop.x + 6}" y="${shop.y + 2}" class="shop-label">ร้าน</text>
-      ${stops}
-    </svg>
-  `;
+  const pins = customers.map((customer) => { const p = point(customer.lat, customer.lng); return `<circle class="customer-pin" cx="${p.x}" cy="${p.y}" r="1.8"><title>${safe(customer.name)}</title></circle>`; }).join('');
+  return `<div class="map-wrap"><svg class="route-map" viewBox="0 0 100 100" role="img" aria-label="แผนที่เส้นทางจัดส่ง"><path class="street" d="M-5 28 Q22 20 46 31 T105 23 M-5 72 Q25 61 48 73 T105 66 M24 -5 Q19 35 31 55 T26 105 M72 -5 Q63 28 75 53 T69 105"/><path class="street thin" d="M0 48 L100 43 M46 0 L52 100"/>${routes}${pins}<circle class="shop-pin" cx="${shop.x}" cy="${shop.y}" r="3.4"/><text x="${shop.x + 4}" y="${shop.y + 1}">ร้าน</text></svg><div class="map-legend">${trips.map((trip) => { const rider = store.riders.find((item) => item.id === trip.riderId); return `<span><i style="background:${rider?.color}"></i>${safe(rider?.name)}</span>`; }).join('')}</div></div>`;
 }
 
-function bindEvents() {
-  document.querySelectorAll<HTMLButtonElement>('[data-nav]').forEach((button) => {
-    button.addEventListener('click', () => {
-      state.selected = button.dataset.nav as AppState['selected'];
-      render();
-    });
-  });
+function riderView(): string {
+  const trip = store.trips.find((item) => item.id === riderTripId) ?? store.trips[0];
+  return `<section class="rider-layout"><aside class="surface trip-selector"><span class="kicker">เลือกรอบส่ง</span><h2>ใบงานวันนี้</h2>${store.trips.length ? store.trips.map((item) => `<button class="selector-item ${item.id === trip?.id ? 'active' : ''}" data-select-trip="${item.id}"><span><strong>${item.code}</strong><small>${tripStatus(item.status)}</small></span><b>${item.orderIds.length} จุด</b></button>`).join('') : emptyState('bike', 'ยังไม่มีใบงาน', 'จัดรอบส่งก่อนเปิดหน้าไรเดอร์')}</aside>${trip ? riderTicket(trip) : ''}</section>`;
+}
 
-  document.querySelector<HTMLButtonElement>('[data-recalculate]')?.addEventListener('click', () => {
-    state.routeVersion += 1;
+function riderTicket(trip: Trip): string {
+  const rider = store.riders.find((item) => item.id === trip.riderId);
+  const completed = trip.orderIds.filter((id) => orderOf(id)?.status === 'delivered').length;
+  const nextOrder = trip.orderIds.map(orderOf).find((order) => order?.status !== 'delivered');
+  const nextCustomer = nextOrder ? customerOf(nextOrder) : undefined;
+  return `<article class="rider-phone"><header><div><span>ใบงาน ${trip.code}</span><h2>สวัสดี ${safe(rider?.name)}</h2></div><span class="rider-avatar" style="--rider:${rider?.color}">${safe(rider?.name.charAt(0))}</span></header><div class="rider-summary"><div><strong>${completed}/${trip.orderIds.length}</strong><span>ส่งสำเร็จ</span></div><div><strong>${trip.distanceKm}</strong><span>กิโลเมตร</span></div><div><strong>${trip.etaMinutes}</strong><span>นาทีโดยประมาณ</span></div></div>${nextCustomer ? `<a class="navigate-button" href="https://www.google.com/maps/dir/?api=1&destination=${nextCustomer.lat},${nextCustomer.lng}" target="_blank" rel="noreferrer">${icon('map-pin')} นำทางไปจุดถัดไป</a>` : `<div class="complete-banner">${icon('check')} ส่งครบทุกจุดแล้ว</div>`}<div class="stop-list">${trip.orderIds.map((id, index) => riderStop(trip, id, index)).join('')}</div>${trip.status === 'ready' ? `<button class="button rider-start" data-start-trip="${trip.id}">${icon('bike')} เริ่มออกส่ง</button>` : ''}</article>`;
+}
+
+function riderStop(trip: Trip, orderId: string, index: number): string {
+  const order = orderOf(orderId)!;
+  const customer = customerOf(order)!;
+  const done = order.status === 'delivered';
+  return `<div class="stop-item ${done ? 'done' : ''}"><span class="stop-index">${done ? icon('check', 16) : index + 1}</span><div><strong>${safe(customer.name)}</strong><p>${safe(customer.address)}</p><small>${order.boxes} กล่อง · ${safe(order.menu)}${order.note ? ` · ${safe(order.note)}` : ''}</small><div class="stop-actions"><a href="tel:${safe(customer.phone)}">${icon('phone', 15)} โทร</a><a href="https://www.google.com/maps?q=${customer.lat},${customer.lng}" target="_blank" rel="noreferrer">${icon('map-pin', 15)} แผนที่</a>${!done ? `<button data-deliver="${order.id}" data-trip-id="${trip.id}">${icon('package-check', 15)} ส่งสำเร็จ</button>` : '<b>ส่งแล้ว</b>'}</div></div></div>`;
+}
+
+function emptyState(iconName: string, title: string, detail: string): string {
+  return `<div class="empty-state">${icon(iconName, 26)}<strong>${title}</strong><span>${detail}</span></div>`;
+}
+
+function orderModal(): string {
+  return `<div class="modal-backdrop"><form class="modal" id="order-form"><div class="modal-head"><div><span class="kicker">ออเดอร์ใหม่</span><h2>รับรายการอาหาร</h2></div><button type="button" class="icon-button" data-close>${icon('x')}</button></div><label>ลูกค้า<select name="customerId" required><option value="">เลือกลูกค้า</option>${store.customers.map((customer) => `<option value="${customer.id}">${safe(customer.name)} · ${safe(customer.zone)}</option>`).join('')}</select></label><div class="form-grid"><label>เมนูอาหาร<input name="menu" placeholder="เช่น ข้าวกะเพราไก่" required></label><label>จำนวนกล่อง<input name="boxes" type="number" min="1" max="50" value="1" required></label></div><div class="form-grid"><label>การชำระเงิน<select name="payment"><option value="paid">โอนแล้ว</option><option value="cash">เก็บเงินสด</option></select></label><label>หมายเหตุ<input name="note" placeholder="เช่น ไม่ใส่พริก"></label></div><div class="modal-actions"><button type="button" class="button secondary" data-close>ยกเลิก</button><button class="button primary" type="submit">บันทึกออเดอร์</button></div></form></div>`;
+}
+
+function customerModal(): string {
+  return `<div class="modal-backdrop"><form class="modal" id="customer-form"><div class="modal-head"><div><span class="kicker">ลูกค้าใหม่</span><h2>เพิ่มข้อมูลจุดส่ง</h2></div><button type="button" class="icon-button" data-close>${icon('x')}</button></div><div class="form-grid"><label>ชื่อ-นามสกุล<input name="name" required></label><label>เบอร์โทร<input name="phone" type="tel" required></label></div><label>ที่อยู่จัดส่ง<input name="address" required></label><label>โซน / จุดสังเกต<input name="zone" required></label><div class="form-grid"><label>ละติจูด<input name="lat" type="number" step="any" value="16.4732" required></label><label>ลองจิจูด<input name="lng" type="number" step="any" value="102.8217" required></label></div><p class="form-help">เปิด Google Maps แล้วคลิกขวาที่จุดส่งเพื่อคัดลอกพิกัด</p><div class="modal-actions"><button type="button" class="button secondary" data-close>ยกเลิก</button><button class="button primary" type="submit">เพิ่มลูกค้า</button></div></form></div>`;
+}
+
+function showModal(content: string): void {
+  document.querySelector('#modal-root')!.innerHTML = content;
+  createIcons({ icons: { X } });
+  bindModalEvents();
+}
+
+function closeModal(): void {
+  document.querySelector('#modal-root')!.innerHTML = '';
+}
+
+function showToast(message: string, error = false): void {
+  const toast = document.querySelector<HTMLDivElement>('#toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.className = `toast show ${error ? 'error' : ''}`;
+  window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => toast.className = 'toast', 2800);
+}
+
+async function act(task: () => Promise<unknown>, success: string): Promise<void> {
+  try {
+    await task();
+    await refresh();
     render();
-  });
+    showToast(success);
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : 'เกิดข้อผิดพลาด', true);
+  }
+}
 
-  document.querySelector<HTMLFormElement>('#customer-form')?.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget as HTMLFormElement);
-    state.customers.push({
-      id: Date.now(),
-      name: String(data.get('name')),
-      phone: String(data.get('phone')),
-      zone: String(data.get('zone')),
-      x: Number(data.get('x')),
-      y: Number(data.get('y'))
-    });
+function bindEvents(): void {
+  document.querySelectorAll<HTMLElement>('[data-page]').forEach((element) => element.addEventListener('click', () => {
+    page = element.dataset.page as Page;
+    if (element.dataset.trip) riderTripId = element.dataset.trip;
     render();
-  });
-
-  document.querySelector<HTMLFormElement>('#order-form')?.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget as HTMLFormElement);
-    state.orders.push({
-      id: Date.now(),
-      customerId: Number(data.get('customerId')),
-      boxes: Number(data.get('boxes')),
-      note: String(data.get('note') ?? '')
-    });
-    render();
-  });
-
-  document.querySelector<HTMLFormElement>('#rider-form')?.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget as HTMLFormElement);
-    state.activeCode = String(data.get('code')).toUpperCase();
-    render();
-  });
-
-  document.querySelectorAll<HTMLButtonElement>('[data-delete-customer]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const id = Number(button.dataset.deleteCustomer);
-      state.customers = state.customers.filter((customer) => customer.id !== id);
-      state.orders = state.orders.filter((order) => order.customerId !== id);
-      render();
-    });
-  });
-
-  document.querySelectorAll<HTMLButtonElement>('[data-delete-order]').forEach((button) => {
-    button.addEventListener('click', () => {
-      state.orders = state.orders.filter((order) => order.id !== Number(button.dataset.deleteOrder));
-      render();
-    });
+  }));
+  document.querySelector('[data-menu]')?.addEventListener('click', () => document.querySelector('#sidebar')?.classList.toggle('open'));
+  document.querySelectorAll('[data-new-order]').forEach((button) => button.addEventListener('click', () => showModal(orderModal())));
+  document.querySelector('[data-new-customer]')?.addEventListener('click', () => showModal(customerModal()));
+  document.querySelectorAll('[data-dispatch]').forEach((button) => button.addEventListener('click', () => act(() => api('/api/dispatch', { method: 'POST' }), 'จัดรอบส่งและมอบหมายไรเดอร์แล้ว')));
+  document.querySelectorAll<HTMLElement>('[data-select-trip]').forEach((button) => button.addEventListener('click', () => { riderTripId = button.dataset.selectTrip!; render(); }));
+  document.querySelectorAll<HTMLElement>('[data-start-trip]').forEach((button) => button.addEventListener('click', () => act(() => api(`/api/trips/${button.dataset.startTrip}/start`, { method: 'PATCH' }), 'เริ่มรอบส่งแล้ว')));
+  document.querySelectorAll<HTMLElement>('[data-deliver]').forEach((button) => button.addEventListener('click', () => act(() => api(`/api/trips/${button.dataset.tripId}/deliver/${button.dataset.deliver}`, { method: 'PATCH' }), 'บันทึกว่าส่งสำเร็จแล้ว')));
+  document.querySelectorAll<HTMLElement>('[data-delete-order]').forEach((button) => button.addEventListener('click', () => act(() => api(`/api/orders/${button.dataset.deleteOrder}`, { method: 'DELETE' }), 'ลบออเดอร์แล้ว')));
+  document.querySelectorAll<HTMLElement>('[data-delete-customer]').forEach((button) => button.addEventListener('click', () => act(() => api(`/api/customers/${button.dataset.deleteCustomer}`, { method: 'DELETE' }), 'ลบข้อมูลลูกค้าแล้ว')));
+  document.querySelector<HTMLInputElement>('#order-search')?.addEventListener('input', (event) => {
+    const query = (event.currentTarget as HTMLInputElement).value.trim().toLowerCase();
+    const results = store.orders.filter((order) => `${order.id} ${customerOf(order)?.name} ${order.menu}`.toLowerCase().includes(query));
+    document.querySelector('#order-table')!.innerHTML = orderTable(results);
+    createIcons({ icons: { Trash2, Utensils } });
   });
 }
 
-function baht(value: number) {
-  return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', maximumFractionDigits: 0 }).format(value);
+function bindModalEvents(): void {
+  document.querySelectorAll('[data-close]').forEach((button) => button.addEventListener('click', closeModal));
+  document.querySelector('#order-form')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const values = Object.fromEntries(new FormData(event.currentTarget as HTMLFormElement));
+    closeModal();
+    void act(() => api('/api/orders', { method: 'POST', body: JSON.stringify(values) }), 'เพิ่มออเดอร์แล้ว');
+  });
+  document.querySelector('#customer-form')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const values = Object.fromEntries(new FormData(event.currentTarget as HTMLFormElement));
+    closeModal();
+    void act(() => api('/api/customers', { method: 'POST', body: JSON.stringify({ ...values, lat: Number(values.lat), lng: Number(values.lng) }) }), 'เพิ่มลูกค้าแล้ว');
+  });
 }
 
-render();
+void (async () => {
+  try {
+    await refresh();
+  } catch {
+    app.innerHTML = `<div class="boot error-screen"><div class="brand-mark">LR</div><h1>เชื่อมต่อระบบไม่ได้</h1><p>ตรวจสอบว่า API ทำงานอยู่ แล้วรีเฟรชหน้าอีกครั้ง</p></div>`;
+    return;
+  }
+  loading = false;
+  render();
+})();
