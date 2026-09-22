@@ -45,3 +45,5 @@ export type Store = {
   riders: Rider[];
   trips: Trip[];
 };
+
+export type Page = 'dashboard' | 'orders' | 'customers' | 'routes' | 'rider';

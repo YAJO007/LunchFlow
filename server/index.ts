@@ -2,7 +2,9 @@ import cors from 'cors';
 import express from 'express';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { createTrips, makeId, readStore, saveStore } from './store.ts';
+import { createId, createTrips } from './route-planner.ts';
+import { readStore, saveStore } from './store.ts';
+import { InputError, parseCustomer, parseOrder } from './validation.ts';
 import type { Customer, Order } from '../src/types.ts';
 
 const app = express();
@@ -16,7 +18,7 @@ app.get('/api/state', async (_request, response) => response.json(await readStor
 
 app.post('/api/customers', async (request, response) => {
   const store = await readStore();
-  const customer: Customer = { id: makeId('CUS'), ...request.body };
+  const customer: Customer = { id: createId('CUS'), ...parseCustomer(request.body) };
   store.customers.push(customer);
   await saveStore(store);
   response.status(201).json(customer);
@@ -35,13 +37,13 @@ app.delete('/api/customers/:id', async (request, response) => {
 
 app.post('/api/orders', async (request, response) => {
   const store = await readStore();
+  const input = parseOrder(request.body);
+  if (!store.customers.some((customer) => customer.id === input.customerId)) {
+    throw new InputError('ไม่พบลูกค้าที่เลือก');
+  }
   const order: Order = {
     id: `ORD-${String(Date.now()).slice(-6)}`,
-    customerId: request.body.customerId,
-    boxes: Number(request.body.boxes),
-    menu: request.body.menu,
-    note: request.body.note || '',
-    payment: request.body.payment,
+    ...input,
     status: 'pending',
     createdAt: new Date().toISOString()
   };
@@ -115,6 +117,12 @@ if (existsSync(distPath)) {
     next();
   });
 }
+
+app.use((error: unknown, _request: express.Request, response: express.Response, _next: express.NextFunction) => {
+  const isInputError = error instanceof InputError;
+  const message = error instanceof Error ? error.message : 'เกิดข้อผิดพลาดภายในระบบ';
+  response.status(isInputError ? 400 : 500).json({ message });
+});
 
 app.listen(port, '127.0.0.1', () => {
   console.log(`LunchRoute API ready at http://127.0.0.1:${port}`);

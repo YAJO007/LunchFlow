@@ -8,6 +8,7 @@
     "dev:api": "tsx watch server/index.ts",
     "dev:web": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
+    "test": "tsx --test server/**/*.test.ts",
     "start": "tsx server/index.ts"
   },
   "dependencies": {
