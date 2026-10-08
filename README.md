@@ -7,6 +7,7 @@
 | Backend (Web API) | NodeJS + Express + TypeScript + MySQL (aiven) | โฟลเดอร์หลัก (ราก) |
 | Frontend (หน้าเว็บ) | Angular + Tailwind CSS + daisyUI + Leaflet (แผนที่) | โฟลเดอร์ `frontend/` |
 
+- **เว็บออนไลน์:** https://lunchflow-web-h70r.onrender.com
 - **API ออนไลน์:** https://lunchflow-u723.onrender.com
 - **GitHub:** https://github.com/YAJO007/LunchFlow
 
