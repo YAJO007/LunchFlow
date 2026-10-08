@@ -150,7 +150,11 @@ npm run dev
 
 ## 5. คู่มือการใช้งาน API ทุกเส้น
 
-Base URL ในเครื่อง: `http://localhost:3000` (หลัง Deploy เปลี่ยนเป็น URL ของ Render)
+- **ออนไลน์ (Render):** https://lunchflow-u723.onrender.com
+- **ในเครื่อง:** `http://localhost:3000`
+
+> Render แบบฟรีจะหลับเมื่อไม่มีคนใช้ ครั้งแรกที่เปิดอาจรอประมาณ 1 นาที
+
 ทุกเส้นที่ส่ง Body ต้องตั้ง Header `Content-Type: application/json`
 
 ### สรุปทุกเส้น
