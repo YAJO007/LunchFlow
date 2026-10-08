@@ -1,154 +1,195 @@
-# HW5 – Web API ร้านข้าวกล่องเดลิเวอรี (ส่งด่วนมื้อเที่ยง)
+# LunchFlow – ระบบจัดเส้นทางและแบ่งงานไรเดอร์ (ร้านข้าวกล่อง ส่งด่วนมื้อเที่ยง)
 
-Web API (NodeJS + Express + TypeScript + MySQL) สำหรับโปรเจกต์ **ระบบจัดเส้นทางและแบ่งงานไรเดอร์อัจฉริยะ**
-ใช้จัดการ **ลูกค้า** และ **รายการสั่งซื้อ** ตามโจทย์ HW-5
+เว็บจริงตามโจทย์ **Project.pdf** ต่อยอดจากงาน **HW5 (Web API)**
 
-> เขียนตามบทเรียน `NodeJS Web API (TS)` ทั้งหมด (Express Router, `req.params` / `req.query` / `req.body`,
-> `res.status().json()`, `mysql2` Connection Pool, Model Interface, Spread Merge, CORS, Deploy บน Render)
+| ส่วน | เทคโนโลยี | อยู่ที่ |
+|---|---|---|
+| Backend (Web API) | NodeJS + Express + TypeScript + MySQL (aiven) | โฟลเดอร์หลัก (ราก) |
+| Frontend (หน้าเว็บ) | Angular + Tailwind CSS + daisyUI + Leaflet (แผนที่) | โฟลเดอร์ `frontend/` |
+
+- **API ออนไลน์:** https://lunchflow-u723.onrender.com
+- **GitHub:** https://github.com/YAJO007/LunchFlow
+
+> เขียนตามบทเรียนในวิชา: Express Router / `req.params` `req.query` `req.body` / `res.status().json()` / mysql2 Pool /
+> Angular Component, Data binding (`model()`, `[(ngModel)]`), `@if` `@for`, Router + query params (`input()`),
+> Service แชร์ข้อมูล, `fetch` แบบบทเรียน CORS, daisyUI
 
 ---
 
-## 1. เช็กลิสต์ตามโจทย์
+## 1. เช็กลิสต์ตามโจทย์ Project.pdf
 
-| ข้อในโจทย์ | ทำที่ไหน |
+**หน้าจอเจ้าของร้าน**
+| ความต้องการ | ทำที่ไหน |
 |---|---|
-| 1. ER Diagram | [`docs/er-diagram.png`](docs/er-diagram.png) และหัวข้อ [ER Diagram](#3-er-diagram) (วาดซ้ำใน erdplus.com ตามตาราง) |
-| 2.1 เพิ่ม ลบ แก้ไข แสดงข้อมูลลูกค้าทุกคน | `POST` / `DELETE` / `PUT` / `GET /customer` |
-| 2.2 ค้นหาจากส่วนหนึ่งของชื่อ, นามสกุล | `GET /customer/search?firstname=...&lastname=...` |
-| 2.3 ลูกค้าทั้งหมดในระยะ 1 กม. จากพิกัดที่กำหนด | `GET /customer/nearby?lat=...&lng=...` |
-| 3.1 จำลองออเดอร์ 20-30 รายการ (มีข้อมูลลูกค้า + จำนวนกล่อง) | `POST /order/simulate` และ `GET /order` (JOIN ข้อมูลลูกค้ามาให้) |
-| 3.1.3 เพิ่ม ลบ แก้ไขจำนวนกล่อง | `POST /order`, `DELETE /order/:id`, `PUT /order/:id` |
-| 3.2 ล้าง (ลบทั้งหมด) รายการสั่งซื้อ | `DELETE /order` |
-| 3.3 ออเดอร์ทั้งหมดในระยะ 2 กม. จากพิกัดที่กำหนด | `GET /order/nearby?lat=...&lng=...` |
-| 4. Deploy ให้ทดสอบผ่านอินเทอร์เน็ต | หัวข้อ [Deploy บน Render](#7-deploy-บน-render) |
+| จัดการข้อมูลลูกค้า (ชื่อ เบอร์โทร พิกัดบ้าน) และเห็นบ้านลูกค้าบนแผนที่ | หน้า **ลูกค้า** (`/customers`) – คลิกแผนที่เพื่อเลือกพิกัด |
+| จัดการออเดอร์ จำลองออเดอร์ เพิ่ม ลบ แก้จำนวนกล่อง | หน้า **ออเดอร์** (`/orders`) |
+| กดปุ่มเดียวแล้วระบบแบ่งงานไรเดอร์ + แผนที่ใหญ่ เส้นทางแยกสีต่อคน (คนที่ 1 แดง, 2 เขียว, 3 น้ำเงิน, ...) | หน้า **จัดเส้นทาง** (`/routes`) ปุ่ม "คำนวณเส้นทาง" |
+| ไม่พอใจเส้นทาง กดคำนวณใหม่ให้เสนอเส้นทางอื่น | ปุ่ม "คำนวณใหม่ (แผนถัดไป)" – มีแผนให้เลือกสูงสุด 5 แบบ |
+| เห็นค่าใช้จ่าย กำไร/ขาดทุน และเวลาที่ใช้ | การ์ดสรุปด้านบนแผนที่ (ขาดทุนจะขึ้นสีแดงพร้อมคำเตือน) |
 
-กติกาจากโจทย์โปรเจกต์ที่ใส่ไว้ในโค้ด:
-- ออเดอร์ 1 รายการ สั่งได้ **1-3 กล่อง** (ถ้าส่งนอกช่วงนี้จะได้ `400`)
-- จำลองออเดอร์ได้ครั้งละ **20-30 รายการ** ลูกค้าและจำนวนกล่องถูกสุ่ม
-- ลูกค้าตัวอย่าง 30 คน อยู่รอบมหาวิทยาลัยมหาสารคาม ในระยะไม่เกิน 3 กม.
+**หน้าจอไรเดอร์ (มือถือ)**
+| ความต้องการ | ทำที่ไหน |
+|---|---|
+| กรอกเลขใบงานเพื่อดูใบงานของตัวเอง | หน้า **ใบงานไรเดอร์** (`/rider`) หรือลิงก์ `/rider?job=1001` |
+| สรุปง่าย ๆ ต้องหยิบกี่กล่อง ลำดับจุดส่ง 1 → 2 → 3 | การ์ดสรุป + ลำดับจุดส่ง (ชื่อ ที่อยู่ เบอร์โทร เวลาถึง) |
+| ปุ่มเปิดแผนที่นำทาง | ปุ่ม "เปิดแผนที่นำทาง" (Google Maps ผ่านทุกจุดตามลำดับ) |
+
+**เงื่อนไขธุรกิจที่ระบบใช้คำนวณ** (แก้ได้ที่ `config/shop.ts`)
+| เงื่อนไข | ค่า |
+|---|---|
+| ราคาขาย / ต้นทุนอาหาร | 65 / 40 บาทต่อกล่อง |
+| ค่าไรเดอร์ | 15 บาทต่อรอบ + 2 บาท × จำนวนกล่อง × ระยะทาง (กม.) |
+| ไรเดอร์ 1 คน | ไม่เกิน 3 ออเดอร์ |
+| ความเร็ว | 30 กม./ชม. (+ ส่งของจุดละ 2 นาที) |
+| เวลา | ออกจากร้าน 11:30 ต้องถึงทุกคนไม่เกิน 12:30 |
+| ลูกค้า | อยู่รอบมหาวิทยาลัยมหาสารคามในระยะ 3 กม. สั่งได้ 1–3 กล่อง |
+
+**งาน HW5 (Web API)** ยังอยู่ครบ – ดู [คู่มือ API](#8-คู่มือการใช้งาน-api-ทุกเส้น) เส้นที่ 1–15
 
 ---
 
 ## 2. โครงสร้างโปรเจกต์
 
 ```
-Angular hw5/
-├── server.ts              เปิดพอร์ตเซิร์ฟเวอร์ (บทที่ 01)
-├── app.ts                 รวม Router + CORS + express.json() (บทที่ 02, 04, 12)
-├── dbconnect.ts           Connection Pool ไปที่ MySQL (บทที่ 06) อ่านค่าจาก .env
-├── .env.example           ตัวอย่างไฟล์ .env (ค่าเชื่อมต่อฐานข้อมูล)
+Angular hw5/   (repo LunchFlow)
+├── server.ts / app.ts           เปิดเซิร์ฟเวอร์ + รวม Router + CORS
+├── dbconnect.ts                 Connection Pool (อ่านค่าจาก .env)
+├── .env.example                 ตัวอย่างไฟล์ .env
+├── config/shop.ts               ข้อมูลร้าน + เงื่อนไขคิดเงิน + สีไรเดอร์
 ├── controller/
-│   ├── index.ts           GET /  (เช็กว่าเซิร์ฟเวอร์ทำงาน)
-│   ├── customer.ts        API ลูกค้าทั้งหมด
-│   └── order.ts           API ออเดอร์ทั้งหมด
-├── model/
-│   ├── customer.ts        Interface ของลูกค้า (บทที่ 07.01)
-│   └── order.ts           Interface ของออเดอร์
+│   ├── customer.ts              API ลูกค้า (HW5)
+│   ├── order.ts                 API ออเดอร์ (HW5)
+│   ├── route.ts                 API จัดเส้นทาง / ยืนยันแผน
+│   └── job.ts                   API ใบงานไรเดอร์
+├── model/                       Interface ของ customer, order, route
 ├── utils/
-│   └── distance.ts        ฟังก์ชันคำนวณระยะทาง (กม.) ระหว่าง 2 พิกัด
+│   ├── distance.ts              คำนวณระยะทางระหว่าง 2 พิกัด
+│   └── route-planner.ts         ตัวจัดเส้นทางไรเดอร์ (หัวใจของระบบ)
 ├── database/
-│   ├── lunchbox.sql       สร้างตาราง + ลูกค้าตัวอย่าง 30 คน
-│   └── setup.ts           สคริปต์รัน lunchbox.sql ให้อัตโนมัติ (npm run setup-db)
-├── docs/er-diagram.png    รูป ER Diagram
-├── postman/               ไฟล์ Collection สำหรับ Import เข้า Postman
-├── package.json
-└── tsconfig.json
+│   ├── lunchbox.sql             สร้างตาราง 5 ตาราง + ลูกค้าตัวอย่าง 30 คน
+│   └── setup.ts                 รัน lunchbox.sql ให้อัตโนมัติ (npm run setup-db)
+├── docs/er-diagram.png
+├── postman/                     Collection สำหรับทดสอบ API
+└── frontend/                    เว็บ Angular
+    └── src/app/
+        ├── app.routes.ts        เส้นทางหน้าเว็บ
+        ├── models.ts            โครงสร้างข้อมูล (ตรงกับ API)
+        ├── services/api.ts      เรียก API ทุกเส้นด้วย fetch
+        ├── utils/map.ts         ฟังก์ชันวาดแผนที่ (Leaflet)
+        ├── components/navbar/   แถบเมนู
+        └── pages/
+            ├── customers/       หน้าจัดการลูกค้า + แผนที่
+            ├── orders/          หน้าจัดการออเดอร์
+            ├── routes/          หน้าจัดเส้นทาง (แผนที่ใหญ่ + สรุปเงิน)
+            └── rider/           หน้าใบงานไรเดอร์ (มือถือ)
 ```
-
-### การหาระยะทาง (ข้อ 2.3 และ 3.3) ทำงานอย่างไร
-1. ดึงข้อมูลจากฐานข้อมูลมาทั้งหมด (`SELECT`)
-2. ใช้ `map` คำนวณระยะจากพิกัดที่ส่งมา ถึงพิกัดบ้านลูกค้า ด้วยฟังก์ชัน `getDistanceKm()` (สูตร Haversine) แล้วแนบ `distance_km` ไปกับข้อมูล
-3. ใช้ `filter` เก็บเฉพาะรายการที่ `distance_km` ไม่เกิน 1 กม. (ลูกค้า) หรือ 2 กม. (ออเดอร์)
 
 ---
 
-## 3. ER Diagram
+## 3. ระบบจัดเส้นทางทำงานอย่างไร (`utils/route-planner.ts`)
+
+1. **แบ่งออเดอร์เป็นกลุ่ม กลุ่มละไม่เกิน 3 ออเดอร์** (1 กลุ่ม = ไรเดอร์ 1 คน) ลอง 5 วิธี
+   - *กวาดรอบร้าน* – เรียงบ้านลูกค้าตามทิศรอบร้านเหมือนเข็มนาฬิกา แล้วตัดทีละ 3 (เริ่มตัด 3 ตำแหน่งต่างกัน = 3 แผน)
+   - *จับกลุ่มเพื่อนบ้าน* – เลือกบ้านตั้งต้น (ไกลสุด หรือใกล้สุด) แล้วจับคู่กับ 2 บ้านที่อยู่ใกล้มันที่สุด (= 2 แผน)
+2. **เรียงลำดับจุดส่งในกลุ่ม** – ลองทุกลำดับ (3 จุด = 6 แบบ) เลือกแบบที่ระยะทางรวมสั้นที่สุด
+3. **คิดเวลาและเงิน** – เวลาถึงแต่ละจุด, ค่าไรเดอร์ = 15 + 2 × กล่อง × กม., ยอดขาย, ต้นทุน, กำไร
+4. **เรียงแผน** – แผนที่ส่งทันเวลาทุกคนมาก่อน แล้วเรียงตามค่าส่งจากถูกไปแพง
+   แผนที่ 1 = ดีที่สุด, ปุ่ม "คำนวณใหม่" = ดูแผนถัดไป
+5. **ยืนยันแผน** – บันทึกลงตาราง `delivery_plan` / `delivery_job` / `delivery_stop` ได้เลขใบงานให้ไรเดอร์
+
+ตัวอย่างผลจริง (ลูกค้าตัวอย่าง 25 ออเดอร์ 49 กล่อง): ใช้ไรเดอร์ 9 คน ระยะรวม 20.5 กม. ค่าส่ง 390 บาท
+กำไร 835 บาท ส่งถึงคนสุดท้าย 11:43 (ทันก่อน 12:30)
+
+> **ข้อจำกัด:** ระยะทางคิดแบบเส้นตรงระหว่างพิกัด (ยังไม่ใช่ระยะตามถนนจริง) และนับจากร้านถึงจุดสุดท้าย (ไม่นับขากลับ)
+
+---
+
+## 4. ER Diagram
 
 ![ER Diagram](docs/er-diagram.png)
 
 ```mermaid
 erDiagram
     customer ||--o{ orders : places
-    customer {
-        INT id PK
-        VARCHAR firstname
-        VARCHAR lastname
-        VARCHAR phone
-        VARCHAR address
-        DOUBLE latitude
-        DOUBLE longitude
-    }
-    orders {
-        INT id PK
-        INT customer_id FK
-        INT quantity
-        DATETIME order_date
-    }
+    orders |o--o{ delivery_stop : "delivered in"
+    delivery_plan ||--|{ delivery_job : "has jobs"
+    delivery_job ||--|{ delivery_stop : "has stops"
 ```
 
-**วาดใน [erdplus.com](https://erdplus.com/)** (โจทย์ให้ใช้เว็บนี้): สร้าง Entity 2 ตัวตามตารางด้านบน
-→ ตั้ง `id` เป็น Primary Key ทั้งคู่ → ลาก Relationship ชื่อ `places` จาก `customer` (1) ไป `orders` (Many)
-→ Export เป็นรูปไปใส่ใน PDF
+| ตาราง | เก็บอะไร |
+|---|---|
+| `customer` | ลูกค้า (ชื่อ เบอร์โทร ที่อยู่ พิกัด) |
+| `orders` | ออเดอร์ (ลูกค้าที่สั่ง จำนวนกล่อง 1–3) |
+| `delivery_plan` | แผนจัดส่งที่ยืนยันแล้ว + สรุปเงินและเวลา |
+| `delivery_job` | ใบงานไรเดอร์ 1 คน (`id` = เลขใบงาน เริ่ม 1001) |
+| `delivery_stop` | จุดส่งในใบงาน เรียงตาม `stop_no` (เก็บชื่อ/ที่อยู่ไว้ด้วย ใบงานจะไม่หายแม้ล้างออเดอร์) |
 
-ความสัมพันธ์: ลูกค้า 1 คน มีได้หลายออเดอร์ (`orders.customer_id` → `customer.id`)
-ถ้าลบลูกค้า ออเดอร์ของลูกค้าคนนั้นจะถูกลบตามไปด้วย (`ON DELETE CASCADE`)
+**วาดใน erdplus.com** (ตามโจทย์ HW5): สร้าง Entity 5 ตัวตามตาราง → ลาก Relationship ตามรูป → Export รูปใส่ PDF
 
 ---
 
-## 4. วิธีติดตั้งและรันในเครื่อง
+## 5. วิธีติดตั้งและรันในเครื่อง
 
-ฐานข้อมูลใช้ **MySQL บน [aiven.io](https://aiven.io/)** (ฟรี ไม่ต้องลงโปรแกรมในเครื่อง และใช้ตัวเดียวกันตอน Deploy ได้เลย)
+### 5.1 ฐานข้อมูล (aiven.io)
+1. สร้าง MySQL แบบ Free ที่ https://console.aiven.io แล้วจด Host / Port / User / Password / Database
+2. คัดลอก `.env.example` เป็น `.env` แล้วใส่ค่าที่จดไว้
+   ```
+   DB_HOST=mysql-xxxx.aivencloud.com
+   DB_PORT=12345
+   DB_USER=avnadmin
+   DB_PASSWORD=รหัสผ่านจาก aiven
+   DB_NAME=defaultdb
+   ```
+   ไฟล์ `.env` อยู่ใน `.gitignore` แล้ว รหัสผ่านจึงไม่ถูกอัปขึ้น GitHub
 
-### 4.1 สร้างฐานข้อมูลบน aiven
-1. สมัคร / Login ที่ https://console.aiven.io
-2. กด **Create service** → เลือก **MySQL** → เลือกแพลน **Free** → กด Create แล้วรอจนสถานะเป็น **Running**
-3. ในหน้า **Overview** ของ service จดค่าเหล่านี้ไว้: **Host, Port, User, Password, Database name** (ปกติ User คือ `avnadmin`, Database คือ `defaultdb`)
-
-### 4.2 สร้างตารางและข้อมูลตัวอย่าง
-**วิธีที่ง่ายที่สุด** (หลังทำข้อ 4.3 และ `npm install` แล้ว) รันคำสั่งนี้ครั้งเดียว:
-```shell
-npm run setup-db
-```
-ขึ้น `สร้างตารางสำเร็จ มีลูกค้าทั้งหมด 30 คน` ก็เรียบร้อย (คำสั่งนี้จะลบตารางเดิมแล้วสร้างใหม่ทุกครั้ง)
-
-**หรือ** ใช้ extension Database Client ใน VS Code ตามบทเรียน:
-1. ใน VS Code ลง extension **Database Client** (database-client.com)
-2. กดไอคอน Database ทางซ้าย → **Create Connection** → เลือก **MySQL** → ใส่ Host / Port / User / Password จาก aiven
-   และเปิด **SSL** → กด **Connect**
-3. เปิดไฟล์ `database/lunchbox.sql` → เลือกฐานข้อมูล `defaultdb` → กด **Run** (หรือคลิกขวาที่ `defaultdb` → Import SQL แล้วเลือกไฟล์นี้)
-4. จะได้ตาราง `customer` (ลูกค้า 30 คน) และตาราง `orders` (ว่าง รอจำลองออเดอร์)
-
-### 4.3 ตั้งค่าการเชื่อมต่อในไฟล์ `.env`
-คัดลอกไฟล์ `.env.example` เป็นชื่อ `.env` แล้วใส่ค่าจากหน้า Overview ของ aiven
-
-```
-DB_HOST=mysql-xxxx.aivencloud.com
-DB_PORT=12345
-DB_USER=avnadmin
-DB_PASSWORD=รหัสผ่านจาก aiven
-DB_NAME=defaultdb
-```
-
-`dbconnect.ts` จะอ่านค่าจากไฟล์นี้เอง ไฟล์ `.env` อยู่ใน `.gitignore` แล้ว จึงไม่ถูกอัปขึ้น GitHub (รหัสผ่านไม่หลุด)
-ตอน Deploy บน Render ให้ใส่ค่าเดียวกันนี้ใน Environment Variables แทน
-
-### 4.4 ติดตั้งแพ็กเกจและรัน
+### 5.2 Backend (Web API)
 ```shell
 npm install
-npm run dev
+npm run setup-db     # สร้างตาราง + ลูกค้าตัวอย่าง 30 คน (ลบข้อมูลเดิมทุกครั้ง)
+npm run dev          # http://localhost:3000
 ```
-เห็นข้อความ `Server is started on port 3000` แล้วเปิด http://localhost:3000 จะเจอ `Lunchbox Web API is running`
 
-| คำสั่ง | ทำอะไร |
+### 5.3 Frontend (หน้าเว็บ) – เปิด Terminal ใหม่
+```shell
+cd frontend
+npm install
+npm start            # เปิด http://localhost:4200 ให้อัตโนมัติ
+```
+หน้าเว็บที่เปิดจาก `localhost` จะเรียก API ในเครื่อง (`localhost:3000`) อัตโนมัติ
+ถ้าเปิดเว็บที่ Deploy แล้ว จะเรียก API บน Render (ตั้งไว้ใน `frontend/src/app/services/api.ts`)
+
+| คำสั่ง (โฟลเดอร์หลัก) | ทำอะไร |
 |---|---|
-| `npm run setup-db` | สร้างตาราง + ลูกค้าตัวอย่างในฐานข้อมูล (รันครั้งแรกครั้งเดียว) |
-| `npm run dev` | รันแบบพัฒนา (ts-node-dev รีสตาร์ตให้เองเวลากดเซฟ) |
-| `npm run build` | คอมไพล์ TypeScript เป็น JavaScript ลงโฟลเดอร์ `dist` |
-| `npm start` | รันเวอร์ชันที่คอมไพล์แล้ว (`node dist/server.js`) |
+| `npm run setup-db` | สร้างตาราง + ข้อมูลตัวอย่าง |
+| `npm run dev` | รัน API แบบพัฒนา |
+| `npm run build` / `npm start` | คอมไพล์ / รัน API เวอร์ชันจริง |
+
+| คำสั่ง (`frontend/`) | ทำอะไร |
+|---|---|
+| `npm start` | รันเว็บแบบพัฒนา |
+| `npm run build` | สร้างไฟล์เว็บไว้ Deploy (`frontend/dist/lunchflow-web/browser`) |
 
 ---
 
-## 5. คู่มือการใช้งาน API ทุกเส้น
+## 6. วิธีใช้งานหน้าเว็บ (ลำดับที่แนะนำ)
+
+1. **ลูกค้า** – ดูบ้านลูกค้า 30 คนบนแผนที่ / เพิ่มลูกค้า: กรอกชื่อ เบอร์ ที่อยู่ แล้ว **คลิกบนแผนที่** เพื่อเลือกพิกัด
+   ค้นหาด้วยชื่อ/นามสกุล หรือคลิกจุดบนแผนที่แล้วกด "ลูกค้าในระยะ 1 กม."
+2. **ออเดอร์** – กด "จำลองออเดอร์" (20–30 รายการ) / แก้จำนวนกล่องจาก dropdown ในตาราง / ลบ / ล้างทั้งหมด
+3. **จัดเส้นทาง** – กด **คำนวณเส้นทาง** → ดูแผนที่ เส้นทางแต่ละสี เวลา กำไร/ขาดทุน
+   - ไม่พอใจ → **คำนวณใหม่ (แผนถัดไป)**
+   - กดการ์ดไรเดอร์เพื่อดูเส้นทางเฉพาะคนนั้น
+   - พอใจ → **ยืนยันแผนและออกใบงาน** → แต่ละการ์ดจะมี "ใบงาน 10xx"
+4. **ใบงานไรเดอร์** – ไรเดอร์เปิดบนมือถือ กรอกเลขใบงาน → เห็นจำนวนกล่อง ลำดับจุดส่ง เบอร์โทร (กดโทรได้) และปุ่ม **เปิดแผนที่นำทาง**
+
+---
+
+## 7. ทดสอบ API ด้วย Postman
+Import `postman/lunchbox-api.postman_collection.json` แล้วเปลี่ยนตัวแปร `baseUrl` เป็น `http://localhost:3000` หรือ URL ของ Render
+
+---
+
+## 8. คู่มือการใช้งาน API ทุกเส้น
 
 - **ออนไลน์ (Render):** https://lunchflow-u723.onrender.com
 - **ในเครื่อง:** `http://localhost:3000`
@@ -176,6 +217,13 @@ npm run dev
 | 13 | PUT | `/order/:id` | แก้ไขจำนวนกล่อง |
 | 14 | DELETE | `/order/:id` | ลบออเดอร์ 1 รายการ |
 | 15 | DELETE | `/order` | ล้างออเดอร์ทั้งหมด |
+| 16 | GET | `/route/shop` | ข้อมูลร้านและเงื่อนไขการคิดเงิน |
+| 17 | POST | `/route/calculate` | คำนวณเส้นทาง (ยังไม่บันทึก) |
+| 18 | POST | `/route/confirm` | ยืนยันแผนและออกใบงาน |
+| 19 | GET | `/route/latest` | แผนล่าสุดที่ยืนยันแล้ว |
+| 20 | GET | `/job/:id` | ใบงานไรเดอร์ตามเลขใบงาน |
+
+> เส้นที่ 1–15 คืองาน HW5 ส่วนเส้นที่ 16–20 เพิ่มสำหรับเว็บจัดเส้นทาง
 
 ### รหัสสถานะ (Status Code) ที่ใช้
 | Code | ความหมาย |
@@ -361,42 +409,88 @@ DELETE http://localhost:3000/order
 
 ---
 
-## 6. ทดสอบด้วย Postman
-1. เปิด Postman → **Import** → เลือกไฟล์ `postman/lunchbox-api.postman_collection.json`
-2. จะได้ Collection ชื่อ **HW5 Lunchbox Web API** ที่มีครบทั้ง 15 เส้น
-3. ตัวแปร `baseUrl` ตั้งไว้เป็น `http://localhost:3000` (แก้เป็น URL ของ Render ตอนทดสอบหลัง Deploy)
+### จัดเส้นทางและใบงาน (Route / Job)
 
-ลำดับที่แนะนำ: `GET /customer` → `POST /order/simulate` → `GET /order` → `GET /order/nearby` → `PUT /order/1` → `DELETE /order`
+#### 16) GET `/route/shop` – ข้อมูลร้านและเงื่อนไข
+ผลลัพธ์ `200`
+```json
+{
+  "name": "ข้าวกล่องเดลิเวอรี ส่งด่วนมื้อเที่ยง",
+  "latitude": 16.2459, "longitude": 103.2525,
+  "pricePerBox": 65, "foodCostPerBox": 40,
+  "riderBaseFee": 15, "riderFeePerKmPerBox": 2,
+  "maxOrdersPerRider": 3, "speedKmPerHour": 30, "minutesPerStop": 2,
+  "departureTime": "11:30", "deadlineTime": "12:30"
+}
+```
+
+#### 17) POST `/route/calculate` – คำนวณเส้นทาง
+Body (ไม่บังคับ) `{ "option": 0 }` – `0` = แผนที่ดีที่สุด, `1` = แผนสำรองถัดไป, ... (เกินจำนวนแผนจะวนกลับแผนแรก)
+
+ผลลัพธ์ `200` (ย่อ)
+```json
+{
+  "option": 0,
+  "total_options": 5,
+  "plan": {
+    "strategy": "กวาดรอบร้าน (เริ่มตำแหน่งที่ 1)",
+    "rider_count": 9, "total_order": 25, "total_box": 49,
+    "total_distance_km": 20.53, "delivery_cost": 390.31,
+    "revenue": 3185, "food_cost": 1960, "profit": 834.69,
+    "departure_time": "11:30", "deadline_time": "12:30",
+    "last_arrival_time": "11:43", "all_on_time": true,
+    "jobs": [
+      {
+        "rider_no": 1, "color": "#e11d48", "total_box": 5,
+        "distance_km": 3.74, "duration_min": 12, "cost": 52.44,
+        "finish_time": "11:42", "on_time": true,
+        "map_url": "https://www.google.com/maps/dir/?api=1&...",
+        "stops": [
+          { "stop_no": 1, "order_id": 25, "customer_name": "ธีรเดช วงศ์ใหญ่", "quantity": 1,
+            "distance_from_prev_km": 1.91, "arrival_time": "11:34", "...": "..." }
+        ]
+      }
+    ]
+  }
+}
+```
+ยังไม่มีออเดอร์ → `400`
+
+#### 18) POST `/route/confirm` – ยืนยันแผนและออกใบงาน
+Body `{ "option": 0 }` (เลขแผนเดียวกับที่ดูอยู่)
+ผลลัพธ์ `201` – แผนเหมือนข้อ 17 แต่มี `id` (เลขแผน) และทุกใบงานมี `id` (**เลขใบงาน** เริ่มที่ 1001)
+
+#### 19) GET `/route/latest` – แผนล่าสุดที่ยืนยันแล้ว
+ผลลัพธ์ `200` เหมือนข้อ 18 / ยังไม่เคยยืนยันแผน → `404`
+
+#### 20) GET `/job/:id` – ใบงานไรเดอร์
+```
+GET http://localhost:3000/job/1001
+```
+ผลลัพธ์ `200` ใบงาน 1 ใบ พร้อมจุดส่งเรียงตามลำดับ และ `map_url` สำหรับเปิดนำทาง / ไม่พบ → `404`
+
 
 ---
 
-## 7. Deploy บน Render
-(ตามบทเรียน 14-Deployment)
+## 9. Deploy
 
-1. **ฐานข้อมูลออนไลน์** – ใช้ MySQL บน aiven ตัวเดียวกับหัวข้อ 4 ได้เลย
-2. **อัปโหลดโค้ดขึ้น GitHub** (ไฟล์ `.gitignore` กันโฟลเดอร์ `node_modules` และ `dist` ไว้แล้ว)
-3. ที่ [Render](https://render.com/) → New → Web Service → เลือก repo นี้ แล้วตั้งค่า
-   - **Build Command:** `npm install && npx tsc`
-   - **Start Command:** `node dist/server.js`
-4. แท็บ **Environment** ใส่ค่าฐานข้อมูลจาก aiven
+### 9.1 Web API บน Render (Web Service)
+- Build Command: `npm install && npx tsc` / Start Command: `node dist/server.js`
+- Environment Variables: `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` (ค่าเดียวกับ `.env`)
+- ทุกครั้งที่อัปโค้ดใหม่ ให้กด **Manual Deploy → Deploy latest commit** ใน Render
 
-   | Key | ตัวอย่าง |
-   |---|---|
-   | `DB_HOST` | `mysql-xxxx.aivencloud.com` |
-   | `DB_PORT` | `12345` |
-   | `DB_USER` | `avnadmin` |
-   | `DB_PASSWORD` | (รหัสจาก aiven) |
-   | `DB_NAME` | `defaultdb` |
+### 9.2 หน้าเว็บบน Render (Static Site)
+- New → **Static Site** → repo LunchFlow
+- Root Directory: `frontend`
+- Build Command: `npm install && npm run build`
+- Publish Directory: `dist/lunchflow-web/browser`
+- แท็บ **Redirects/Rewrites** เพิ่ม: Source `/*` → Destination `/index.html` → Action **Rewrite**
+  (ให้เปิดลิงก์ เช่น `/rider?job=1001` ตรง ๆ ได้)
 
-5. รอ Deploy เสร็จ แล้วเปิด URL ที่ Render ให้มา เช่น `https://xxxx.onrender.com/customer`
-   ส่ง URL นี้ให้อาจารย์/TA ทดสอบ
-
+> Render แบบฟรีจะหลับเมื่อไม่มีคนใช้ ครั้งแรกที่เปิดอาจรอประมาณ 1 นาที
 
 ---
 
-## 8. สิ่งที่ต้องส่งใน Classroom
-- [ ] **ไฟล์ PDF**
-  - [ ] ข้อมูลสมาชิกกลุ่มทุกคน (ชื่อ-นามสกุล, รหัสนิสิต)
-  - [ ] ER Diagram (วาดจาก erdplus.com หรือใช้ `docs/er-diagram.png`)
-  - [ ] คู่มือการใช้งานทุกเส้น API (คัดจากหัวข้อ 5 + ใส่ URL ที่ Deploy แล้ว)
-- [ ] **ไฟล์ Zip Source** – Zip ทั้งโฟลเดอร์ **ยกเว้น `node_modules`** (และ `dist`)
+## 10. สิ่งที่ต้องส่ง (HW5)
+- [ ] **PDF**: สมาชิกกลุ่ม / ER Diagram (erdplus.com) / คู่มือ API ทุกเส้น (หัวข้อ 8) + URL ที่ Deploy
+- [ ] **Zip Source**: ไม่เอา `node_modules`, `dist`, `frontend/node_modules`, `frontend/dist`, `.env`
