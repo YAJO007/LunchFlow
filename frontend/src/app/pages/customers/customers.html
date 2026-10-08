@@ -1,0 +1,147 @@
+<div class="mb-6">
+  <h1 class="text-3xl font-bold">จัดการข้อมูลลูกค้า</h1>
+  <p class="text-base-content/70">เพิ่ม แก้ไข ลบ และดูตำแหน่งบ้านลูกค้าบนแผนที่ (คลิกบนแผนที่เพื่อเลือกพิกัด)</p>
+</div>
+
+@if (message()) {
+  <div class="alert alert-success mb-4">
+    <span>{{ message() }}</span>
+    <button class="btn btn-ghost btn-xs" (click)="message.set('')">ปิด</button>
+  </div>
+}
+@if (errorMessage()) {
+  <div class="alert alert-error mb-4">
+    <span>{{ errorMessage() }}</span>
+    <button class="btn btn-ghost btn-xs" (click)="errorMessage.set('')">ปิด</button>
+  </div>
+}
+
+<div class="grid gap-6 lg:grid-cols-5">
+  <!-- ฝั่งซ้าย: ฟอร์ม + ค้นหา -->
+  <div class="flex flex-col gap-6 lg:col-span-2">
+    <div class="card bg-base-100 shadow">
+      <div class="card-body">
+        <h2 class="card-title">
+          {{ editingId() === null ? 'เพิ่มลูกค้าใหม่' : 'แก้ไขลูกค้า #' + editingId() }}
+        </h2>
+
+        <div class="grid grid-cols-2 gap-3">
+          <label class="fieldset">
+            <span class="fieldset-legend">ชื่อ</span>
+            <input class="input w-full" [(ngModel)]="firstname" placeholder="สมชาย" />
+          </label>
+          <label class="fieldset">
+            <span class="fieldset-legend">นามสกุล</span>
+            <input class="input w-full" [(ngModel)]="lastname" placeholder="ใจดี" />
+          </label>
+        </div>
+        <label class="fieldset">
+          <span class="fieldset-legend">เบอร์โทร</span>
+          <input class="input w-full" [(ngModel)]="phone" placeholder="0812345678" />
+        </label>
+        <label class="fieldset">
+          <span class="fieldset-legend">ที่อยู่</span>
+          <input class="input w-full" [(ngModel)]="address" placeholder="หอพักหน้ามอ ต.ขามเรียง" />
+        </label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="fieldset">
+            <span class="fieldset-legend">ละติจูด</span>
+            <input class="input w-full" type="number" [(ngModel)]="latitude" placeholder="คลิกบนแผนที่" />
+          </label>
+          <label class="fieldset">
+            <span class="fieldset-legend">ลองจิจูด</span>
+            <input class="input w-full" type="number" [(ngModel)]="longitude" placeholder="คลิกบนแผนที่" />
+          </label>
+        </div>
+
+        <div class="card-actions mt-2 justify-end">
+          @if (editingId() !== null) {
+            <button class="btn btn-ghost" (click)="resetForm()">ยกเลิก</button>
+          }
+          <button class="btn btn-primary" (click)="saveCustomer()">
+            {{ editingId() === null ? 'เพิ่มลูกค้า' : 'บันทึกการแก้ไข' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card bg-base-100 shadow">
+      <div class="card-body">
+        <h2 class="card-title">ค้นหาลูกค้า</h2>
+        <div class="grid grid-cols-2 gap-3">
+          <input class="input w-full" [(ngModel)]="searchFirstname" placeholder="ส่วนหนึ่งของชื่อ" />
+          <input class="input w-full" [(ngModel)]="searchLastname" placeholder="ส่วนหนึ่งของนามสกุล" />
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button class="btn btn-secondary btn-sm" (click)="search()">ค้นหาชื่อ</button>
+          <button class="btn btn-outline btn-sm" (click)="searchNearby()">
+            ลูกค้าในระยะ 1 กม. จากจุดที่เลือก
+          </button>
+          <button class="btn btn-ghost btn-sm" (click)="clearSearch()">แสดงทั้งหมด</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ฝั่งขวา: แผนที่ -->
+  <div class="card overflow-hidden bg-base-100 shadow lg:col-span-3">
+    <div id="customer-map" class="h-[460px] w-full lg:h-full lg:min-h-[520px]"></div>
+  </div>
+</div>
+
+<!-- ตารางลูกค้า -->
+<div class="card mt-6 bg-base-100 shadow">
+  <div class="card-body">
+    <h2 class="card-title">รายชื่อลูกค้า ({{ customers().length }} คน)</h2>
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>ชื่อ - นามสกุล</th>
+            <th>เบอร์โทร</th>
+            <th>ที่อยู่</th>
+            <th>พิกัด</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (customer of customers(); track customer.id) {
+            <tr>
+              <td>{{ customer.id }}</td>
+              <td>
+                <button class="link link-hover font-medium" (click)="showOnMap(customer)">
+                  {{ customer.firstname }} {{ customer.lastname }}
+                </button>
+                @if (customer.distance_km !== undefined) {
+                  <div class="badge badge-accent badge-sm">{{ customer.distance_km }} กม.</div>
+                }
+              </td>
+              <td>{{ customer.phone }}</td>
+              <td class="max-w-xs text-sm">{{ customer.address }}</td>
+              <td class="text-xs text-base-content/70">
+                {{ customer.latitude | number: '1.4-4' }}, {{ customer.longitude | number: '1.4-4' }}
+              </td>
+              <td class="whitespace-nowrap text-right">
+                @if (deletingId() === customer.id) {
+                  <span class="mr-2 text-sm text-error">ลบจริงไหม?</span>
+                  <button class="btn btn-error btn-xs" (click)="deleteCustomer(customer.id)">ลบ</button>
+                  <button class="btn btn-ghost btn-xs" (click)="deletingId.set(null)">ไม่</button>
+                } @else {
+                  <button class="btn btn-ghost btn-xs" (click)="editCustomer(customer)">แก้ไข</button>
+                  <button class="btn btn-ghost btn-xs text-error" (click)="deletingId.set(customer.id)">
+                    ลบ
+                  </button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="text-center text-base-content/60">ไม่พบข้อมูลลูกค้า</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

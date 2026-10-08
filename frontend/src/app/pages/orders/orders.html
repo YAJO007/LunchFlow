@@ -1,0 +1,156 @@
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="text-3xl font-bold">จัดการออเดอร์</h1>
+    <p class="text-base-content/70">จำลองออเดอร์ช่วง 10 โมง เพิ่ม ลบ หรือแก้ไขจำนวนกล่อง (สั่งได้ 1-3 กล่อง)</p>
+  </div>
+  <a routerLink="/routes" class="btn btn-primary">ไปจัดเส้นทาง →</a>
+</div>
+
+@if (message()) {
+  <div class="alert alert-success mb-4">
+    <span>{{ message() }}</span>
+    <button class="btn btn-ghost btn-xs" (click)="message.set('')">ปิด</button>
+  </div>
+}
+@if (errorMessage()) {
+  <div class="alert alert-error mb-4">
+    <span>{{ errorMessage() }}</span>
+    <button class="btn btn-ghost btn-xs" (click)="errorMessage.set('')">ปิด</button>
+  </div>
+}
+
+<!-- สรุปตัวเลข -->
+<div class="stats stats-vertical mb-6 w-full bg-base-100 shadow sm:stats-horizontal">
+  <div class="stat">
+    <div class="stat-title">ออเดอร์</div>
+    <div class="stat-value text-primary">{{ orders().length }}</div>
+    <div class="stat-desc">{{ onlyNearby() ? 'เฉพาะในระยะ 2 กม. จากร้าน' : 'ทั้งหมด' }}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-title">ข้าวกล่องรวม</div>
+    <div class="stat-value">{{ totalBox() }}</div>
+    <div class="stat-desc">กล่อง</div>
+  </div>
+  <div class="stat">
+    <div class="stat-title">ยอดขาย</div>
+    <div class="stat-value text-secondary">{{ totalBox() * 65 }}</div>
+    <div class="stat-desc">บาท (กล่องละ 65)</div>
+  </div>
+</div>
+
+<div class="grid gap-6 md:grid-cols-2">
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h2 class="card-title">จำลองออเดอร์</h2>
+      <p class="text-sm text-base-content/70">สุ่มลูกค้าและจำนวนกล่อง เพื่อทดสอบระบบ (ครั้งละ 20-30 รายการ)</p>
+      <div class="flex items-center gap-2">
+        <input type="number" min="20" max="30" class="input w-28" [(ngModel)]="simulateAmount" />
+        <span>รายการ</span>
+        <button class="btn btn-accent" [disabled]="loading()" (click)="simulate()">
+          @if (loading()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          จำลองออเดอร์
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h2 class="card-title">เพิ่มออเดอร์เอง</h2>
+      <div class="flex flex-wrap items-center gap-2">
+        <select class="select w-full sm:flex-1" [(ngModel)]="newCustomerId">
+          <option [ngValue]="null" disabled>เลือกลูกค้า</option>
+          @for (customer of customers(); track customer.id) {
+            <option [ngValue]="customer.id">{{ customer.firstname }} {{ customer.lastname }}</option>
+          }
+        </select>
+        <select class="select w-28" [(ngModel)]="newQuantity">
+          @for (box of boxChoices; track box) {
+            <option [ngValue]="box">{{ box }} กล่อง</option>
+          }
+        </select>
+        <button class="btn btn-secondary" (click)="addOrder()">เพิ่ม</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ตารางออเดอร์ -->
+<div class="card mt-6 bg-base-100 shadow">
+  <div class="card-body">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <h2 class="card-title">รายการออเดอร์</h2>
+      <div class="flex flex-wrap items-center gap-2">
+        <label class="label cursor-pointer gap-2 text-sm">
+          <input type="checkbox" class="toggle toggle-sm" [checked]="onlyNearby()" (change)="toggleNearby()" />
+          เฉพาะในระยะ 2 กม. จากร้าน
+        </label>
+        @if (confirmClear()) {
+          <span class="text-sm text-error">ล้างทั้งหมดจริงไหม?</span>
+          <button class="btn btn-error btn-sm" (click)="clearAll()">ล้างเลย</button>
+          <button class="btn btn-ghost btn-sm" (click)="confirmClear.set(false)">ไม่</button>
+        } @else {
+          <button class="btn btn-outline btn-error btn-sm" (click)="confirmClear.set(true)">
+            ล้างออเดอร์ทั้งหมด
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>ลูกค้า</th>
+            <th>เบอร์โทร</th>
+            <th>ที่อยู่</th>
+            <th>จำนวนกล่อง</th>
+            @if (onlyNearby()) {
+              <th>ระยะจากร้าน</th>
+            }
+            <th>เวลาสั่ง</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (order of orders(); track order.id) {
+            <tr>
+              <td>{{ order.id }}</td>
+              <td class="font-medium">{{ order.firstname }} {{ order.lastname }}</td>
+              <td>{{ order.phone }}</td>
+              <td class="max-w-xs text-sm">{{ order.address }}</td>
+              <td>
+                <select #qty class="select select-sm w-24" (change)="changeQuantity(order, qty.value)">
+                  @for (box of boxChoices; track box) {
+                    <option [value]="box" [selected]="box === order.quantity">{{ box }}</option>
+                  }
+                </select>
+              </td>
+              @if (onlyNearby()) {
+                <td>{{ order.distance_km }} กม.</td>
+              }
+              <td class="text-sm">{{ order.order_date | date: 'd MMM HH:mm' }}</td>
+              <td class="whitespace-nowrap text-right">
+                @if (deletingId() === order.id) {
+                  <button class="btn btn-error btn-xs" (click)="deleteOrder(order.id)">ยืนยันลบ</button>
+                  <button class="btn btn-ghost btn-xs" (click)="deletingId.set(null)">ไม่</button>
+                } @else {
+                  <button class="btn btn-ghost btn-xs text-error" (click)="deletingId.set(order.id)">ลบ</button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="text-center text-base-content/60">
+                ยังไม่มีออเดอร์ ลองกด "จำลองออเดอร์"
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

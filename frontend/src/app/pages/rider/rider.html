@@ -1,0 +1,91 @@
+<!-- หน้าใบงานไรเดอร์: ออกแบบให้ดูบนมือถือเป็นหลัก -->
+<div class="mx-auto max-w-lg">
+  <h1 class="text-2xl font-bold">ใบงานไรเดอร์</h1>
+  <p class="mb-4 text-base-content/70">กรอกเลขใบงานที่ได้รับจากร้าน</p>
+
+  <div class="join mb-4 w-full">
+    <input
+      class="input join-item w-full text-lg"
+      type="number"
+      inputmode="numeric"
+      placeholder="เช่น 1001"
+      [(ngModel)]="jobNumber"
+      (keyup.enter)="findJob()"
+    />
+    <button class="btn btn-primary join-item" [disabled]="loading()" (click)="findJob()">ดูใบงาน</button>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert alert-error mb-4">{{ errorMessage() }}</div>
+  }
+
+  @if (job(); as j) {
+    <div class="card mb-4 border-t-8 bg-base-100 shadow" [style.border-top-color]="j.color">
+      <div class="card-body p-5">
+        <div class="flex items-center justify-between">
+          <h2 class="card-title">ใบงาน {{ j.id }}</h2>
+          <span class="badge badge-lg" [style.background]="j.color" style="color: white">
+            ไรเดอร์คนที่ {{ j.rider_no }}
+          </span>
+        </div>
+
+        <!-- สรุปสั้น ๆ อ่านง่าย -->
+        <div class="my-2 grid grid-cols-3 gap-2 text-center">
+          <div class="rounded-box bg-base-200 p-3">
+            <div class="text-3xl font-bold text-primary">{{ j.total_box }}</div>
+            <div class="text-xs">กล่องที่ต้องหยิบ</div>
+          </div>
+          <div class="rounded-box bg-base-200 p-3">
+            <div class="text-3xl font-bold">{{ j.stops.length }}</div>
+            <div class="text-xs">จุดส่ง</div>
+          </div>
+          <div class="rounded-box bg-base-200 p-3">
+            <div class="text-3xl font-bold">{{ j.distance_km }}</div>
+            <div class="text-xs">กม.</div>
+          </div>
+        </div>
+        <p class="text-sm">
+          ออกจากร้าน <b>{{ j.departure_time ?? '11:30' }}</b> • ต้องส่งให้ครบก่อน
+          <b>{{ j.deadline_time ?? '12:30' }}</b>
+        </p>
+
+        <a class="btn btn-secondary btn-block btn-lg mt-2" [href]="j.map_url" target="_blank" rel="noopener">
+          🧭 เปิดแผนที่นำทาง
+        </a>
+      </div>
+    </div>
+
+    <!-- ลำดับจุดส่ง -->
+    <ul class="timeline timeline-vertical timeline-compact mb-4">
+      @for (stop of j.stops; track stop.stop_no; let last = $last) {
+        <li>
+          <div class="timeline-middle">
+            <span class="map-pin" [style.background]="j.color">{{ stop.stop_no }}</span>
+          </div>
+          <div class="timeline-end mb-4 w-full">
+            <div class="card bg-base-100 shadow-sm">
+              <div class="card-body gap-1 p-4">
+                <div class="flex justify-between">
+                  <span class="font-bold">จุดที่ {{ stop.stop_no }}: {{ stop.customer_name }}</span>
+                  <span class="badge badge-accent">{{ stop.quantity }} กล่อง</span>
+                </div>
+                <div class="text-sm">{{ stop.address }}</div>
+                <div class="flex justify-between text-sm">
+                  <a class="link link-primary" [href]="'tel:' + stop.phone">📞 {{ stop.phone }}</a>
+                  <span>ถึงประมาณ <b>{{ stop.arrival_time }}</b></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          @if (!last) {
+            <hr [style.background]="j.color" />
+          }
+        </li>
+      }
+    </ul>
+  }
+
+  <div class="card overflow-hidden bg-base-100 shadow">
+    <div id="rider-map" class="h-[320px] w-full"></div>
+  </div>
+</div>
