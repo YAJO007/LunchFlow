@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "HW5 Lunchbox Web API",
+    "name": "LunchFlow Web API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -389,6 +389,155 @@
               ],
               "path": [
                 "order"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Route & Job",
+      "item": [
+        {
+          "name": "ข้อมูลร้าน",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/route/shop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "route",
+                "shop"
+              ]
+            }
+          }
+        },
+        {
+          "name": "คำนวณเส้นทาง (แผนที่ดีที่สุด)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/route/calculate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "route",
+                "calculate"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"option\": 0\n}"
+            }
+          }
+        },
+        {
+          "name": "คำนวณใหม่ (แผนถัดไป)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/route/calculate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "route",
+                "calculate"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"option\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "ยืนยันแผนและออกใบงาน",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/route/confirm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "route",
+                "confirm"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"option\": 0\n}"
+            }
+          }
+        },
+        {
+          "name": "แผนล่าสุดที่ยืนยัน",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/route/latest",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "route",
+                "latest"
+              ]
+            }
+          }
+        },
+        {
+          "name": "ใบงานไรเดอร์",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/job/1001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "job",
+                "1001"
               ]
             }
           }
