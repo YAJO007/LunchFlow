@@ -1,10 +1,16 @@
 -- =========================================================
 -- ฐานข้อมูล HW5 : ร้านข้าวกล่องเดลิเวอรี (ส่งด่วนมื้อเที่ยง)
--- ตาราง customer = ข้อมูลลูกค้า
--- ตาราง orders   = รายการสั่งซื้อ (1 ลูกค้า สั่งได้หลายออเดอร์)
+-- ตาราง customer      = ข้อมูลลูกค้า
+-- ตาราง orders        = รายการสั่งซื้อ (1 ลูกค้า สั่งได้หลายออเดอร์)
+-- ตาราง delivery_plan = แผนจัดส่งที่เจ้าของร้านกดยืนยัน
+-- ตาราง delivery_job  = ใบงานของไรเดอร์แต่ละคน (id = เลขใบงาน)
+-- ตาราง delivery_stop = จุดส่งของในใบงาน เรียงตามลำดับ
 -- วิธีใช้: เปิด phpMyAdmin > เลือกฐานข้อมูล > แท็บ Import > เลือกไฟล์นี้
 -- =========================================================
 
+DROP TABLE IF EXISTS `delivery_stop`;
+DROP TABLE IF EXISTS `delivery_job`;
+DROP TABLE IF EXISTS `delivery_plan`;
 DROP TABLE IF EXISTS `orders`;
 DROP TABLE IF EXISTS `customer`;
 
@@ -28,6 +34,65 @@ CREATE TABLE `orders` (
   CONSTRAINT `fk_orders_customer`
     FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`)
     ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `delivery_plan` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `strategy` VARCHAR(100) NOT NULL,
+  `rider_count` INT NOT NULL,
+  `total_order` INT NOT NULL,
+  `total_box` INT NOT NULL,
+  `total_distance_km` DOUBLE NOT NULL,
+  `delivery_cost` DOUBLE NOT NULL,
+  `revenue` DOUBLE NOT NULL,
+  `food_cost` DOUBLE NOT NULL,
+  `profit` DOUBLE NOT NULL,
+  `departure_time` VARCHAR(5) NOT NULL,
+  `deadline_time` VARCHAR(5) NOT NULL,
+  `last_arrival_time` VARCHAR(5) NOT NULL,
+  `all_on_time` TINYINT NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `delivery_job` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `plan_id` INT NOT NULL,
+  `rider_no` INT NOT NULL,
+  `color` VARCHAR(20) NOT NULL,
+  `total_box` INT NOT NULL,
+  `distance_km` DOUBLE NOT NULL,
+  `duration_min` INT NOT NULL,
+  `cost` DOUBLE NOT NULL,
+  `finish_time` VARCHAR(5) NOT NULL,
+  `on_time` TINYINT NOT NULL,
+  `map_url` VARCHAR(2000) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_job_plan`
+    FOREIGN KEY (`plan_id`) REFERENCES `delivery_plan` (`id`)
+    ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=1001 DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `delivery_stop` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `job_id` INT NOT NULL,
+  `stop_no` INT NOT NULL,
+  `order_id` INT NULL,
+  `customer_name` VARCHAR(200) NOT NULL,
+  `phone` VARCHAR(20) NOT NULL,
+  `address` VARCHAR(255) NOT NULL,
+  `latitude` DOUBLE NOT NULL,
+  `longitude` DOUBLE NOT NULL,
+  `quantity` INT NOT NULL,
+  `distance_from_prev_km` DOUBLE NOT NULL,
+  `arrival_time` VARCHAR(5) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_stop_job`
+    FOREIGN KEY (`job_id`) REFERENCES `delivery_job` (`id`)
+    ON DELETE CASCADE,
+  CONSTRAINT `fk_stop_order`
+    FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`)
+    ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ลูกค้าตัวอย่าง 30 คน อยู่รอบมหาวิทยาลัยมหาสารคาม ในระยะไม่เกิน 3 กิโลเมตร

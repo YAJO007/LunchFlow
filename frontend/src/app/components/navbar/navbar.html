@@ -1,0 +1,17 @@
+<div class="navbar bg-neutral text-neutral-content shadow-md px-4">
+  <div class="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-2">
+    <a routerLink="/routes" class="flex items-center gap-2 text-xl font-bold">
+      <span class="text-2xl">🍱</span>
+      <span>Lunch<span class="text-accent">Flow</span></span>
+    </a>
+    <ul class="menu menu-horizontal gap-1 p-0">
+      @for (menu of menus; track menu.path) {
+        <li>
+          <a [routerLink]="menu.path" routerLinkActive="bg-primary text-primary-content">
+            {{ menu.label }}
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+</div>

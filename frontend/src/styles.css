@@ -1,0 +1,57 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* ธีมสีของร้าน (สร้างด้วย daisyUI theme generator แล้วปรับสี) */
+@plugin "daisyui/theme" {
+  name: "lunchflow";
+  default: true;
+  color-scheme: light;
+  --color-base-100: #fffaf3;
+  --color-base-200: #f6eddf;
+  --color-base-300: #e8dac4;
+  --color-base-content: #2b211b;
+  --color-primary: #d9480f;
+  --color-primary-content: #ffffff;
+  --color-secondary: #2b6e4f;
+  --color-secondary-content: #ffffff;
+  --color-accent: #f2b33d;
+  --color-accent-content: #2b211b;
+  --color-neutral: #2b211b;
+  --color-neutral-content: #fffaf3;
+  --color-info: #2563eb;
+  --color-info-content: #ffffff;
+  --color-success: #16a34a;
+  --color-success-content: #ffffff;
+  --color-warning: #d97706;
+  --color-warning-content: #ffffff;
+  --color-error: #dc2626;
+  --color-error-content: #ffffff;
+  --radius-selector: 0.5rem;
+  --radius-field: 0.6rem;
+  --radius-box: 1rem;
+}
+
+body {
+  font-family: "Prompt", sans-serif;
+}
+
+/* หมุดตัวเลขบนแผนที่ (ใช้กับ Leaflet divIcon) */
+.map-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 9999px;
+  border: 2px solid white;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);
+}
+
+.map-shop {
+  font-size: 26px;
+  line-height: 26px;
+  text-align: center;
+}
