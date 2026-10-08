@@ -1,28 +1,24 @@
 {
-  "name": "smart-lunch-rider-routing",
-  "version": "2.0.0",
-  "private": true,
-  "type": "module",
+  "name": "lunchbox-web-api",
+  "version": "1.0.0",
+  "description": "HW5 Web API ร้านข้าวกล่องเดลิเวอรี (จัดการลูกค้าและรายการสั่งซื้อ)",
+  "main": "dist/server.js",
   "scripts": {
-    "dev": "concurrently -k -n API,WEB -c yellow,cyan \"npm:dev:api\" \"npm:dev:web\"",
-    "dev:api": "tsx watch server/index.ts",
-    "dev:web": "vite --host 127.0.0.1",
-    "build": "tsc --noEmit && vite build",
-    "test": "tsx --test server/**/*.test.ts",
-    "start": "tsx server/index.ts"
+    "dev": "ts-node-dev server.ts",
+    "setup-db": "ts-node database/setup.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "lucide": "^0.468.0",
-    "tsx": "^4.19.2"
+    "mysql2": "^3.11.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.3",
     "@types/node": "^22.10.2",
-    "concurrently": "^9.1.2",
-    "typescript": "^5.6.3",
-    "vite": "^8.3.0"
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.6.3"
   }
 }

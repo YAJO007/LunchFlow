@@ -1,0 +1,399 @@
+{
+  "info": {
+    "name": "HW5 Lunchbox Web API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Customer",
+      "item": [
+        {
+          "name": "ลูกค้าทั้งหมด",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer"
+              ]
+            }
+          }
+        },
+        {
+          "name": "ลูกค้าตาม id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "ค้นหาชื่อ/นามสกุล",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/search?firstname=สม&lastname=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "firstname",
+                  "value": "สม"
+                },
+                {
+                  "key": "lastname",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "ลูกค้าในระยะ 1 กม.",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/nearby?lat=16.2459&lng=103.2525",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "nearby"
+              ],
+              "query": [
+                {
+                  "key": "lat",
+                  "value": "16.2459"
+                },
+                {
+                  "key": "lng",
+                  "value": "103.2525"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "เพิ่มลูกค้า",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"ทดสอบ\",\n  \"lastname\": \"ระบบ\",\n  \"phone\": \"0812345678\",\n  \"address\": \"หอพักหน้ามอ ต.ขามเรียง\",\n  \"latitude\": 16.2461,\n  \"longitude\": 103.2519\n}"
+            }
+          }
+        },
+        {
+          "name": "แก้ไขลูกค้า",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"0899999999\"\n}"
+            }
+          }
+        },
+        {
+          "name": "ลบลูกค้า",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Order",
+      "item": [
+        {
+          "name": "ออเดอร์ทั้งหมด",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/order",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "order"
+              ]
+            }
+          }
+        },
+        {
+          "name": "ออเดอร์ตาม id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/order/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "order",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "ออเดอร์ในระยะ 2 กม.",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/order/nearby?lat=16.2459&lng=103.2525",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "order",
+                "nearby"
+              ],
+              "query": [
+                {
+                  "key": "lat",
+                  "value": "16.2459"
+                },
+                {
+                  "key": "lng",
+                  "value": "103.2525"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "จำลองออเดอร์ 20-30 รายการ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/order/simulate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "order",
+                "simulate"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 25\n}"
+            }
+          }
+        },
+        {
+          "name": "เพิ่มออเดอร์",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/order",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "order"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_id\": 1,\n  \"quantity\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "แก้ไขจำนวนกล่อง",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/order/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "order",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 3\n}"
+            }
+          }
+        },
+        {
+          "name": "ลบออเดอร์",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/order/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "order",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "ล้างออเดอร์ทั้งหมด",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/order",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "order"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
