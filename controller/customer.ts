@@ -13,6 +13,7 @@ router.get("/", async (req, res) => {
     const customers = rows as Customer[];
     res.status(200).json(customers);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -29,6 +30,7 @@ router.get("/search", async (req, res) => {
     const customers = rows as Customer[];
     res.status(200).json(customers);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -54,6 +56,7 @@ router.get("/nearby", async (req, res) => {
 
     res.status(200).json(result);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -70,6 +73,7 @@ router.get("/:id", async (req, res) => {
     }
     res.status(200).json(customers[0]);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -106,6 +110,7 @@ router.post("/", async (req, res) => {
       last_id: insertResult.insertId,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -113,7 +118,7 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     const id = +req.params.id;
-    const customer: Customer = req.body || {};
+    const customer: Partial<CustomerPostRequest> = req.body || {};
 
     const [rows] = await conn.query("SELECT * FROM customer WHERE id = ?", [id]);
     const result = rows as Customer[];
@@ -139,6 +144,7 @@ router.put("/:id", async (req, res) => {
 
     res.status(200).json({ affected_row: updateResult.affectedRows });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -155,6 +161,7 @@ router.delete("/:id", async (req, res) => {
     }
     res.status(200).json({ affected_row: deleteResult.affectedRows });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

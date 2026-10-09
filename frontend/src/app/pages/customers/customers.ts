@@ -12,6 +12,7 @@ import { addPin, addShopMarker, createMap, fitToLayer } from '../../utils/map';
   templateUrl: './customers.html',
 })
 export class Customers implements AfterViewInit {
+
   customers = signal<Customer[]>([]);
   message = signal('');
   errorMessage = signal('');

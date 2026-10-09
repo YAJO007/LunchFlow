@@ -7,12 +7,14 @@ import { getDistanceKm } from "../utils/distance";
 export const router = express.Router();
 
 const NEARBY_KM = 2;
+
 const MIN_BOX = 1;
 const MAX_BOX = 3;
+
 const MIN_SIMULATE = 20;
 const MAX_SIMULATE = 30;
 
-const SELECT_ORDER_DETAIL =
+export const SELECT_ORDER_DETAIL =
   "SELECT orders.id, orders.customer_id, orders.quantity, orders.order_date, " +
   "customer.firstname, customer.lastname, customer.phone, customer.address, " +
   "customer.latitude, customer.longitude " +
@@ -32,6 +34,7 @@ router.get("/", async (req, res) => {
     const orders = rows as OrderDetail[];
     res.status(200).json(orders);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -57,6 +60,7 @@ router.get("/nearby", async (req, res) => {
 
     res.status(200).json(result);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -73,6 +77,7 @@ router.get("/:id", async (req, res) => {
     }
     res.status(200).json(orders[0]);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -109,13 +114,18 @@ router.post("/simulate", async (req, res) => {
 
     res.status(201).json({ created_order: amount, total_box: totalBox });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
 router.post("/", async (req, res) => {
   try {
-    const order: OrderPostRequest = req.body || {};
+    const body = req.body || {};
+    const order: OrderPostRequest = {
+      customer_id: Number(body.customer_id),
+      quantity: Number(body.quantity),
+    };
 
     if (!order.customer_id || !isValidQuantity(order.quantity)) {
       return res.status(400).json({ error: "Please send customer_id and quantity (1-3)" });
@@ -140,6 +150,7 @@ router.post("/", async (req, res) => {
       last_id: insertResult.insertId,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -164,6 +175,7 @@ router.put("/:id", async (req, res) => {
     }
     res.status(200).json({ affected_row: updateResult.affectedRows });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -174,6 +186,7 @@ router.delete("/", async (req, res) => {
     const deleteResult = result as any;
     res.status(200).json({ affected_row: deleteResult.affectedRows });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -190,6 +203,7 @@ router.delete("/:id", async (req, res) => {
     }
     res.status(200).json({ affected_row: deleteResult.affectedRows });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

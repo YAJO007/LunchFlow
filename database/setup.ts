@@ -3,6 +3,7 @@ import { conn } from "../dbconnect";
 
 async function setup() {
   try {
+
     const sqlText = fs.readFileSync("database/lunchbox.sql", "utf8").replace(/\r/g, "");
     const commands = sqlText
       .split(";\n")

@@ -66,6 +66,7 @@ export class RoutePlanning implements AfterViewInit {
 
   async confirmPlan() {
     this.loading.set(true);
+    this.errorMessage.set('');
     try {
       const saved = await this.api.confirmRoute(this.option());
       this.plan.set(saved);

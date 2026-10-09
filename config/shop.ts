@@ -1,6 +1,6 @@
-
 export const SHOP = {
   name: "ข้าวกล่องเดลิเวอรี ส่งด่วนมื้อเที่ยง",
+
   latitude: 16.2459,
   longitude: 103.2525,
 

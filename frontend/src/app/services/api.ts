@@ -5,6 +5,7 @@ import { Customer, Order, PlanOption, RiderJob, RoutePlan, Shop } from '../model
   providedIn: 'root',
 })
 export class Api {
+
   baseUrl =
     location.hostname === 'localhost'
       ? 'http://localhost:3000'

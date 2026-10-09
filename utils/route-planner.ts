@@ -28,10 +28,12 @@ function minutesToTime(totalMinutes: number): string {
 }
 
 function groupBySweep(orders: OrderDetail[], startIndex: number): OrderDetail[][] {
+
   const angleOf = (order: OrderDetail) =>
     Math.atan2(order.longitude - SHOP.longitude, order.latitude - SHOP.latitude);
 
   const sorted = [...orders].sort((a, b) => angleOf(a) - angleOf(b));
+
   const rotated = [...sorted.slice(startIndex), ...sorted.slice(0, startIndex)];
 
   const groups: OrderDetail[][] = [];
@@ -46,6 +48,7 @@ function groupByNearest(orders: OrderDetail[], startFromFarthest: boolean): Orde
   const groups: OrderDetail[][] = [];
 
   while (remaining.length > 0) {
+
     let seedIndex = 0;
     for (let i = 1; i < remaining.length; i++) {
       const isFarther = distanceFromShop(remaining[i]) > distanceFromShop(remaining[seedIndex]);
@@ -159,6 +162,7 @@ function buildJob(group: OrderDetail[], riderNo: number): RiderJob {
 
   const durationMinutes =
     (distanceSoFar / SHOP.speedKmPerHour) * 60 + (ordered.length - 1) * SHOP.minutesPerStop;
+
   const cost = SHOP.riderBaseFee + SHOP.riderFeePerKmPerBox * totalBox * distanceSoFar;
 
   return {
@@ -227,6 +231,7 @@ function groupsKey(groups: OrderDetail[][]): string {
 }
 
 export function calculatePlans(orders: OrderDetail[]): RoutePlan[] {
+
   const candidates = [
     { name: "กวาดรอบร้าน (เริ่มตำแหน่งที่ 1)", groups: groupBySweep(orders, 0) },
     { name: "กวาดรอบร้าน (เริ่มตำแหน่งที่ 2)", groups: groupBySweep(orders, 1) },

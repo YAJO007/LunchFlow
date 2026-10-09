@@ -11,6 +11,7 @@ import { addShopMarker, createMap, drawJob, fitToLayer } from '../../utils/map';
   templateUrl: './rider.html',
 })
 export class Rider implements AfterViewInit {
+
   jobFromUrl = input<string | undefined>(undefined, { alias: 'job' });
 
   jobNumber = model('');
