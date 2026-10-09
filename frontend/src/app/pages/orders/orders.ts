@@ -18,21 +18,16 @@ export class Orders {
   errorMessage = signal('');
   loading = signal(false);
 
-  // จำลองออเดอร์
   simulateAmount = model(25);
 
-  // ฟอร์มเพิ่มออเดอร์
   newCustomerId = model<number | null>(null);
   newQuantity = model(1);
 
-  // ตัวกรอง: แสดงเฉพาะออเดอร์ในระยะ 2 กม. จากร้าน
   onlyNearby = signal(false);
 
-  // ถามยืนยันก่อนลบ
   deletingId = signal<number | null>(null);
   confirmClear = signal(false);
 
-  // ตัวเลือกจำนวนกล่อง (ลูกค้าสั่งได้ 1-3 กล่อง)
   boxChoices = [1, 2, 3];
 
   constructor(private api: Api) {
@@ -61,7 +56,6 @@ export class Orders {
     await this.loadOrders();
   }
 
-  // จำนวนกล่องรวมทุกออเดอร์
   totalBox(): number {
     let total = 0;
     for (const order of this.orders()) {
@@ -103,7 +97,6 @@ export class Orders {
     }
   }
 
-  // เปลี่ยนจำนวนกล่องจาก dropdown ในตาราง
   async changeQuantity(order: Order, quantity: string) {
     try {
       await this.api.updateOrderQuantity(order.id, Number(quantity));

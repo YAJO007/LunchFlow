@@ -12,17 +12,15 @@ import { addPin, addShopMarker, createMap, fitToLayer } from '../../utils/map';
   templateUrl: './customers.html',
 })
 export class Customers implements AfterViewInit {
-  // รายชื่อลูกค้าที่แสดงในตาราง
+
   customers = signal<Customer[]>([]);
   message = signal('');
   errorMessage = signal('');
 
-  // ช่องค้นหา
   searchFirstname = model('');
   searchLastname = model('');
 
-  // ฟอร์มเพิ่ม/แก้ไขลูกค้า
-  editingId = signal<number | null>(null); // null = เพิ่มใหม่
+  editingId = signal<number | null>(null);
   firstname = model('');
   lastname = model('');
   phone = model('');
@@ -30,24 +28,20 @@ export class Customers implements AfterViewInit {
   latitude = model<number | null>(null);
   longitude = model<number | null>(null);
 
-  // id ลูกค้าที่กำลังถามยืนยันการลบ
   deletingId = signal<number | null>(null);
 
-  // แผนที่
   private map!: L.Map;
-  private layer = L.featureGroup(); // หมุดลูกค้า
-  private pickLayer = L.featureGroup(); // หมุดตำแหน่งที่คลิกเลือก
+  private layer = L.featureGroup();
+  private pickLayer = L.featureGroup();
   private markers: { [id: number]: L.Marker } = {};
 
   constructor(private api: Api) {}
 
-  // สร้างแผนที่หลังจากหน้า HTML พร้อมแล้ว (ต้องมี <div id="customer-map"> ก่อน)
   ngAfterViewInit() {
     this.map = createMap('customer-map');
     this.layer.addTo(this.map);
     this.pickLayer.addTo(this.map);
 
-    // คลิกบนแผนที่ = เลือกพิกัดบ้านลูกค้าให้ฟอร์ม
     this.map.on('click', (event: L.LeafletMouseEvent) => {
       this.setPickedLocation(event.latlng.lat, event.latlng.lng);
     });
@@ -75,7 +69,6 @@ export class Customers implements AfterViewInit {
     }
   }
 
-  // ค้นหาลูกค้าในระยะ 1 กม. จากจุดที่เลือกบนแผนที่
   async searchNearby() {
     const lat = this.latitude();
     const lng = this.longitude();
@@ -101,7 +94,6 @@ export class Customers implements AfterViewInit {
     this.loadCustomers();
   }
 
-  // วาดหมุดลูกค้าทุกคนบนแผนที่
   drawCustomers(zoomToAll: boolean) {
     this.layer.clearLayers();
     this.markers = {};
@@ -125,14 +117,12 @@ export class Customers implements AfterViewInit {
     }
   }
 
-  // กดชื่อลูกค้าในตาราง = เลื่อนแผนที่ไปที่บ้านลูกค้า
   showOnMap(customer: Customer) {
     this.map.setView([customer.latitude, customer.longitude], 17);
     this.markers[customer.id]?.openPopup();
     document.getElementById('customer-map')?.scrollIntoView({ behavior: 'smooth' });
   }
 
-  // ปักหมุดตำแหน่งที่เลือก และใส่พิกัดลงฟอร์ม
   setPickedLocation(lat: number, lng: number) {
     this.latitude.set(Number(lat.toFixed(6)));
     this.longitude.set(Number(lng.toFixed(6)));
@@ -140,8 +130,6 @@ export class Customers implements AfterViewInit {
     this.pickLayer.clearLayers();
     addPin(this.pickLayer, lat, lng, '#d9480f', '+', 'ตำแหน่งที่เลือก');
   }
-
-  // ---------- ฟอร์ม ----------
 
   editCustomer(customer: Customer) {
     this.editingId.set(customer.id);

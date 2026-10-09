@@ -1,11 +1,9 @@
-// สคริปต์สร้างตารางและข้อมูลตัวอย่างใน MySQL (รันครั้งเดียว)
-// วิธีรัน:  npm run setup-db
 import fs from "fs";
 import { conn } from "../dbconnect";
 
 async function setup() {
   try {
-    // อ่านไฟล์ SQL แล้วแยกเป็นทีละคำสั่ง (คั่นด้วย ; ท้ายบรรทัด)
+
     const sqlText = fs.readFileSync("database/lunchbox.sql", "utf8").replace(/\r/g, "");
     const commands = sqlText
       .split(";\n")

@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
-/* ธีมสีของร้าน (สร้างด้วย daisyUI theme generator แล้วปรับสี) */
 @plugin "daisyui/theme" {
   name: "lunchflow";
   default: true;
@@ -35,7 +34,6 @@ body {
   font-family: "Prompt", sans-serif;
 }
 
-/* หมุดตัวเลขบนแผนที่ (ใช้กับ Leaflet divIcon) */
 .map-pin {
   display: flex;
   align-items: center;

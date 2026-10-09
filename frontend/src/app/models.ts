@@ -1,5 +1,3 @@
-// โครงสร้างข้อมูลที่ได้จาก Web API (ชื่อ field ตรงกับฝั่ง Backend)
-
 export interface Customer {
   id: number;
   firstname: string;
@@ -8,7 +6,7 @@ export interface Customer {
   address: string;
   latitude: number;
   longitude: number;
-  distance_km?: number; // มีเฉพาะตอนค้นหาในระยะ
+  distance_km?: number;
 }
 
 export interface Order {
@@ -39,7 +37,7 @@ export interface RouteStop {
 }
 
 export interface RiderJob {
-  id?: number; // เลขใบงาน
+  id?: number;
   rider_no: number;
   color: string;
   total_box: number;
@@ -72,7 +70,6 @@ export interface RoutePlan {
   jobs: RiderJob[];
 }
 
-// ผลจาก POST /route/calculate
 export interface PlanOption {
   option: number;
   total_options: number;

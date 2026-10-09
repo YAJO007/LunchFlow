@@ -14,13 +14,12 @@ import { addShopMarker, createMap, drawJob, fitToLayer } from '../../utils/map';
 export class RoutePlanning implements AfterViewInit {
   shop = signal<Shop | null>(null);
   plan = signal<RoutePlan | null>(null);
-  option = signal(0); // แผนที่กำลังดู (0 = ดีที่สุด)
+  option = signal(0);
   totalOptions = signal(0);
-  confirmed = signal(false); // กดยืนยันแล้วหรือยัง
+  confirmed = signal(false);
   loading = signal(false);
   errorMessage = signal('');
 
-  // ไรเดอร์ที่เลือกดูบนแผนที่ (null = ดูทุกคน)
   selectedRider = signal<number | null>(null);
 
   private map!: L.Map;
@@ -40,12 +39,10 @@ export class RoutePlanning implements AfterViewInit {
     }
   }
 
-  // ปุ่ม "คำนวณเส้นทาง" = เริ่มที่แผนที่ดีที่สุด
   calculate() {
     this.loadOption(0);
   }
 
-  // ปุ่ม "คำนวณใหม่" = ดูแผนสำรองถัดไป
   recalculate() {
     this.loadOption(this.option() + 1);
   }
@@ -67,9 +64,9 @@ export class RoutePlanning implements AfterViewInit {
     this.loading.set(false);
   }
 
-  // ยืนยันแผน -> บันทึกลงฐานข้อมูลและได้เลขใบงานของไรเดอร์แต่ละคน
   async confirmPlan() {
     this.loading.set(true);
+    this.errorMessage.set('');
     try {
       const saved = await this.api.confirmRoute(this.option());
       this.plan.set(saved);
@@ -81,7 +78,6 @@ export class RoutePlanning implements AfterViewInit {
     this.loading.set(false);
   }
 
-  // ดูแผนล่าสุดที่ยืนยันไว้ (เผื่อปิดหน้าไปแล้วอยากดูเลขใบงานอีกครั้ง)
   async loadLatest() {
     this.loading.set(true);
     this.errorMessage.set('');
@@ -96,13 +92,11 @@ export class RoutePlanning implements AfterViewInit {
     this.loading.set(false);
   }
 
-  // กดการ์ดไรเดอร์ = ดูเฉพาะเส้นทางคนนั้น (กดซ้ำ = กลับมาดูทุกคน)
   toggleRider(riderNo: number) {
     this.selectedRider.set(this.selectedRider() === riderNo ? null : riderNo);
     this.drawPlan();
   }
 
-  // วาดเส้นทางทุกคน (หรือเฉพาะคนที่เลือก) บนแผนที่
   drawPlan() {
     const plan = this.plan();
     this.layer.clearLayers();
@@ -118,7 +112,6 @@ export class RoutePlanning implements AfterViewInit {
     fitToLayer(this.map, this.layer);
   }
 
-  // ลิงก์ไปหน้าใบงานไรเดอร์
   jobLink(job: RiderJob) {
     return { job: job.id };
   }
