@@ -1,12 +1,10 @@
 import express from "express";
 import { conn } from "../dbconnect";
-import { RiderJob, RouteStop } from "../model/route";
+import { RiderJob } from "../model/route";
+import { loadJobStops } from "./route";
 
 export const router = express.Router();
 
-// ---------------------------------------------------------
-// GET /job/:id  ใบงานของไรเดอร์ (ไรเดอร์กรอกเลขใบงานในหน้าเว็บ)
-// ---------------------------------------------------------
 router.get("/:id", async (req, res) => {
   try {
     const [jobRows] = await conn.query(
@@ -22,15 +20,12 @@ router.get("/:id", async (req, res) => {
     }
 
     const job = jobs[0];
-    const [stopRows] = await conn.query(
-      "SELECT * FROM delivery_stop WHERE job_id = ? ORDER BY stop_no",
-      [job.id]
-    );
-    job.stops = stopRows as RouteStop[];
+    job.stops = await loadJobStops(job.id);
     job.on_time = Boolean(job.on_time);
 
     res.status(200).json(job as RiderJob);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

@@ -33,7 +33,7 @@
 }
 
 @if (plan(); as p) {
-  <!-- แถบสถานะแผน -->
+
   <div class="mb-4 flex flex-wrap items-center gap-2">
     @if (confirmed()) {
       <span class="badge badge-secondary badge-lg">ยืนยันแล้ว • แผนเลขที่ {{ p.id }}</span>
@@ -46,7 +46,6 @@
     <span class="text-sm text-base-content/70">วิธีแบ่งงาน: {{ p.strategy }}</span>
   </div>
 
-  <!-- สรุปเวลา -->
   <div class="stats stats-vertical mb-4 w-full bg-base-100 shadow md:stats-horizontal">
     <div class="stat">
       <div class="stat-title">ไรเดอร์ที่ใช้</div>
@@ -73,7 +72,6 @@
     </div>
   </div>
 
-  <!-- สรุปเงิน -->
   <div class="stats stats-vertical mb-6 w-full bg-base-100 shadow md:stats-horizontal">
     <div class="stat">
       <div class="stat-title">ยอดขาย</div>
@@ -106,7 +104,6 @@
   }
 }
 
-<!-- แผนที่ขนาดใหญ่ -->
 <div class="card mb-6 overflow-hidden bg-base-100 shadow">
   <div id="route-map" class="h-[560px] w-full"></div>
   @if (!plan()) {
@@ -116,7 +113,6 @@
   }
 </div>
 
-<!-- การ์ดไรเดอร์แต่ละคน -->
 @if (plan(); as p) {
   <div class="mb-3 flex items-center justify-between">
     <h2 class="text-xl font-bold">ไรเดอร์ {{ p.rider_count }} คน</h2>

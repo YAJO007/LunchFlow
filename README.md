@@ -69,7 +69,9 @@ Angular hw5/   (repo LunchFlow)
 ├── database/
 │   ├── lunchbox.sql             สร้างตาราง 5 ตาราง + ลูกค้าตัวอย่าง 30 คน
 │   └── setup.ts                 รัน lunchbox.sql ให้อัตโนมัติ (npm run setup-db)
-├── docs/er-diagram.png
+├── docs/
+│   ├── er-diagram.png
+│   └── API-GUIDE.md             คู่มือการใช้งาน API ทุกเส้น
 ├── postman/                     Collection สำหรับทดสอบ API
 └── frontend/                    เว็บ Angular
     └── src/app/
@@ -192,284 +194,35 @@ Import `postman/lunchbox-api.postman_collection.json` แล้วเปลี�
 
 ## 8. คู่มือการใช้งาน API ทุกเส้น
 
+คู่มือฉบับเต็ม: [docs/API-GUIDE.md](docs/API-GUIDE.md)
+
 - **ออนไลน์ (Render):** https://lunchflow-u723.onrender.com
 - **ในเครื่อง:** `http://localhost:3000`
 
-> Render แบบฟรีจะหลับเมื่อไม่มีคนใช้ ครั้งแรกที่เปิดอาจรอประมาณ 1 นาที
-
-ทุกเส้นที่ส่ง Body ต้องตั้ง Header `Content-Type: application/json`
-
-### สรุปทุกเส้น
-
 | # | Method | Path | ใช้ทำอะไร |
 |---|---|---|---|
-| 1 | GET | `/customer` | แสดงลูกค้าทุกคน |
-| 2 | GET | `/customer/:id` | แสดงลูกค้า 1 คน |
-| 3 | GET | `/customer/search?firstname=&lastname=` | ค้นหาจากส่วนหนึ่งของชื่อ/นามสกุล |
+| 1 | GET | `/customer` | ดูลูกค้าทุกคน |
+| 2 | GET | `/customer/:id` | ดูลูกค้า 1 คน |
+| 3 | GET | `/customer/search?firstname=&lastname=` | ค้นหาจากบางส่วนของชื่อ/นามสกุล |
 | 4 | GET | `/customer/nearby?lat=&lng=` | ลูกค้าในระยะ 1 กม. |
 | 5 | POST | `/customer` | เพิ่มลูกค้า |
 | 6 | PUT | `/customer/:id` | แก้ไขลูกค้า |
 | 7 | DELETE | `/customer/:id` | ลบลูกค้า |
-| 8 | GET | `/order` | แสดงออเดอร์ทั้งหมด + ข้อมูลลูกค้า |
-| 9 | GET | `/order/:id` | แสดงออเดอร์ 1 รายการ |
+| 8 | GET | `/order` | ดูออเดอร์ทั้งหมด + ข้อมูลลูกค้า |
+| 9 | GET | `/order/:id` | ดูออเดอร์ 1 รายการ |
 | 10 | GET | `/order/nearby?lat=&lng=` | ออเดอร์ในระยะ 2 กม. |
-| 11 | POST | `/order/simulate` | จำลองออเดอร์ 20-30 รายการ |
+| 11 | POST | `/order/simulate` | จำลองออเดอร์ 20–30 รายการ |
 | 12 | POST | `/order` | เพิ่มออเดอร์ |
-| 13 | PUT | `/order/:id` | แก้ไขจำนวนกล่อง |
+| 13 | PUT | `/order/:id` | แก้จำนวนกล่อง |
 | 14 | DELETE | `/order/:id` | ลบออเดอร์ 1 รายการ |
 | 15 | DELETE | `/order` | ล้างออเดอร์ทั้งหมด |
-| 16 | GET | `/route/shop` | ข้อมูลร้านและเงื่อนไขการคิดเงิน |
+| 16 | GET | `/route/shop` | ข้อมูลร้านและเงื่อนไขคิดเงิน |
 | 17 | POST | `/route/calculate` | คำนวณเส้นทาง (ยังไม่บันทึก) |
-| 18 | POST | `/route/confirm` | ยืนยันแผนและออกใบงาน |
+| 18 | POST | `/route/confirm` | ยืนยันแผนและออกเลขใบงาน |
 | 19 | GET | `/route/latest` | แผนล่าสุดที่ยืนยันแล้ว |
 | 20 | GET | `/job/:id` | ใบงานไรเดอร์ตามเลขใบงาน |
 
 > เส้นที่ 1–15 คืองาน HW5 ส่วนเส้นที่ 16–20 เพิ่มสำหรับเว็บจัดเส้นทาง
-
-### รหัสสถานะ (Status Code) ที่ใช้
-| Code | ความหมาย |
-|---|---|
-| 200 | สำเร็จ |
-| 201 | เพิ่มข้อมูลสำเร็จ |
-| 400 | ส่งข้อมูลมาไม่ครบหรือผิดรูปแบบ |
-| 404 | ไม่พบข้อมูลตาม id ที่ส่งมา |
-| 500 | เซิร์ฟเวอร์/ฐานข้อมูลผิดพลาด |
-
----
-
-### ลูกค้า (Customer)
-
-#### 1) GET `/customer` – แสดงลูกค้าทุกคน
-```
-GET http://localhost:3000/customer
-```
-ผลลัพธ์ `200`
-```json
-[
-  {
-    "id": 1,
-    "firstname": "สมชาย",
-    "lastname": "ใจดี",
-    "phone": "0897514212",
-    "address": "136/1 หมู่บ้านดอนนา ต.ขามเรียง อ.กันทรวิชัย จ.มหาสารคาม",
-    "latitude": 16.245607,
-    "longitude": 103.246601
-  }
-]
-```
-
-#### 2) GET `/customer/:id` – แสดงลูกค้า 1 คน
-```
-GET http://localhost:3000/customer/2
-```
-ผลลัพธ์ `200` ได้ object ลูกค้า 1 คน / ถ้าไม่พบได้ `404` `{ "error": "Customer not found" }`
-
-#### 3) GET `/customer/search` – ค้นหาจากส่วนหนึ่งของชื่อ, นามสกุล
-| Query | ความหมาย |
-|---|---|
-| `firstname` | ส่วนหนึ่งของชื่อ (ไม่ส่งก็ได้) |
-| `lastname` | ส่วนหนึ่งของนามสกุล (ไม่ส่งก็ได้) |
-
-```
-GET http://localhost:3000/customer/search?firstname=สม
-GET http://localhost:3000/customer/search?lastname=ใจ
-GET http://localhost:3000/customer/search?firstname=สม&lastname=ใจ
-```
-ผลลัพธ์ `200` เป็น array ของลูกค้าที่ตรง (เช่น ค้น `สม` ได้ สมชาย, สมหญิง)
-
-#### 4) GET `/customer/nearby` – ลูกค้าในระยะ 1 กม.
-| Query | ความหมาย |
-|---|---|
-| `lat` | ละติจูดจุดศูนย์กลาง (จำเป็น) |
-| `lng` | ลองจิจูดจุดศูนย์กลาง (จำเป็น) |
-
-```
-GET http://localhost:3000/customer/nearby?lat=16.2459&lng=103.2525
-```
-ผลลัพธ์ `200` – มี `distance_km` (ระยะห่างเป็นกิโลเมตร) เพิ่มมาให้ทุกคน
-```json
-[
-  { "id": 1, "firstname": "สมชาย", "lastname": "ใจดี", "...": "...", "distance_km": 0.631 }
-]
-```
-ไม่ส่ง `lat`/`lng` หรือไม่ใช่ตัวเลข → `400` `{ "error": "Please send lat and lng" }`
-
-#### 5) POST `/customer` – เพิ่มลูกค้า
-Body (ต้องส่งครบทุกช่อง)
-```json
-{
-  "firstname": "ทดสอบ",
-  "lastname": "ระบบ",
-  "phone": "0812345678",
-  "address": "หอพักหน้ามอ ต.ขามเรียง",
-  "latitude": 16.2461,
-  "longitude": 103.2519
-}
-```
-ผลลัพธ์ `201`
-```json
-{ "affected_row": 1, "last_id": 31 }
-```
-ส่งไม่ครบ → `400` `{ "error": "Please send all customer fields" }`
-
-#### 6) PUT `/customer/:id` – แก้ไขลูกค้า
-ส่งมาเฉพาะช่องที่ต้องการแก้ก็ได้ ช่องที่ไม่ส่งจะใช้ค่าเดิม
-```
-PUT http://localhost:3000/customer/31
-```
-```json
-{ "phone": "0899999999" }
-```
-ผลลัพธ์ `200` `{ "affected_row": 1 }` / ไม่พบ id → `404`
-
-#### 7) DELETE `/customer/:id` – ลบลูกค้า
-```
-DELETE http://localhost:3000/customer/31
-```
-ผลลัพธ์ `200` `{ "affected_row": 1 }` / ไม่พบ id → `404`
-*ออเดอร์ของลูกค้าคนนี้จะถูกลบไปด้วย*
-
----
-
-### รายการสั่งซื้อ (Order)
-
-ข้อมูลออเดอร์ที่ได้จากทุกเส้น `GET` จะมีข้อมูลลูกค้าที่สั่งติดมาด้วย:
-```json
-{
-  "id": 1,
-  "customer_id": 14,
-  "quantity": 2,
-  "order_date": "2026-10-08T04:12:00.000Z",
-  "firstname": "อรอุมา",
-  "lastname": "ภูมิใจ",
-  "phone": "0859148448",
-  "address": "97/19 หอพักในมหาวิทยาลัย ต.ขามเรียง อ.กันทรวิชัย จ.มหาสารคาม",
-  "latitude": 16.24643,
-  "longitude": 103.250214
-}
-```
-
-#### 8) GET `/order` – แสดงออเดอร์ทั้งหมด
-```
-GET http://localhost:3000/order
-```
-ผลลัพธ์ `200` เป็น array ของออเดอร์ (เรียงตาม id)
-
-#### 9) GET `/order/:id` – แสดงออเดอร์ 1 รายการ
-```
-GET http://localhost:3000/order/1
-```
-ผลลัพธ์ `200` / ไม่พบ → `404` `{ "error": "Order not found" }`
-
-#### 10) GET `/order/nearby` – ออเดอร์ในระยะ 2 กม.
-```
-GET http://localhost:3000/order/nearby?lat=16.2459&lng=103.2525
-```
-ผลลัพธ์ `200` – เหมือนข้อ 8 แต่เหลือเฉพาะออเดอร์ที่บ้านลูกค้าอยู่ไม่เกิน 2 กม. และมี `distance_km` เพิ่มมา
-ไม่ส่ง `lat`/`lng` → `400`
-
-#### 11) POST `/order/simulate` – จำลองออเดอร์ 20-30 รายการ
-Body (ไม่บังคับ) – ถ้าไม่ส่ง ระบบสุ่มจำนวน 20-30 ให้เอง
-```json
-{ "amount": 25 }
-```
-ระบบจะสุ่มลูกค้าจากตาราง `customer` และสุ่มจำนวนกล่อง 1-3 ให้แต่ละออเดอร์
-ผลลัพธ์ `201`
-```json
-{ "created_order": 25, "total_box": 49 }
-```
-`amount` ไม่อยู่ในช่วง 20-30 → `400` / ยังไม่มีลูกค้าในระบบ → `400`
-
-#### 12) POST `/order` – เพิ่มออเดอร์
-```json
-{ "customer_id": 1, "quantity": 2 }
-```
-ผลลัพธ์ `201` `{ "affected_row": 1, "last_id": 47 }`
-`quantity` ไม่ใช่ 1-3 → `400` / ไม่มีลูกค้า id นี้ → `404`
-
-#### 13) PUT `/order/:id` – แก้ไขจำนวนกล่อง
-```
-PUT http://localhost:3000/order/1
-```
-```json
-{ "quantity": 3 }
-```
-ผลลัพธ์ `200` `{ "affected_row": 1 }` / `quantity` ไม่ใช่ 1-3 → `400` / ไม่พบออเดอร์ → `404`
-
-#### 14) DELETE `/order/:id` – ลบออเดอร์ 1 รายการ
-```
-DELETE http://localhost:3000/order/1
-```
-ผลลัพธ์ `200` `{ "affected_row": 1 }` / ไม่พบ → `404`
-
-#### 15) DELETE `/order` – ล้างออเดอร์ทั้งหมด
-```
-DELETE http://localhost:3000/order
-```
-ผลลัพธ์ `200` `{ "affected_row": 43 }` (จำนวนออเดอร์ที่ถูกลบ)
-
----
-
-### จัดเส้นทางและใบงาน (Route / Job)
-
-#### 16) GET `/route/shop` – ข้อมูลร้านและเงื่อนไข
-ผลลัพธ์ `200`
-```json
-{
-  "name": "ข้าวกล่องเดลิเวอรี ส่งด่วนมื้อเที่ยง",
-  "latitude": 16.2459, "longitude": 103.2525,
-  "pricePerBox": 65, "foodCostPerBox": 40,
-  "riderBaseFee": 15, "riderFeePerKmPerBox": 2,
-  "maxOrdersPerRider": 3, "speedKmPerHour": 30, "minutesPerStop": 2,
-  "departureTime": "11:30", "deadlineTime": "12:30"
-}
-```
-
-#### 17) POST `/route/calculate` – คำนวณเส้นทาง
-Body (ไม่บังคับ) `{ "option": 0 }` – `0` = แผนที่ดีที่สุด, `1` = แผนสำรองถัดไป, ... (เกินจำนวนแผนจะวนกลับแผนแรก)
-
-ผลลัพธ์ `200` (ย่อ)
-```json
-{
-  "option": 0,
-  "total_options": 5,
-  "plan": {
-    "strategy": "กวาดรอบร้าน (เริ่มตำแหน่งที่ 1)",
-    "rider_count": 9, "total_order": 25, "total_box": 49,
-    "total_distance_km": 20.53, "delivery_cost": 390.31,
-    "revenue": 3185, "food_cost": 1960, "profit": 834.69,
-    "departure_time": "11:30", "deadline_time": "12:30",
-    "last_arrival_time": "11:43", "all_on_time": true,
-    "jobs": [
-      {
-        "rider_no": 1, "color": "#e11d48", "total_box": 5,
-        "distance_km": 3.74, "duration_min": 12, "cost": 52.44,
-        "finish_time": "11:42", "on_time": true,
-        "map_url": "https://www.google.com/maps/dir/?api=1&...",
-        "stops": [
-          { "stop_no": 1, "order_id": 25, "customer_name": "ธีรเดช วงศ์ใหญ่", "quantity": 1,
-            "distance_from_prev_km": 1.91, "arrival_time": "11:34", "...": "..." }
-        ]
-      }
-    ]
-  }
-}
-```
-ยังไม่มีออเดอร์ → `400`
-
-#### 18) POST `/route/confirm` – ยืนยันแผนและออกใบงาน
-Body `{ "option": 0 }` (เลขแผนเดียวกับที่ดูอยู่)
-ผลลัพธ์ `201` – แผนเหมือนข้อ 17 แต่มี `id` (เลขแผน) และทุกใบงานมี `id` (**เลขใบงาน** เริ่มที่ 1001)
-
-#### 19) GET `/route/latest` – แผนล่าสุดที่ยืนยันแล้ว
-ผลลัพธ์ `200` เหมือนข้อ 18 / ยังไม่เคยยืนยันแผน → `404`
-
-#### 20) GET `/job/:id` – ใบงานไรเดอร์
-```
-GET http://localhost:3000/job/1001
-```
-ผลลัพธ์ `200` ใบงาน 1 ใบ พร้อมจุดส่งเรียงตามลำดับ และ `map_url` สำหรับเปิดนำทาง / ไม่พบ → `404`
-
 
 ---
 
@@ -493,5 +246,5 @@ GET http://localhost:3000/job/1001
 ---
 
 ## 10. สิ่งที่ต้องส่ง (HW5)
-- [ ] **PDF**: สมาชิกกลุ่ม / ER Diagram (erdplus.com) / คู่มือ API ทุกเส้น (หัวข้อ 8) + URL ที่ Deploy
+- [ ] **PDF**: สมาชิกกลุ่ม / ER Diagram (erdplus.com) / คู่มือ API ทุกเส้น (`docs/API-GUIDE.md`) + URL ที่ Deploy
 - [ ] **Zip Source**: ไม่เอา `node_modules`, `dist`, `frontend/node_modules`, `frontend/dist`, `.env`

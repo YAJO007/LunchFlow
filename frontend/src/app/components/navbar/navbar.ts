@@ -7,7 +7,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   templateUrl: './navbar.html',
 })
 export class Navbar {
-  // เมนูหลัก (เพิ่มหน้าใหม่แค่เพิ่มรายการตรงนี้)
+
   menus = [
     { path: '/routes', label: 'จัดเส้นทาง' },
     { path: '/orders', label: 'ออเดอร์' },

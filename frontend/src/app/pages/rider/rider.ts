@@ -11,7 +11,7 @@ import { addShopMarker, createMap, drawJob, fitToLayer } from '../../utils/map';
   templateUrl: './rider.html',
 })
 export class Rider implements AfterViewInit {
-  // รับเลขใบงานจาก URL เช่น /rider?job=1001 (ไม่ส่งมาก็ได้)
+
   jobFromUrl = input<string | undefined>(undefined, { alias: 'job' });
 
   jobNumber = model('');
@@ -29,7 +29,6 @@ export class Rider implements AfterViewInit {
     this.layer.addTo(this.map);
     addShopMarker(this.layer);
 
-    // ถ้ามีเลขใบงานมากับลิงก์ ให้เปิดใบงานเลย
     const fromUrl = this.jobFromUrl();
     if (fromUrl) {
       this.jobNumber.set(fromUrl);

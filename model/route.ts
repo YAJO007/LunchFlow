@@ -1,4 +1,3 @@
-// จุดส่งของ 1 จุดในใบงานไรเดอร์
 export interface RouteStop {
   stop_no: number;
   order_id: number;
@@ -12,9 +11,8 @@ export interface RouteStop {
   arrival_time: string;
 }
 
-// ใบงานของไรเดอร์ 1 คน
 export interface RiderJob {
-  id?: number; // เลขใบงาน (มีหลังกดยืนยันแผน)
+  id?: number;
   rider_no: number;
   color: string;
   total_box: number;
@@ -27,9 +25,8 @@ export interface RiderJob {
   stops: RouteStop[];
 }
 
-// แผนการจัดส่งทั้งหมดของรอบนี้
 export interface RoutePlan {
-  id?: number; // เลขแผน (มีหลังกดยืนยันแผน)
+  id?: number;
   strategy: string;
   rider_count: number;
   total_order: number;

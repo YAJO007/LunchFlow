@@ -1,20 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Customer, Order, PlanOption, RiderJob, RoutePlan, Shop } from '../models';
 
-// Service กลางสำหรับเรียก Web API ทุกเส้น (ใช้ fetch แบบเดียวกับบทเรียน CORS)
 @Injectable({
   providedIn: 'root',
 })
 export class Api {
-  // เปิดเว็บในเครื่อง (localhost) -> ใช้ API ในเครื่อง
-  // เปิดเว็บที่ Deploy แล้ว -> ใช้ API บน Render
+
   baseUrl =
     location.hostname === 'localhost'
       ? 'http://localhost:3000'
       : 'https://lunchflow-u723.onrender.com';
 
-  // ฟังก์ชันกลาง: ส่ง request แล้วแปลงผลลัพธ์เป็น JSON
-  // ถ้า API ตอบ error (เช่น 400, 404) จะโยน Error พร้อมข้อความกลับไปให้หน้าเว็บแสดง
   private async request(method: string, path: string, body?: object) {
     const response = await fetch(this.baseUrl + path, {
       method: method,
@@ -28,7 +24,6 @@ export class Api {
     return data;
   }
 
-  // ---------- ลูกค้า ----------
   getCustomers(): Promise<Customer[]> {
     return this.request('GET', '/customer');
   }
@@ -55,7 +50,6 @@ export class Api {
     return this.request('DELETE', '/customer/' + id);
   }
 
-  // ---------- ออเดอร์ ----------
   getOrders(): Promise<Order[]> {
     return this.request('GET', '/order');
   }
@@ -84,7 +78,6 @@ export class Api {
     return this.request('DELETE', '/order');
   }
 
-  // ---------- จัดเส้นทาง / ใบงาน ----------
   getShop(): Promise<Shop> {
     return this.request('GET', '/route/shop');
   }

@@ -8,7 +8,6 @@ import { router as job } from "./controller/job";
 
 export const app = express();
 
-// อนุญาตให้เว็บจากโดเมนอื่น (เช่น Angular ที่ localhost:4200) เรียก API ได้
 app.use(
   cors({
     origin: "*",
@@ -17,7 +16,6 @@ app.use(
   })
 );
 
-// แปลง Body ที่ส่งมาเป็น JSON ให้อ่านได้ผ่าน req.body
 app.use(express.json());
 
 app.use("/", index);

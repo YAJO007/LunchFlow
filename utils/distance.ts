@@ -1,4 +1,3 @@
-// คำนวณระยะทาง (กิโลเมตร) ระหว่าง 2 พิกัดบนโลก ด้วยสูตร Haversine
 export function getDistanceKm(
   lat1: number,
   lng1: number,
@@ -7,7 +6,6 @@ export function getDistanceKm(
 ): number {
   const earthRadiusKm = 6371;
 
-  // แปลงองศาเป็นเรเดียน
   const toRadian = (degree: number) => (degree * Math.PI) / 180;
 
   const dLat = toRadian(lat2 - lat1);
