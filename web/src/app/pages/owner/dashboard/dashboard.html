@@ -1,0 +1,150 @@
+<div class="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <h1 class="text-3xl font-bold">ภาพรวม</h1>
+    <div class="flex gap-2">
+      <button class="btn btn-ghost" (click)="load()" [disabled]="loading()">
+        <span class="icon" [class.animate-spin]="loading()">refresh</span>
+      </button>
+      <a routerLink="/owner/routes" class="btn btn-primary"><span class="icon">alt_route</span> จัดเส้นทาง</a>
+    </div>
+  </div>
+
+  @if (!connected()) {
+    <div role="alert" class="alert alert-error alert-soft mb-6">
+      <span class="icon">cloud_off</span>
+      <span>เชื่อมต่อ API ไม่ได้ — ถ้าใช้ Render รอ 1 นาทีแล้วกดรีเฟรช</span>
+    </div>
+  }
+
+  
+  <section class="relative mb-6 overflow-hidden rounded-box border-2 border-base-content bg-primary p-6 text-white shadow-brutal-lg sm:p-8">
+    <div class="flex flex-wrap items-center justify-between gap-6">
+      <div>
+        <div class="text-sm text-white/80">รอบนี้</div>
+        <div class="num mt-1 text-4xl font-bold">
+          {{ orders().length }} <span class="text-lg font-normal text-white/80">ออเดอร์</span>
+          · {{ totalBox() }} <span class="text-lg font-normal text-white/80">กล่อง</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-5">
+        <div class="text-right">
+          <div class="text-xs text-white/70">ออกจากร้าน</div>
+          <div class="num text-4xl font-bold">{{ appData.shop().departureTime }}</div>
+        </div>
+        <span class="icon text-white/70">arrow_forward</span>
+        <div>
+          <div class="text-xs text-white/70">ส่งครบภายใน</div>
+          <div class="num inline-block -rotate-2 rounded-lg border-2 border-base-content bg-white px-2 text-4xl font-bold text-primary">{{ appData.shop().deadlineTime }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+  <div class="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <a routerLink="/owner/customers" class="panel p-5 transition hover:-translate-y-0.5">
+      <div class="flex items-center gap-2 text-sm text-base-content/70"><span class="icon text-primary">group</span> ลูกค้า</div>
+      <div class="num mt-2 text-2xl font-bold sm:text-3xl">{{ loading() ? '…' : int(customers().length) }}</div>
+    </a>
+    <a routerLink="/owner/orders" class="panel p-5 transition hover:-translate-y-0.5">
+      <div class="flex items-center gap-2 text-sm text-base-content/70"><span class="icon text-fuchsia-600">receipt_long</span> ออเดอร์</div>
+      <div class="num mt-2 text-2xl font-bold sm:text-3xl">{{ loading() ? '…' : int(orders().length) }}</div>
+    </a>
+    <a routerLink="/owner/riders" class="panel p-5 transition hover:-translate-y-0.5">
+      <div class="flex items-center gap-2 text-sm text-base-content/70"><span class="icon text-accent">sports_motorsports</span> ไรเดอร์พร้อม</div>
+      <div class="num mt-2 text-2xl font-bold sm:text-3xl">{{ appData.availableRiders().length }}<span class="text-base text-base-content/65">/{{ appData.riders().length }}</span></div>
+    </a>
+    <a routerLink="/owner/report" class="panel p-5 transition hover:-translate-y-0.5">
+      <div class="flex items-center gap-2 text-sm text-base-content/70"><span class="icon text-success">payments</span> ยอดขาย</div>
+      <div class="num mt-2 text-2xl font-bold sm:text-3xl">฿{{ int(revenue()) }}</div>
+    </a>
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-5">
+    
+    <section class="panel p-6 lg:col-span-3">
+      <h2 class="mb-4 font-semibold">ขั้นตอน</h2>
+      <ul class="flex flex-col gap-2">
+        @for (step of steps(); track step.title) {
+          <li>
+            <a [routerLink]="step.link" class="flex items-center gap-4 rounded-xl border-2 border-base-content px-4 py-3 transition hover:bg-secondary">
+              <div
+                class="num grid size-9 shrink-0 place-items-center rounded-full text-sm font-bold"
+                [class]="step.done ? 'bg-success/15 text-success ring-1 ring-success/50' : 'bg-base-300/60 text-base-content/70'"
+              >
+                @if (step.done) {
+                  <span class="icon text-xl!">check</span>
+                } @else {
+                  {{ $index + 1 }}
+                }
+              </div>
+              <div class="flex-1 font-medium">{{ step.title }}</div>
+              <div class="text-sm text-base-content/70">{{ step.sub }}</div>
+            </a>
+          </li>
+        }
+      </ul>
+      @if (problemOrders().length > 0) {
+        <div role="alert" class="alert alert-warning alert-soft mt-4">
+          <span class="icon">warning</span> {{ problemOrders().length }} ออเดอร์ข้อมูลผิด
+        </div>
+      }
+    </section>
+
+    
+    <section class="panel p-6 lg:col-span-2">
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="font-semibold">แผนล่าสุด</h2>
+        @if (latestPlan()) {
+          <span class="badge badge-soft" [class]="latestPlan().all_on_time ? 'badge-success' : 'badge-error'">
+            {{ latestPlan().all_on_time ? 'ทันเวลา' : 'เสี่ยงช้า' }}
+          </span>
+        }
+      </div>
+
+      @if (latestPlan()) {
+        <div class="grid grid-cols-2 gap-3">
+          <div class="rounded-xl bg-base-200 p-3">
+            <div class="text-xs text-base-content/70">แผน</div>
+            <div class="num text-xl font-bold">#{{ latestPlan().id }}</div>
+          </div>
+          <div class="rounded-xl bg-base-200 p-3">
+            <div class="text-xs text-base-content/70">กำไร</div>
+            <div class="num text-xl font-bold" [class]="latestPlan().profit < 0 ? 'text-error' : 'text-success'">฿{{ money(latestPlan().profit) }}</div>
+          </div>
+          <div class="rounded-xl bg-base-200 p-3">
+            <div class="text-xs text-base-content/70">ไรเดอร์</div>
+            <div class="num text-xl font-bold">{{ latestPlan().rider_count }}</div>
+          </div>
+          <div class="rounded-xl bg-base-200 p-3">
+            <div class="text-xs text-base-content/70">เสร็จ</div>
+            <div class="num text-xl font-bold">{{ latestPlan().last_arrival_time }}</div>
+          </div>
+        </div>
+        <div class="mt-4 flex flex-wrap gap-2">
+          @for (job of latestPlan().jobs; track job.id) {
+            <a [routerLink]="['/rider/job', job.id]" class="chip num transition hover:border-primary">
+              <span class="size-2.5 rounded-full" [style.background-color]="job.color"></span>{{ job.id }}
+            </a>
+          }
+        </div>
+      } @else {
+        <div class="flex flex-col items-center rounded-xl border-2 border-dashed border-base-content/40 p-8 text-center">
+          <span class="icon text-4xl! text-base-content/20">route</span>
+          <a routerLink="/owner/routes" class="btn btn-sm btn-primary mt-4">คำนวณเส้นทาง</a>
+        </div>
+      }
+    </section>
+  </div>
+
+  
+  <section class="panel mt-6 flex flex-wrap items-center gap-2 p-4">
+    <span class="icon text-base-content/70">settings_ethernet</span>
+    <span class="text-sm text-base-content/60">API</span>
+    <span class="size-2 rounded-full" [class]="connected() ? 'bg-success ' : 'bg-error'"></span>
+    <input type="text" class="input input-sm w-full max-w-xs" [(ngModel)]="apiUrl" placeholder="http://localhost:3000" />
+    <button class="btn btn-sm btn-primary" (click)="saveApi()">บันทึก</button>
+    <button class="btn btn-sm btn-ghost" (click)="useApi(apiLocal)">localhost</button>
+    <button class="btn btn-sm btn-ghost" (click)="useApi(apiRender)">Render</button>
+  </section>
+</div>
