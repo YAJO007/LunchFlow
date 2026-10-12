@@ -1,4 +1,4 @@
-import { Component, input, signal, OnInit } from '@angular/core';
+import { Component, input, signal, OnChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppData } from '../../../service/app-data';
 
@@ -8,7 +8,7 @@ import { AppData } from '../../../service/app-data';
   templateUrl: './rider-login.html',
   styleUrl: './rider-login.css',
 })
-export class RiderLogin implements OnInit {
+export class RiderLogin implements OnChanges {
   job = input<string>();
 
   error = signal('');
@@ -18,9 +18,14 @@ export class RiderLogin implements OnInit {
     this.recent.set(this.appData.recentJobs());
   }
 
-  ngOnInit() {
+  ngOnChanges() {
     if (this.job()) {
-      this.router.navigate(['/rider/job', this.job()]);
+      const no = this.job()!;
+      if (!/^[1-9][0-9]*$/.test(no) || !Number.isSafeInteger(Number(no))) {
+        this.error.set('กรอกเป็นตัวเลข เช่น 1001');
+        return;
+      }
+      this.router.navigate(['/rider/job', no]);
     }
   }
 
