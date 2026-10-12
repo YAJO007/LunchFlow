@@ -1,7 +1,7 @@
 {
   "name": "lunchbox-web-api",
   "version": "1.0.0",
-  "description": "HW5 Web API ร้านข้าวกล่องเดลิเวอรี (จัดการลูกค้าและรายการสั่งซื้อ)",
+  "description": "LunchFlow Web API ระบบจัดเส้นทางและแบ่งงานไรเดอร์ ร้านข้าวกล่องส่งด่วนมื้อเที่ยง",
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev server.ts",
