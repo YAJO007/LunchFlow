@@ -1,0 +1,50 @@
+<div class="mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <h1 class="text-3xl font-bold">ไรเดอร์</h1>
+    <div class="flex gap-2">
+      <button class="btn" (click)="setAll(true)">พร้อมทุกคน</button>
+      <button class="btn btn-square" (click)="reset()" title="ค่าเริ่มต้น" aria-label="ค่าเริ่มต้น"><span class="icon">restart_alt</span></button>
+    </div>
+  </div>
+
+  <div class="mb-6 grid grid-cols-3 gap-3">
+    <div class="panel p-5">
+      <div class="text-sm text-base-content/70">พร้อม</div>
+      <div class="num mt-1 text-2xl font-bold sm:text-3xl text-success">{{ appData.availableRiders().length }}</div>
+    </div>
+    <div class="panel p-5">
+      <div class="text-sm text-base-content/70">ไม่พร้อม</div>
+      <div class="num mt-1 text-2xl font-bold sm:text-3xl text-base-content/65">{{ appData.riders().length - appData.availableRiders().length }}</div>
+    </div>
+    <div class="panel p-5">
+      <div class="text-sm text-base-content/70">รับได้</div>
+      <div class="num mt-1 text-2xl font-bold sm:text-3xl">{{ appData.availableRiders().length * appData.shop().maxOrdersPerRider }}</div>
+    </div>
+  </div>
+
+  <section class="panel overflow-hidden">
+    <ul>
+      @for (r of appData.riders(); track r.no) {
+        <li class="flex items-center gap-4 border-b border-base-300 px-5 py-3 last:border-b-0">
+          <div class="num grid size-10 shrink-0 place-items-center rounded-full font-bold" [class]="r.available ? 'bg-primary text-white border-2 border-base-content' : 'bg-base-200 text-base-content/30 border-2 border-base-300'">
+            {{ r.no }}
+          </div>
+          <div class="min-w-0 flex-1" [class.opacity-50]="!r.available">
+            <div class="font-medium">{{ r.name }}</div>
+            <div class="num text-sm text-base-content/65">{{ r.phone || '-' }}</div>
+          </div>
+          <input type="checkbox" class="toggle toggle-primary" [checked]="r.available" (change)="toggle(r)" [attr.aria-label]="r.name" />
+          <button class="btn btn-ghost btn-sm btn-circle text-error" title="ลบ" (click)="remove(r)"><span class="icon text-lg!">delete</span></button>
+        </li>
+      } @empty {
+        <li class="py-12 text-center text-base-content/65">ยังไม่มีไรเดอร์</li>
+      }
+    </ul>
+
+    <div class="flex flex-wrap items-center gap-2 border-t-2 border-base-content bg-base-200 px-5 py-4">
+      <input type="text" class="input w-full sm:w-60" placeholder="ชื่อไรเดอร์" [(ngModel)]="newName" />
+      <input type="tel" class="input w-full sm:w-40" placeholder="เบอร์โทร" maxlength="10" [(ngModel)]="newPhone" />
+      <button class="btn btn-primary" (click)="add()"><span class="icon">person_add</span> เพิ่ม</button>
+    </div>
+  </section>
+</div>

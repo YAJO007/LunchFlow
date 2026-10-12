@@ -1,0 +1,251 @@
+<div class="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <h1 class="text-3xl font-bold">จัดเส้นทาง</h1>
+    <div class="flex flex-wrap gap-2">
+      @if (plan()) {
+        <button class="btn" (click)="next()" [disabled]="calculating() || confirming()">
+          <span class="icon" [class.animate-spin]="calculating() || confirming()">autorenew</span> แผนถัดไป
+        </button>
+      }
+      <button class="btn btn-primary" (click)="calculate(0)" [disabled]="calculating() || orders().length === 0">
+        @if (calculating()) {
+          <span class="loading loading-spinner loading-sm"></span>
+        } @else {
+          <span class="icon">bolt</span>
+        }
+        คำนวณเส้นทาง
+      </button>
+    </div>
+  </div>
+
+  <!-- ตรวจข้อมูล -->
+  <div class="mb-6 flex flex-wrap gap-2">
+    <span class="chip"><span class="icon text-lg! text-primary">receipt_long</span><span class="num">{{ orders().length }}</span> ออเดอร์ · <span class="num">{{ totalBox() }}</span> กล่อง</span>
+    @if (problemOrders().length === 0) {
+      <span class="chip bg-success/10 text-success"><span class="icon text-lg!">verified</span> ข้อมูลถูกต้อง</span>
+    } @else {
+      <span class="chip bg-warning/20"><span class="icon text-lg!">warning</span> {{ problemOrders().length }} ออเดอร์ต้องตรวจ</span>
+    }
+    <a routerLink="/owner/riders" class="chip hover:border-primary"><span class="icon text-lg! text-accent">sports_motorsports</span> ไรเดอร์พร้อม <span class="num">{{ availableCount() }}</span></a>
+  </div>
+
+  @if (orders().length === 0 && !calculating()) {
+    <div class="panel flex flex-col items-center p-14 text-center">
+      <span class="icon text-6xl! text-base-content/20">route</span>
+      <p class="mt-3 text-base-content/70">ยังไม่มีออเดอร์</p>
+      <a routerLink="/owner/orders" class="btn btn-primary mt-5">ไปหน้าออเดอร์</a>
+    </div>
+  }
+
+  @if (orders().length > 0 && !plan() && !calculating()) {
+    <div class="panel flex flex-col items-center p-14 text-center">
+      <button class="btn btn-primary btn-lg size-24 rounded-full shadow-brutal-lg" (click)="calculate(0)" aria-label="คำนวณเส้นทาง">
+        <span class="icon icon-fill text-5xl!">bolt</span>
+      </button>
+      <p class="mt-5 text-base-content/70">กดเพื่อคำนวณ</p>
+    </div>
+  }
+
+  @if (plan()) {
+    <!-- สถานะ + เลือกแผน -->
+    <div class="mb-4 flex flex-wrap items-center gap-2">
+      @if (isConfirmedView()) {
+        <span class="badge badge-success badge-soft gap-1 py-3"><span class="icon text-base!">verified</span> แผน #{{ plan().id }} ยืนยันแล้ว</span>
+      } @else {
+        <span class="badge badge-warning badge-soft py-3">แผนร่าง</span>
+        <div class="join">
+          @for (i of optionList(); track i) {
+            <button class="btn btn-sm join-item" [class.btn-primary]="i === option()" (click)="calculate(i)" [disabled]="calculating() || confirming()">{{ i + 1 }}</button>
+          }
+        </div>
+      }
+      <span class="text-sm text-base-content/65">{{ plan().strategy }}</span>
+    </div>
+
+    <!-- คำเตือน -->
+    @if (unassignedJobs().length > 0) {
+      <div role="alert" class="alert alert-error alert-soft mb-4">
+        <span class="icon">person_off</span>
+        <span>
+          ไรเดอร์ไม่พอ: ต้องใช้ {{ plan().rider_count }} มี {{ availableCount() }} — ยังจัดไม่ได้ {{ unassignedOrderCount() }} ออเดอร์
+          (ใบงาน {{ unassignedList() }})
+        </span>
+      </div>
+    }
+    @if (!plan().all_on_time) {
+      <div role="alert" class="alert alert-warning alert-soft mb-4">
+        <span class="icon">running_with_errors</span>
+        <span>เสี่ยงช้า: คนสุดท้ายถึง {{ plan().last_arrival_time }} (เกิน {{ plan().deadline_time }})</span>
+      </div>
+    }
+
+    <!-- ตัวเลขสรุป -->
+    <div class="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+      <div class="panel p-4">
+        <div class="text-xs text-base-content/70">ไรเดอร์</div>
+        <div class="num mt-1 text-2xl font-bold">{{ plan().rider_count }}</div>
+      </div>
+      <div class="panel p-4">
+        <div class="text-xs text-base-content/70">ออเดอร์ / กล่อง</div>
+        <div class="num mt-1 text-2xl font-bold">{{ plan().total_order }}<span class="text-base text-base-content/65"> / {{ plan().total_box }}</span></div>
+      </div>
+      <div class="panel p-4">
+        <div class="text-xs text-base-content/70">ระยะทาง</div>
+        <div class="num mt-1 text-2xl font-bold">{{ km(plan().total_distance_km) }}<span class="text-base text-base-content/65"> กม.</span></div>
+      </div>
+      <div class="panel p-4">
+        <div class="text-xs text-base-content/70">เสร็จ</div>
+        <div class="num mt-1 text-2xl font-bold" [class.text-error]="!plan().all_on_time">{{ plan().last_arrival_time }}</div>
+        <div class="num text-xs" [class]="slackMinutes(plan()) >= 0 ? 'text-success' : 'text-error'">
+          {{ slackMinutes(plan()) >= 0 ? 'เหลือ ' + slackMinutes(plan()) : 'ช้า ' + -slackMinutes(plan()) }} นาที
+        </div>
+      </div>
+      <div class="panel p-4">
+        <div class="text-xs text-base-content/70">ค่าไรเดอร์</div>
+        <div class="num mt-1 text-2xl font-bold">฿{{ money(plan().delivery_cost) }}</div>
+      </div>
+      <div class="panel p-4" [class]="plan().profit >= 0 ? 'bg-success/10!' : 'bg-error/10!'">
+        <div class="text-xs text-base-content/70">กำไร</div>
+        <div class="num mt-1 text-2xl font-bold" [class]="plan().profit >= 0 ? 'text-success' : 'text-error'">฿{{ money(plan().profit) }}</div>
+      </div>
+    </div>
+
+    <div class="grid gap-6 xl:grid-cols-5">
+      <!-- แผนที่ -->
+      <section class="panel p-4 xl:col-span-3">
+        <div class="mb-3 flex flex-wrap items-center gap-1.5">
+          <button class="btn btn-xs" [class]="highlight() === 0 ? 'btn-primary' : 'btn-ghost'" (click)="highlight.set(0)">ทั้งหมด</button>
+          @for (job of plan().jobs; track job.rider_no) {
+            <button
+              class="btn btn-xs gap-1"
+              [class]="highlight() === job.rider_no ? 'btn-primary' : 'btn-ghost'"
+              (click)="highlight.set(highlight() === job.rider_no ? 0 : job.rider_no)"
+            >
+              <span class="size-2.5 rounded-full" [style.background-color]="job.color"></span>{{ job.rider_no }}
+            </button>
+          }
+        </div>
+        <div class="aspect-square overflow-hidden rounded-xl border-2 border-base-content sm:aspect-[4/3] xl:aspect-square">
+          <app-route-map [jobs]="plan().jobs" [shop]="appData.shop()" [highlight]="highlight()"></app-route-map>
+        </div>
+      </section>
+
+      <div class="flex flex-col gap-6 xl:col-span-2">
+        <!-- การเงิน -->
+        <section class="panel p-5">
+          <h2 class="mb-2 font-semibold">ต้นทุน</h2>
+          <div class="flex flex-col text-sm">
+            <div class="flex justify-between border-b border-base-300 py-2"><span class="text-base-content/60">ยอดขาย</span><b class="num">฿{{ money(plan().revenue) }}</b></div>
+            <div class="flex justify-between border-b border-base-300 py-2"><span class="text-base-content/60">ค่าอาหาร</span><span class="num text-error">−{{ money(plan().food_cost) }}</span></div>
+            <div class="flex justify-between border-b border-base-300 py-2"><span class="text-base-content/60">ค่าเรียกไรเดอร์</span><span class="num text-error">−{{ money(plan().rider_count * appData.shop().riderBaseFee) }}</span></div>
+            <div class="flex justify-between border-b border-base-300 py-2"><span class="text-base-content/60">ค่าส่งตามระยะ</span><span class="num text-error">−{{ money(distanceCost(plan())) }}</span></div>
+            <div class="flex justify-between pt-3 text-base"><b>กำไร</b><b class="num" [class]="plan().profit >= 0 ? 'text-success' : 'text-error'">฿{{ money(plan().profit) }}</b></div>
+          </div>
+        </section>
+
+        <!-- เทียบแผน -->
+        @if (previous() && !isConfirmedView()) {
+          <section class="panel p-5">
+            <h2 class="mb-2 font-semibold">เทียบแผนก่อน</h2>
+            <table class="table table-sm">
+              <tbody>
+                @for (row of compareRows(); track row.label) {
+                  <tr class="border-base-300">
+                    <td class="pl-0 text-base-content/60">{{ row.label }}</td>
+                    <td class="num text-right text-base-content/65">{{ row.before }}</td>
+                    <td class="num text-right">{{ row.after }}</td>
+                    <td class="num pr-0 text-right" [class]="diffClass(row.diff, row.goodWhenLess)">{{ diffText(row.diff, row.unit) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </section>
+        }
+
+        <!-- ยืนยัน -->
+        @if (!isConfirmedView()) {
+          <button class="btn btn-primary btn-lg btn-block" (click)="confirmOpen.set(true)" [disabled]="unassignedJobs().length > 0 || calculating() || confirming() || invalidOrders().length > 0">
+            <span class="icon">task_alt</span> ยืนยันแผน
+          </button>
+        } @else {
+          <section class="panel bg-success/10 p-5">
+            <h2 class="flex items-center gap-2 font-semibold text-success"><span class="icon icon-fill">verified</span> ใบงาน</h2>
+            <div class="mt-3 flex flex-wrap gap-2">
+              @for (job of plan().jobs; track job.id) {
+                <a [routerLink]="['/rider/job', job.id]" class="chip num font-semibold transition hover:border-primary">
+                  <span class="size-2.5 rounded-full" [style.background-color]="job.color"></span>{{ job.id }}
+                </a>
+              }
+            </div>
+            <button class="btn btn-sm mt-3" (click)="calculate(0, false)">คำนวณใหม่</button>
+          </section>
+        }
+      </div>
+    </div>
+
+    <!-- ใบงาน -->
+    <h2 class="mt-8 mb-3 text-lg font-semibold">ใบงาน <span class="num text-base-content/65">{{ plan().jobs.length }}</span></h2>
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      @for (job of plan().jobs; track job.rider_no) {
+        <article class="panel overflow-hidden transition" [class.ring-2]="highlight() === job.rider_no" [class.ring-primary]="highlight() === job.rider_no">
+          <div class="h-2 border-b-2 border-base-content" [style.background-color]="job.color"></div>
+          <div class="p-4">
+            <div class="flex items-center gap-3">
+              <div class="num grid size-9 place-items-center rounded-full font-bold text-white" [style.background-color]="job.color">{{ job.rider_no }}</div>
+              <div class="min-w-0 flex-1">
+                <div class="font-semibold">{{ job.id ? 'ใบงาน ' + job.id : 'ไรเดอร์ ' + job.rider_no }}</div>
+                <div class="truncate text-sm" [class]="appData.riderOf(job.rider_no) ? 'text-base-content/70' : 'text-error'">{{ riderName(job.rider_no) }}</div>
+              </div>
+              <span class="badge badge-sm badge-soft" [class]="job.on_time ? 'badge-success' : 'badge-error'">{{ job.finish_time }}</span>
+            </div>
+
+            <div class="mt-4 grid grid-cols-4 gap-1 rounded-xl bg-base-200 p-2 text-center">
+              <div><div class="num font-bold">{{ job.total_box }}</div><div class="text-[11px] text-base-content/65">กล่อง</div></div>
+              <div><div class="num font-bold">{{ km(job.distance_km) }}</div><div class="text-[11px] text-base-content/65">กม.</div></div>
+              <div><div class="num font-bold">{{ job.duration_min }}</div><div class="text-[11px] text-base-content/65">นาที</div></div>
+              <div><div class="num font-bold">{{ money(job.cost) }}</div><div class="text-[11px] text-base-content/65">บาท</div></div>
+            </div>
+
+            <ol class="mt-4 flex flex-col gap-2">
+              @for (stop of job.stops; track stop.stop_no) {
+                <li class="flex items-center gap-3 text-sm">
+                  <span class="num grid size-6 shrink-0 place-items-center rounded-full text-xs font-bold text-white" [style.background-color]="job.color">{{ stop.stop_no }}</span>
+                  <span class="min-w-0 flex-1 truncate">{{ stop.customer_name }}</span>
+                  <span class="num text-base-content/65">{{ stop.quantity }}×</span>
+                  <span class="num w-11 text-right font-medium">{{ stop.arrival_time }}</span>
+                </li>
+              }
+            </ol>
+
+            <div class="mt-4 flex gap-2">
+              <a class="btn btn-sm flex-1" [href]="job.map_url" target="_blank"><span class="icon text-lg!">map</span> Maps</a>
+              @if (job.id) {
+                <a class="btn btn-sm btn-primary flex-1" [routerLink]="['/rider/job', job.id]"><span class="icon text-lg!">open_in_new</span> เปิด</a>
+              }
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</div>
+
+<!-- ยืนยันแผน -->
+@if (confirmOpen()) {
+  <div class="modal modal-open">
+    <div role="dialog" aria-modal="true" class="modal-box">
+      <h3 class="text-lg font-semibold">ยืนยันแผน {{ option() + 1 }}?</h3>
+      <p class="mt-2 text-sm text-base-content/70">สร้างใบงาน {{ plan().rider_count }} ใบ · กำไร ฿{{ money(plan().profit) }}</p>
+      <div class="modal-action">
+        <button class="btn btn-ghost" (click)="confirmOpen.set(false)">ยกเลิก</button>
+        <button class="btn btn-primary" (click)="confirm()" [disabled]="confirming() || calculating() || unassignedJobs().length > 0">
+          @if (confirming()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          ยืนยัน
+        </button>
+      </div>
+    </div>
+    <div class="modal-backdrop bg-base-content/40" (click)="confirmOpen.set(false)"></div>
+  </div>
+}

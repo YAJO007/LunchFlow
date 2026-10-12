@@ -1,0 +1,46 @@
+<div class="flex h-dvh flex-col print:h-auto">
+  <!-- แถบด้านบน -->
+  <header class="z-30 flex h-16 shrink-0 items-center gap-2 border-b-2 border-base-content bg-base-100 px-3 print:hidden sm:px-5">
+    <button class="btn btn-ghost btn-circle lg:hidden" (click)="drawerOpen.set(!drawerOpen())" aria-label="เมนู">
+      <span class="icon">menu</span>
+    </button>
+    <a routerLink="/owner"><app-brand></app-brand></a>
+    <div class="flex-1"></div>
+    <div class="chip hidden md:inline-flex">
+      <span class="icon text-lg! text-primary">schedule</span>
+      <b class="num">{{ clock() }}</b>
+      <span class="text-base-content/65">· {{ countdown() }}</span>
+    </div>
+    <a routerLink="/rider" class="btn btn-ghost btn-circle" title="ไรเดอร์"><span class="icon">two_wheeler</span></a>
+    <button class="btn btn-ghost btn-circle" title="ออกจากระบบ" (click)="logout()"><span class="icon">logout</span></button>
+  </header>
+
+  <div class="relative flex min-h-0 flex-1">
+    @if (drawerOpen()) {
+      <div class="fixed inset-0 z-40 bg-black/60 lg:hidden" (click)="drawerOpen.set(false)"></div>
+    }
+
+    <!-- เมนูด้านซ้าย -->
+    <nav
+      class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col gap-1 border-r-2 border-base-content bg-base-200 p-3 transition-transform duration-200 print:hidden lg:visible lg:static lg:z-auto lg:translate-x-0 lg:bg-transparent"
+      [class.-translate-x-full]="!drawerOpen()"
+      [class.invisible]="!drawerOpen()"
+    >
+      <div class="mb-3 px-2 pt-2 lg:hidden"><app-brand></app-brand></div>
+      @for (m of menus; track m.path) {
+        <button
+          class="flex h-11 w-full items-center gap-3 rounded-xl px-4 text-left text-sm transition"
+          [class]="isActive(m.path) ? 'bg-primary text-white font-bold border-2 border-base-content shadow-brutal-sm' : 'border-2 border-transparent text-base-content/70 hover:border-base-content hover:bg-base-100 hover:text-base-content'"
+          (click)="go(m.path)"
+        >
+          <span class="icon" [class.icon-fill]="isActive(m.path)">{{ m.icon }}</span>
+          {{ m.label }}
+        </button>
+      }
+    </nav>
+
+    <main class="min-w-0 flex-1 overflow-y-auto print:overflow-visible">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

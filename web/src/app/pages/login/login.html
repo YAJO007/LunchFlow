@@ -1,0 +1,21 @@
+<div class="flex min-h-dvh items-center justify-center px-4">
+  <div class="panel w-full max-w-sm p-8 shadow-brutal-lg">
+    <app-brand></app-brand>
+    <h1 class="mt-8 text-2xl font-semibold">เข้าสู่ระบบ</h1>
+
+    <form class="mt-6 flex flex-col gap-3" (ngSubmit)="login()">
+      <input type="text" name="username" placeholder="ชื่อผู้ใช้" class="input input-lg w-full" [(ngModel)]="username" autocomplete="username" />
+      <input type="password" name="password" placeholder="รหัสผ่าน" class="input input-lg w-full" [(ngModel)]="password" autocomplete="current-password" />
+      @if (error()) {
+        <p class="text-sm text-error">{{ error() }}</p>
+      }
+      <button type="submit" class="btn btn-primary btn-lg mt-2">เข้าสู่ระบบ</button>
+    </form>
+
+    <p class="mt-5 text-center text-sm text-base-content/70">ทดลอง: <span class="num text-primary">owner / 1234</span></p>
+    <div class="mt-6 flex justify-between text-sm">
+      <a routerLink="/" class="link link-hover text-base-content/70">← หน้าแรก</a>
+      <a routerLink="/rider" class="link link-hover text-accent">ไรเดอร์</a>
+    </div>
+  </div>
+</div>

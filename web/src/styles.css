@@ -1,0 +1,144 @@
+/* ฟอนต์จาก Google Fonts (import ก่อน tailwindcss ตามบทเรียน 05-Display and Styling) */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400..900&family=Space+Grotesk:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=block');
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* คลาสที่เขียนแบบ [class.ชื่อคลาส]="เงื่อนไข" ใน HTML ให้ Tailwind สร้างไว้เสมอ */
+@source inline("-translate-x-full invisible alert-error alert-info alert-success alert-warning animate-spin bg-secondary btn-active btn-primary line-through opacity-50 opacity-60 ring-2 ring-primary text-error text-success text-warning");
+
+/* ธีม Neo-Brutalism ม่วง-ขาว (daisyUI theme ตามบทเรียน 03-External Components) */
+@plugin "daisyui/theme" {
+  name: "brutal";
+  default: true;
+  color-scheme: light;
+  --color-base-100: #ffffff;
+  --color-base-200: #f3ecff;
+  --color-base-300: #e4d6ff;
+  --color-base-content: #14101f;
+  --color-primary: #7c3aed;
+  --color-primary-content: #ffffff;
+  --color-secondary: #ddd0ff;
+  --color-secondary-content: #2e1065;
+  --color-accent: #a855f7;
+  --color-accent-content: #ffffff;
+  --color-neutral: #14101f;
+  --color-neutral-content: #ffffff;
+  --color-info: #6366f1;
+  --color-info-content: #ffffff;
+  --color-success: #16a34a;
+  --color-success-content: #ffffff;
+  --color-warning: #eab308;
+  --color-warning-content: #14101f;
+  --color-error: #e11d48;
+  --color-error-content: #ffffff;
+  --radius-selector: 0.5rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 2px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* ค่าที่ใช้เป็นคลาส Tailwind ได้: font-num, shadow-brutal, shadow-brutal-lg */
+@theme {
+  --font-sans: 'Noto Sans Thai', sans-serif;
+  --font-num: 'Space Grotesk', 'Noto Sans Thai', sans-serif;
+  --shadow-brutal-sm: 2px 2px 0 0 #14101f;
+  --shadow-brutal: 4px 4px 0 0 #14101f;
+  --shadow-brutal-lg: 8px 8px 0 0 #14101f;
+}
+
+@layer base {
+  body {
+    @apply bg-base-200 font-sans text-base-content antialiased;
+    /* พื้นหลังลายจุด */
+    background-image: radial-gradient(rgb(124 58 237 / 0.18) 1.2px, transparent 1.2px);
+    background-size: 22px 22px;
+  }
+
+  h1 {
+    @apply font-black tracking-tight;
+  }
+
+  ::selection {
+    @apply bg-primary text-white;
+  }
+}
+
+@layer components {
+  /* ไอคอน: <span class="icon">home</span> */
+  .icon {
+    font-family: 'Material Symbols Rounded';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 1.35rem;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    user-select: none;
+  }
+
+  .icon-fill {
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+  }
+
+  /* กล่องขาว ขอบดำหนา เงาทึบ */
+  .panel {
+    @apply rounded-box border-2 border-base-content bg-base-100 shadow-brutal;
+  }
+
+  /* ป้ายเล็ก */
+  .chip {
+    @apply inline-flex h-8 items-center gap-1.5 rounded-lg border-2 border-base-content bg-base-100 px-3 text-sm font-semibold whitespace-nowrap;
+  }
+
+  /* ตัวเลข */
+  .num {
+    @apply font-num tabular-nums;
+  }
+}
+
+/* ส่วนนี้ไม่ใส่ใน @layer เพื่อให้ทับสไตล์เดิมของ daisyUI ได้ */
+/* ปุ่ม: ขอบดำ เงาทึบ กดแล้วยุบ */
+.btn:not(.btn-ghost) {
+  @apply border-2 border-base-content font-bold shadow-brutal-sm transition-all hover:-translate-y-0.5 hover:shadow-brutal active:translate-y-0.5 active:shadow-none;
+}
+
+.btn-ghost {
+  @apply font-semibold;
+}
+
+/* ช่องกรอกข้อมูลขอบดำ */
+.input,
+.select,
+.textarea {
+  @apply border-2 border-base-content bg-base-100 focus-within:outline-primary;
+}
+
+.badge {
+  @apply border-2 border-base-content font-bold;
+}
+
+.alert {
+  @apply border-2 border-base-content shadow-brutal;
+}
+
+.modal-box {
+  @apply border-2 border-base-content shadow-brutal-lg;
+}
+
+.toggle {
+  @apply border-2 border-base-content;
+}
+
+.progress {
+  @apply border-2 border-base-content;
+}

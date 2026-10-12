@@ -1,0 +1,45 @@
+import { Routes } from '@angular/router';
+import { Home } from './pages/home/home';
+import { Login } from './pages/login/login';
+import { Owner } from './pages/owner/owner';
+import { Dashboard } from './pages/owner/dashboard/dashboard';
+import { Customers } from './pages/owner/customers/customers';
+import { Orders } from './pages/owner/orders/orders';
+import { Riders } from './pages/owner/riders/riders';
+import { RoutePlanning } from './pages/owner/route-planning/route-planning';
+import { Report } from './pages/owner/report/report';
+import { Rider } from './pages/rider/rider';
+import { RiderLogin } from './pages/rider/rider-login/rider-login';
+import { JobSheet } from './pages/rider/job-sheet/job-sheet';
+import { JobMap } from './pages/rider/job-map/job-map';
+import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
+
+export const routes: Routes = [
+  { path: '', component: Home },
+  { path: 'login', component: Login },
+  // หน้าจอเจ้าของร้าน (Nested routes: owner.html มี router-outlet ของตัวเอง)
+  {
+    path: 'owner',
+    component: Owner,
+    children: [
+      { path: '', component: Dashboard },
+      { path: 'customers', component: Customers },
+      { path: 'orders', component: Orders },
+      { path: 'riders', component: Riders },
+      { path: 'routes', component: RoutePlanning },
+      { path: 'report', component: Report },
+    ],
+  },
+  // หน้าจอไรเดอร์บนมือถือ
+  {
+    path: 'rider',
+    component: Rider,
+    children: [
+      { path: '', component: RiderLogin },
+      { path: 'job/:id', component: JobSheet },
+      { path: 'map/:id', component: JobMap },
+    ],
+  },
+  //Wild Card Route for 404 request
+  { path: '**', component: Pagenotfound },
+];
