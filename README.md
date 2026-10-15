@@ -392,6 +392,6 @@ push โค้ดขึ้น GitHub แล้วไปที่ service บน 
 | Web API | Node.js, Express 5, TypeScript, mysql2 |
 | ฐานข้อมูล | MySQL บน aiven.io |
 | หน้าเว็บ | Angular 22, Tailwind CSS 4, daisyUI 5 |
-| แผนที่ | วาดเองด้วย SVG + ลิงก์นำทาง Google Maps |
+| แผนที่ | รูปแผนที่จาก OpenStreetMap + วาดเส้นทางทับด้วย SVG + ลิงก์นำทาง Google Maps |
 | Deploy | Render.com (Web Service + Static Site) |
 | ทดสอบ API | Postman |

@@ -45,7 +45,7 @@ src/app/
 │   ├── app-data.ts      ข้อมูลที่ใช้ร่วมกัน (ร้าน ไรเดอร์ login สถานะส่ง)
 │   └── notify.ts        ข้อความแจ้งเตือนมุมจอ
 ├── utils/               จัดรูปแบบตัวเลข + ลิงก์ Google Maps
-├── components/route-map แผนที่เส้นทาง (วาดด้วย SVG)
+├── components/route-map แผนที่เส้นทาง (รูปแผนที่ OpenStreetMap + วาดเส้นทางทับด้วย SVG)
 └── pages/
     ├── home/  login/  pagenotfound/
     ├── owner/           layout + dashboard, customers, orders, riders, route-planning, report
@@ -69,5 +69,5 @@ src/app/
 
 ส่วนที่บทเรียนไม่มีแต่โจทย์ต้องใช้:
 - `ngOnInit()` ในหน้าใบงาน เพื่อโหลดใบงานหลังจากได้เลขใบงานจาก URL แล้ว
-- แผนที่วาดด้วย `<svg>` + `@for` (ไม่ได้ลงไลบรารีแผนที่เพิ่ม) และปุ่มนำทางเป็นลิงก์ Google Maps ธรรมดา
+- แผนที่ใช้รูปจาก OpenStreetMap เป็นพื้นหลัง แล้ววาดเส้นทางทับด้วย `<svg>` + `@for` (ไม่ได้ลงไลบรารีแผนที่เพิ่ม) และปุ่มนำทางเป็นลิงก์ Google Maps ธรรมดา
 - `signal()` เก็บข้อมูลในหน้า แทน `model()` เพราะเมื่อเปิด `withComponentInputBinding()` ค่าใน `model()` จะถูก Router ล้าง

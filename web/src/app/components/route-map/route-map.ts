@@ -9,6 +9,12 @@ export interface MapPoint {
   color: string;
 }
 
+export interface Tile {
+  url: string;
+  x: number;
+  y: number;
+}
+
 @Component({
   selector: 'app-route-map',
   imports: [],
@@ -21,35 +27,76 @@ export class RouteMap {
   @Input() shop: Shop = DEFAULT_SHOP;
 
   size = 400;
-  rings = [1, 2, 3];
 
-  private kmX(lng: number): number {
-    return (lng - this.shop.longitude) * 111.32 * Math.cos((this.shop.latitude * Math.PI) / 180);
+  worldX(lng: number, zoom: number): number {
+    return ((lng + 180) / 360) * 256 * Math.pow(2, zoom);
   }
 
-  private kmY(lat: number): number {
-    return (lat - this.shop.latitude) * 110.57;
+  worldY(lat: number, zoom: number): number {
+    const rad = (lat * Math.PI) / 180;
+    return ((1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2) * 256 * Math.pow(2, zoom);
   }
 
-  scale(): number {
-    let maxKm = 3.3;
+  allLatLng(): number[][] {
+    const list = [[this.shop.latitude, this.shop.longitude]];
+    for (const p of this.points) {
+      list.push([p.lat, p.lng]);
+    }
     for (const job of this.jobs) {
       for (const stop of job.stops) {
-        maxKm = Math.max(maxKm, Math.abs(this.kmX(stop.longitude)), Math.abs(this.kmY(stop.latitude)));
+        list.push([stop.latitude, stop.longitude]);
       }
     }
-    for (const p of this.points) {
-      maxKm = Math.max(maxKm, Math.abs(this.kmX(p.lng)), Math.abs(this.kmY(p.lat)));
+    return list;
+  }
+
+  zoom(): number {
+    const list = this.allLatLng();
+    for (let z = 17; z > 10; z--) {
+      const xs = list.map((p) => this.worldX(p[1], z));
+      const ys = list.map((p) => this.worldY(p[0], z));
+      const width = Math.max(...xs) - Math.min(...xs);
+      const height = Math.max(...ys) - Math.min(...ys);
+      if (width < this.size - 40 && height < this.size - 40) {
+        return z;
+      }
     }
-    return (this.size / 2 - 18) / maxKm;
+    return 10;
+  }
+
+  centerX(): number {
+    const xs = this.allLatLng().map((p) => this.worldX(p[1], this.zoom()));
+    return (Math.max(...xs) + Math.min(...xs)) / 2;
+  }
+
+  centerY(): number {
+    const ys = this.allLatLng().map((p) => this.worldY(p[0], this.zoom()));
+    return (Math.max(...ys) + Math.min(...ys)) / 2;
   }
 
   x(lng: number): number {
-    return this.size / 2 + this.kmX(lng) * this.scale();
+    return this.worldX(lng, this.zoom()) - this.centerX() + this.size / 2;
   }
 
   y(lat: number): number {
-    return this.size / 2 - this.kmY(lat) * this.scale();
+    return this.worldY(lat, this.zoom()) - this.centerY() + this.size / 2;
+  }
+
+  tiles(): Tile[] {
+    const z = this.zoom();
+    const left = this.centerX() - this.size / 2;
+    const top = this.centerY() - this.size / 2;
+    const list: Tile[] = [];
+    for (let tx = Math.floor(left / 256); tx <= Math.floor((left + this.size) / 256); tx++) {
+      for (let ty = Math.floor(top / 256); ty <= Math.floor((top + this.size) / 256); ty++) {
+        list.push({
+          url: 'https://tile.openstreetmap.org/' + z + '/' + tx + '/' + ty + '.png',
+          x: tx * 256 - left,
+          y: ty * 256 - top,
+        });
+      }
+    }
+    return list;
   }
 
   linePoints(job: RiderJob): string {
