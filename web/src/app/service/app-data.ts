@@ -18,7 +18,7 @@ const DEFAULT_RIDERS: Rider[] = [
 ];
 
 // Service เก็บข้อมูลที่ใช้ร่วมกันหลายหน้า (ตามบทเรียน 05-Data Sharing)
-// - ข้อมูลร้าน          => เก็บใน service (รีเฟรชแล้วโหลดใหม่จาก API)
+// - ข้อมูลร้าน          => เก็บใน service
 // - รายชื่อไรเดอร์      => localStorage (ปิดเบราว์เซอร์แล้วยังอยู่)
 // - สถานะส่งสำเร็จ      => localStorage
 // - การเข้าสู่ระบบร้าน  => sessionStorage (ปิดเบราว์เซอร์แล้วต้องเข้าใหม่)
@@ -27,25 +27,13 @@ const DEFAULT_RIDERS: Rider[] = [
 })
 export class AppData {
   shop = signal<Shop>(DEFAULT_SHOP);
-  riders = signal<Rider[]>([]);
+  riders = signal<Rider[]>(DEFAULT_RIDERS);
 
   constructor() {
-    let riders = DEFAULT_RIDERS;
-    // เช็คก่อนว่ามีข้อมูลใน localStorage หรือไม่ ถ้ามีให้ดึงมาใช้
+    // ถ้ามีรายชื่อไรเดอร์ใน localStorage ให้ดึงมาใช้
     if (localStorage.getItem('riders')) {
-      try {
-        const saved = JSON.parse(localStorage.getItem('riders')!);
-        if (Array.isArray(saved) && saved.every((r: any) => r &&
-          Number.isSafeInteger(r.no) && r.no > 0 && typeof r.name === 'string' &&
-          typeof r.phone === 'string' && typeof r.available === 'boolean') &&
-          new Set(saved.map((r: Rider) => r.no)).size === saved.length) {
-          riders = saved;
-        }
-      } catch (error) {
-        // ข้อมูลเสียหาย: ใช้รายชื่อเริ่มต้น
-      }
+      this.riders.set(JSON.parse(localStorage.getItem('riders')!));
     }
-    this.riders.set(riders);
   }
 
   // ---------- ไรเดอร์ ----------
@@ -63,7 +51,7 @@ export class AppData {
     return this.riders().filter((r) => r.available);
   }
 
-  // หาไรเดอร์ที่ได้รับใบงานลำดับที่ riderNo (ใบงานที่ 1 => ไรเดอร์ที่พร้อมคนแรก)
+  // ใบงานที่ 1 => ไรเดอร์ที่พร้อมคนแรก, ใบงานที่ 2 => คนที่สอง, ...
   riderOf(riderNo: number): Rider | undefined {
     return this.availableRiders()[riderNo - 1];
   }
@@ -74,7 +62,7 @@ export class AppData {
   }
 
   login(username: string, password: string): boolean {
-    // บัญชีตัวอย่างสำหรับเดโม: owner / 1234
+    // บัญชีตัวอย่าง: owner / 1234
     if (username === 'owner' && password === '1234') {
       sessionStorage.setItem('owner', username);
       return true;
@@ -87,52 +75,16 @@ export class AppData {
   }
 
   // ---------- สถานะส่งสำเร็จของไรเดอร์ ----------
-  // เก็บเป็น array ของ stop_no ที่ส่งแล้ว แยกตามเลขใบงาน (order_id เป็น null ได้)
+  // เก็บเลขจุดส่ง (stop_no) ที่ส่งแล้ว แยกตามเลขใบงาน
   deliveredOf(jobId: number): number[] {
-    const key = 'delivered-' + jobId;
-    if (localStorage.getItem(key)) {
-      try {
-        const saved = JSON.parse(localStorage.getItem(key)!);
-        return Array.isArray(saved)
-          ? [...new Set<number>(saved.filter((no: any) => Number.isSafeInteger(no) && no > 0))]
-          : [];
-      } catch (error) {
-        return [];
-      }
+    const saved = localStorage.getItem('delivered-' + jobId);
+    if (saved) {
+      return JSON.parse(saved);
     }
     return [];
   }
 
-  saveDelivered(jobId: number, orderIds: number[]) {
-    localStorage.setItem('delivered-' + jobId, JSON.stringify(orderIds));
-  }
-
-  recentJobs(): string[] {
-    try {
-      const saved = JSON.parse(localStorage.getItem('recentJobs') || '[]');
-      return Array.isArray(saved)
-        ? [...new Set<string>(saved.filter((no: any) => typeof no === 'string' && /^[1-9][0-9]*$/.test(no)))].slice(0, 5)
-        : [];
-    } catch (error) {
-      return [];
-    }
-  }
-
-  // ---------- แผนร่าง ----------
-  // จำว่ากำลังดูแผนที่เท่าไหร่ไว้ใน sessionStorage (รีเฟรชแล้วกลับมาแผนเดิม)
-  draftOption(): number | null {
-    if (sessionStorage.getItem('draftOption')) {
-      const option = Number(sessionStorage.getItem('draftOption'));
-      return Number.isSafeInteger(option) && option >= 0 ? option : null;
-    }
-    return null;
-  }
-
-  saveDraftOption(option: number | null) {
-    if (option === null) {
-      sessionStorage.removeItem('draftOption');
-    } else {
-      sessionStorage.setItem('draftOption', String(option));
-    }
+  saveDelivered(jobId: number, stopNos: number[]) {
+    localStorage.setItem('delivered-' + jobId, JSON.stringify(stopNos));
   }
 }

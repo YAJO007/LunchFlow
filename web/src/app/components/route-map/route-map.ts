@@ -7,7 +7,6 @@ import { Shop } from '../../model/shop';
 export interface MapPoint {
   lat: number;
   lng: number;
-  label: string;
   color: string;
 }
 
@@ -23,7 +22,6 @@ export class RouteMap {
   @Input() jobs: RiderJob[] = []; // ใบงานที่จะวาดเส้นทาง
   @Input() points: MapPoint[] = []; // จุดทั่วไป
   @Input() shop: Shop = DEFAULT_SHOP;
-  @Input() highlight: number = 0; // rider_no ที่ต้องการเน้น (0 = แสดงทุกคน)
 
   size = 400; // ขนาด viewBox ของ SVG
   rings = [1, 2, 3]; // วงรัศมี (กม.)
@@ -67,10 +65,5 @@ export class RouteMap {
       text += ' ' + this.x(stop.longitude) + ',' + this.y(stop.latitude);
     }
     return text;
-  }
-
-  // ถ้ามีการเลือกไรเดอร์ ให้คนอื่นจางลง
-  isDim(job: RiderJob): boolean {
-    return this.highlight !== 0 && this.highlight !== job.rider_no;
   }
 }

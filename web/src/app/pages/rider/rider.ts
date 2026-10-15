@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Brand } from '../../components/brand/brand';
 
-// Layout ของหน้าจอไรเดอร์ (ออกแบบสำหรับมือถือ)
+// Layout ของหน้าจอไรเดอร์ (ใช้บนมือถือ)
 @Component({
   selector: 'app-rider',
-  imports: [RouterModule, Brand],
+  imports: [RouterModule],
   templateUrl: './rider.html',
   styleUrl: './rider.css',
 })

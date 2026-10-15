@@ -16,5 +16,3 @@ export const DEFAULT_SHOP: Shop = {
   deadlineTime: '12:30',
 };
 
-// รัศมีพื้นที่ให้บริการ (กิโลเมตร)
-export const SERVICE_RADIUS_KM = 3;

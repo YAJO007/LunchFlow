@@ -11,5 +11,4 @@ export interface Order {
   address: string;
   latitude: number;
   longitude: number;
-  distance_km?: number; // มีเฉพาะตอนเรียก /order/nearby
 }

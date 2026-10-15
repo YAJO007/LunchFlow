@@ -1,28 +1,9 @@
-<div class="flex flex-col items-center pt-10 text-center">
-  <div class="grid size-20 place-items-center -rotate-3 rounded-3xl border-2 border-base-content bg-primary text-white shadow-brutal-lg">
-    <span class="icon icon-fill text-5xl!">two_wheeler</span>
-  </div>
-  <h1 class="mt-6 text-3xl font-bold">ใบงานของฉัน</h1>
-</div>
+<h1 class="text-2xl font-bold">ใบงานของฉัน</h1>
 
-<div class="mt-8">
-  <input #jobNo type="text" inputmode="numeric" placeholder="เลขใบงาน" class="input input-xl num w-full text-center text-3xl tracking-[0.3em]" (keyup.enter)="open(jobNo)" />
+<div class="mt-4 flex flex-col gap-3">
+  <input #jobNo type="number" placeholder="เลขใบงาน เช่น 1001" class="input w-full" />
   @if (error()) {
-    <p class="mt-2 text-center text-sm text-error">{{ error() }}</p>
+    <p class="text-error">{{ error() }}</p>
   }
-  <button class="btn btn-primary btn-lg btn-block mt-4" (click)="open(jobNo)">เปิดใบงาน <span class="icon">arrow_forward</span></button>
+  <button class="btn btn-primary" (click)="open(jobNo)">เปิดใบงาน</button>
 </div>
-
-@if (recent().length > 0) {
-  <div class="mt-8">
-    <div class="mb-2 flex items-center justify-between px-1 text-sm text-base-content/65">
-      <span>ล่าสุด</span>
-      <button class="link link-hover" (click)="clearRecent()">ล้าง</button>
-    </div>
-    <div class="flex flex-wrap gap-2">
-      @for (no of recent(); track no) {
-        <button class="chip num font-semibold hover:border-primary" (click)="openRecent(no)">{{ no }}</button>
-      }
-    </div>
-  </div>
-}

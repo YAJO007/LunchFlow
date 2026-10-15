@@ -1,13 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { Brand } from '../../components/brand/brand';
 import { AppData } from '../../service/app-data';
 
 // หน้าเข้าสู่ระบบของเจ้าของร้าน
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, RouterModule, Brand],
+  imports: [FormsModule, RouterModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
@@ -19,15 +18,10 @@ export class Login {
   constructor(
     private router: Router,
     private appData: AppData,
-  ) {
-    // ถ้าเข้าสู่ระบบอยู่แล้ว ไปหน้าร้านเลย
-    if (this.appData.isLoggedIn()) {
-      this.router.navigate(['/owner']);
-    }
-  }
+  ) {}
 
   login() {
-    if (this.appData.login(this.username().trim(), this.password())) {
+    if (this.appData.login(this.username(), this.password())) {
       this.router.navigate(['/owner']);
     } else {
       this.error.set('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');

@@ -1,40 +1,21 @@
-<div class="flex min-h-dvh flex-col">
-  <header class="flex items-center justify-between px-5 py-4 sm:px-10">
-    <app-brand></app-brand>
-    <a routerLink="/owner" class="btn btn-primary btn-sm">เข้าสู่ระบบ</a>
-  </header>
+<div class="mx-auto max-w-2xl p-6">
+  <h1 class="text-3xl font-bold">LunchFlow</h1>
+  <p class="mt-2">ระบบจัดเส้นทางและแบ่งงานไรเดอร์ ร้านข้าวกล่องส่งด่วนมื้อเที่ยง</p>
 
-  <main class="flex flex-1 flex-col items-center justify-center px-5 pb-20 text-center">
-    <span class="chip mb-6 bg-secondary text-secondary-content">
-      <span class="size-2 animate-pulse rounded-full bg-primary"></span>
-      ออกส่ง {{ appData.shop().departureTime }} · ถึงก่อน {{ appData.shop().deadlineTime }}
-    </span>
-
-    <h1 class="text-5xl leading-tight font-bold sm:text-7xl">
-      ส่งข้าวกล่อง<br />
-      <span class="mt-2 inline-block -rotate-2 rounded-2xl border-4 border-base-content bg-primary px-5 text-white shadow-brutal-lg">ตรงเวลา</span>
-    </h1>
-    <p class="mt-5 text-lg text-base-content/60">แบ่งงานไรเดอร์ จัดเส้นทาง คิดกำไร ในคลิกเดียว</p>
-
-    <div class="mt-12 grid w-full max-w-2xl gap-4 sm:grid-cols-2">
-      <a routerLink="/owner" class="group panel p-6 text-left transition hover:-translate-y-1 hover:shadow-brutal-lg">
-        <span class="icon icon-fill text-4xl! text-primary">storefront</span>
-        <h2 class="mt-4 text-xl font-semibold">เจ้าของร้าน</h2>
-        <p class="mt-1 text-sm text-base-content/70">ลูกค้า · ออเดอร์ · เส้นทาง · กำไร</p>
-        <span class="icon mt-6 text-primary transition group-hover:translate-x-1">arrow_forward</span>
-      </a>
-      <a routerLink="/rider" class="group panel p-6 text-left transition hover:-translate-y-1 hover:shadow-brutal-lg">
-        <span class="icon icon-fill text-4xl! text-accent">two_wheeler</span>
-        <h2 class="mt-4 text-xl font-semibold">ไรเดอร์</h2>
-        <p class="mt-1 text-sm text-base-content/70">กรอกเลขใบงาน แล้วออกส่ง</p>
-        <span class="icon mt-6 text-accent transition group-hover:translate-x-1">arrow_forward</span>
-      </a>
+  <div class="mt-6 grid gap-4 sm:grid-cols-2">
+    <div class="card bg-base-200">
+      <div class="card-body">
+        <h2 class="card-title">เจ้าของร้าน</h2>
+        <p>จัดการลูกค้า ออเดอร์ จัดเส้นทาง และดูกำไร</p>
+        <a routerLink="/login" class="btn btn-primary">เข้าสู่ระบบ</a>
+      </div>
     </div>
-
-    <div class="mt-10 flex flex-wrap justify-center gap-2 text-base-content/70">
-      <span class="chip">รัศมี {{ radius }} กม.</span>
-      <span class="chip">ไรเดอร์ละ ≤ {{ appData.shop().maxOrdersPerRider }} ออเดอร์</span>
-      <span class="chip">กล่องละ {{ appData.shop().pricePerBox }} บาท</span>
+    <div class="card bg-base-200">
+      <div class="card-body">
+        <h2 class="card-title">ไรเดอร์</h2>
+        <p>กรอกเลขใบงาน แล้วออกส่ง</p>
+        <a routerLink="/rider" class="btn">เปิดใบงาน</a>
+      </div>
     </div>
-  </main>
+  </div>
 </div>

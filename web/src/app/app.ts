@@ -12,16 +12,4 @@ export class App {
   protected readonly title = signal('lunchflow-web');
 
   constructor(public notify: Notify) {}
-
-  // เลือกไอคอนตามชนิดข้อความแจ้งเตือน
-  iconOf(type: string): string {
-    if (type === 'success') {
-      return 'check_circle';
-    } else if (type === 'error') {
-      return 'error';
-    } else if (type === 'warning') {
-      return 'warning';
-    }
-    return 'info';
-  }
 }

@@ -1,95 +1,38 @@
-@if (loading()) {
-  <div class="flex justify-center py-24"><span class="loading loading-spinner loading-lg text-primary"></span></div>
-} @else if (!job()) {
-  <div class="panel mt-6 flex flex-col items-center p-10 text-center">
-    <span class="icon text-6xl! text-error">search_off</span>
-    <h1 class="mt-3 text-xl font-semibold">{{ error() === 'ไม่พบใบงานเลขนี้' || error().startsWith('เลขใบงาน') ? 'ไม่พบใบงาน ' + id() : 'โหลดใบงานไม่สำเร็จ' }}</h1>
-    <p class="mt-1 text-sm text-base-content/70">{{ error() }}</p>
-    <div class="mt-6 flex gap-2">
-      <a routerLink="/rider" class="btn btn-primary">กรอกใหม่</a>
-      <button class="btn btn-ghost" (click)="load()">ลองอีกครั้ง</button>
-    </div>
-  </div>
-} @else {
-  <!-- หัวใบงาน -->
-  <section class="relative overflow-hidden rounded-3xl border-2 border-base-content bg-base-100 p-5" [style.box-shadow]="'8px 8px 0 0 ' + j().color">
-    <div class="absolute inset-x-0 top-0 h-2" [style.background-color]="j().color"></div>
-    <div class="relative flex items-start justify-between">
-      <div>
-        <div class="text-sm text-base-content/70">ใบงาน</div>
-        <div class="num text-5xl font-bold">{{ j().id }}</div>
-      </div>
-      <span class="badge badge-soft" [class]="j().on_time ? 'badge-success' : 'badge-error'">{{ j().on_time ? 'ทันเวลา' : 'เสี่ยงช้า' }}</span>
-    </div>
-    <div class="relative mt-5 grid grid-cols-3 gap-2 text-center">
-      <div class="rounded-2xl bg-base-100 border-2 border-base-content py-3">
-        <div class="num text-3xl font-bold" [style.color]="j().color">{{ j().total_box }}</div>
-        <div class="text-xs text-base-content/70">กล่อง</div>
-      </div>
-      <div class="rounded-2xl bg-base-100 border-2 border-base-content py-3">
-        <div class="num text-3xl font-bold">{{ j().stops.length }}</div>
-        <div class="text-xs text-base-content/70">จุด</div>
-      </div>
-      <div class="rounded-2xl bg-base-100 border-2 border-base-content py-3">
-        <div class="num text-3xl font-bold">{{ km(j().distance_km) }}</div>
-        <div class="text-xs text-base-content/70">กม.</div>
-      </div>
-    </div>
-    <div class="num relative mt-4 flex justify-between text-sm text-base-content/60">
-      <span>{{ j().departure_time }} → {{ j().finish_time }}</span>
-      <span>ก่อน {{ j().deadline_time }}</span>
-    </div>
-  </section>
+@if (error()) {
+  <div class="alert alert-error">ไม่พบใบงาน {{ id() }} ({{ error() }})</div>
+  <a routerLink="/rider" class="btn mt-4">กรอกใหม่</a>
+}
 
-  <!-- ความคืบหน้า -->
-  <section class="mt-4 px-1">
-    <div class="num flex justify-between text-sm">
-      <span>ส่งแล้ว {{ delivered().length }}/{{ j().stops.length }}</span>
-      <span class="text-success">{{ progress().toFixed(0) }}%</span>
-    </div>
-    <progress class="progress progress-success mt-2 w-full" [value]="progress()" max="100"></progress>
-    @if (!nextStop()) {
-      <p class="mt-2 text-sm font-medium text-success">ส่งครบแล้ว 🎉</p>
-    }
-  </section>
+@if (job()) {
+  <h1 class="text-2xl font-bold">ใบงาน {{ job()!.id }}</h1>
+  <p class="mt-2">
+    หยิบ <b>{{ job()!.total_box }} กล่อง</b> · ส่ง {{ job()!.stops.length }} จุด · {{ km(job()!.distance_km) }} กม.
+  </p>
+  <p>ออกจากร้าน {{ job()!.departure_time }} · ส่งเสร็จประมาณ {{ job()!.finish_time }} (ต้องก่อน {{ job()!.deadline_time }})</p>
+  <p class="mt-2">ส่งแล้ว {{ delivered().length }} / {{ job()!.stops.length }} จุด</p>
 
-  <!-- จุดส่ง -->
-  <ol class="mt-5 flex flex-col gap-3">
-    @for (stop of j().stops; track stop.stop_no) {
-      <li class="panel overflow-hidden transition" [class.opacity-50]="isDelivered(stop)">
-        <div class="flex gap-3 p-4">
-          <div class="num grid size-10 shrink-0 place-items-center rounded-full text-lg font-bold text-white" [style.background-color]="isDelivered(stop) ? '#16a34a' : j().color">
-            @if (isDelivered(stop)) {
-              <span class="icon">check</span>
-            } @else {
-              {{ stop.stop_no }}
-            }
-          </div>
-          <div class="min-w-0 flex-1">
-            <div class="flex items-start justify-between gap-2">
-              <div class="text-lg leading-tight font-semibold" [class.line-through]="isDelivered(stop)">{{ stop.customer_name }}</div>
-              <div class="num shrink-0 text-lg font-bold">{{ stop.arrival_time }}</div>
-            </div>
-            <div class="num mt-1 text-sm text-primary">{{ stop.quantity }} กล่อง</div>
-            <p class="mt-1 text-sm text-base-content/70">{{ stop.address }}</p>
-          </div>
-        </div>
-        <div class="grid grid-cols-3 divide-x divide-base-300 border-t border-base-300">
-          <a class="btn btn-ghost rounded-none" [href]="'tel:' + stop.phone"><span class="icon text-success">call</span> โทร</a>
-          <a class="btn btn-ghost rounded-none" [href]="navigateLink(stop.latitude, stop.longitude)" target="_blank"><span class="icon text-accent">near_me</span> นำทาง</a>
-          <button class="btn btn-ghost rounded-none" [class.text-success]="!isDelivered(stop)" (click)="toggleDelivered(stop)">
-            <span class="icon">{{ isDelivered(stop) ? 'undo' : 'task_alt' }}</span> {{ isDelivered(stop) ? 'ยกเลิก' : 'ส่งแล้ว' }}
+  <a class="btn btn-primary mt-4 w-full" [href]="job()!.map_url" target="_blank">เปิด Google Maps นำทางทั้งเส้น</a>
+
+  <!-- จุดส่งเรียงตามลำดับ -->
+  @for (stop of job()!.stops; track stop.stop_no) {
+    <div class="card mt-4 bg-base-200" [class.opacity-50]="isDelivered(stop)">
+      <div class="card-body">
+        <h2 class="card-title">{{ stop.stop_no }}. {{ stop.customer_name }}</h2>
+        <p>{{ stop.quantity }} กล่อง · ถึงประมาณ {{ stop.arrival_time }}</p>
+        <p>{{ stop.address }}</p>
+        <div class="card-actions">
+          <a class="btn btn-sm" [href]="'tel:' + stop.phone">โทร {{ stop.phone }}</a>
+          <a class="btn btn-sm" [href]="navigateLink(stop.latitude, stop.longitude)" target="_blank">นำทาง</a>
+          <button class="btn btn-sm btn-success" (click)="toggleDelivered(stop)">
+            {{ isDelivered(stop) ? 'ยกเลิก' : 'ส่งแล้ว' }}
           </button>
         </div>
-      </li>
-    }
-  </ol>
-
-  <!-- ปุ่มด้านล่าง -->
-  <div class="fixed inset-x-0 bottom-0 z-30 border-t-2 border-base-content bg-base-100">
-    <div class="mx-auto grid max-w-xl grid-cols-3 gap-2 p-3">
-      <a class="btn" [routerLink]="['/rider/map', j().id]"><span class="icon">map</span> แผนที่</a>
-      <a class="btn btn-primary col-span-2" [href]="j().map_url" target="_blank"><span class="icon">navigation</span> นำทางทั้งเส้น</a>
+      </div>
     </div>
+  }
+
+  <!-- แผนที่เส้นทาง -->
+  <div class="mt-4 aspect-square border">
+    <app-route-map [jobs]="[job()!]" [shop]="appData.shop()"></app-route-map>
   </div>
 }

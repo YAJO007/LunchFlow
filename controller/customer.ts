@@ -14,7 +14,7 @@ router.get("/", async (req, res) => {
     res.status(200).json(customers);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });
 
@@ -31,7 +31,7 @@ router.get("/search", async (req, res) => {
     res.status(200).json(customers);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });
 
@@ -41,7 +41,7 @@ router.get("/nearby", async (req, res) => {
     const lng = Number(req.query.lng);
 
     if (!req.query.lat || !req.query.lng || isNaN(lat) || isNaN(lng)) {
-      return res.status(400).json({ error: "Please send lat and lng" });
+      return res.status(400).json({ error: "กรุณาส่งพิกัด lat และ lng" });
     }
 
     const [rows] = await conn.query("SELECT * FROM customer");
@@ -57,7 +57,7 @@ router.get("/nearby", async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });
 
@@ -69,12 +69,12 @@ router.get("/:id", async (req, res) => {
     const customers = rows as Customer[];
 
     if (customers.length === 0) {
-      return res.status(404).json({ error: "Customer not found" });
+      return res.status(404).json({ error: "ไม่พบลูกค้า" });
     }
     res.status(200).json(customers[0]);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });
 
@@ -90,7 +90,7 @@ router.post("/", async (req, res) => {
       customer.latitude == null ||
       customer.longitude == null
     ) {
-      return res.status(400).json({ error: "Please send all customer fields" });
+      return res.status(400).json({ error: "กรุณากรอกข้อมูลลูกค้าให้ครบ" });
     }
 
     const sql =
@@ -111,7 +111,7 @@ router.post("/", async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });
 
@@ -124,7 +124,7 @@ router.put("/:id", async (req, res) => {
     const result = rows as Customer[];
 
     if (result.length === 0) {
-      return res.status(404).json({ error: "Customer not found" });
+      return res.status(404).json({ error: "ไม่พบลูกค้า" });
     }
 
     const updateCustomer = { ...result[0], ...customer };
@@ -145,7 +145,7 @@ router.put("/:id", async (req, res) => {
     res.status(200).json({ affected_row: updateResult.affectedRows });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });
 
@@ -157,11 +157,11 @@ router.delete("/:id", async (req, res) => {
     const deleteResult = result as any;
 
     if (deleteResult.affectedRows === 0) {
-      return res.status(404).json({ error: "Customer not found" });
+      return res.status(404).json({ error: "ไม่พบลูกค้า" });
     }
     res.status(200).json({ affected_row: deleteResult.affectedRows });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });
