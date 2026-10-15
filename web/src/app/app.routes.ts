@@ -11,7 +11,6 @@ import { Report } from './pages/owner/report/report';
 import { Rider } from './pages/rider/rider';
 import { RiderLogin } from './pages/rider/rider-login/rider-login';
 import { JobSheet } from './pages/rider/job-sheet/job-sheet';
-import { JobMap } from './pages/rider/job-map/job-map';
 import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
 
 export const routes: Routes = [
@@ -35,7 +34,6 @@ export const routes: Routes = [
     children: [
       { path: '', component: RiderLogin },
       { path: 'job/:id', component: JobSheet },
-      { path: 'map/:id', component: JobMap },
     ],
   },
   { path: '**', component: Pagenotfound },

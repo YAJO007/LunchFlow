@@ -1,173 +1,70 @@
-<div class="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
-  <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-    <h1 class="text-3xl font-bold">ออเดอร์</h1>
-    <div class="flex w-full flex-wrap gap-2 sm:w-auto">
-      <button class="btn text-error" (click)="clearOpen.set(true)" [disabled]="orders().length === 0">
-        <span class="icon">delete_sweep</span> ล้าง
-      </button>
-      <button class="btn" (click)="openAdd()"><span class="icon">add</span> เพิ่ม</button>
-      <div class="join flex-1 sm:flex-none">
-        <input type="number" min="20" max="30" class="input join-item w-20" [(ngModel)]="simulateAmount" />
-        <button class="btn btn-primary join-item flex-1" (click)="simulate()" [disabled]="simulating() || saving()">
-          @if (simulating()) {
-            <span class="loading loading-spinner loading-xs"></span>
-          } @else {
-            <span class="icon">casino</span>
-          }
-          สุ่มออเดอร์
-        </button>
-      </div>
-    </div>
-  </div>
+<h1 class="text-2xl font-bold">ออเดอร์</h1>
 
-  
-  <div class="mb-6 grid grid-cols-3 gap-3">
-    <div class="panel p-3 sm:p-5">
-      <div class="text-sm text-base-content/70">ออเดอร์</div>
-      <div class="num mt-1 text-2xl font-bold sm:text-3xl">{{ orders().length }}</div>
-    </div>
-    <div class="panel p-3 sm:p-5">
-      <div class="text-sm text-base-content/70">กล่อง</div>
-      <div class="num mt-1 text-2xl font-bold sm:text-3xl">{{ totalBox() }}</div>
-    </div>
-    <div class="panel p-3 sm:p-5">
-      <div class="text-sm text-base-content/70">ยอดขาย</div>
-      <div class="num mt-1 text-lg font-bold sm:text-3xl text-primary">฿{{ int(totalBox() * appData.shop().pricePerBox) }}</div>
-    </div>
-  </div>
+<p class="mt-2">ทั้งหมด {{ orders().length }} ออเดอร์ · {{ totalBox() }} กล่อง · ยอดขาย {{ totalBox() * appData.shop().pricePerBox }} บาท</p>
 
-  @if (problemCount() > 0) {
-    <div role="alert" class="alert alert-warning alert-soft mb-6">
-      <span class="icon">rule</span> {{ problemCount() }} ออเดอร์ต้องตรวจสอบ
-    </div>
-  }
-
-  <section class="panel overflow-hidden">
-    <div class="flex flex-wrap items-center gap-2 border-b border-base-300 px-4 py-3">
-      <label class="input input-sm w-full sm:w-60">
-        <span class="icon text-base text-base-content/65">search</span>
-        <input type="text" placeholder="ค้นหา" [(ngModel)]="keyword" />
-      </label>
-      <button class="btn btn-sm" [class.btn-primary]="nearbyOnly()" (click)="toggleNearby()">
-        <span class="icon text-lg!">near_me</span> ในระยะ 2 กม.
-      </button>
-      <div class="flex-1"></div>
-      @if (loading()) {
-        <span class="loading loading-spinner loading-sm text-primary"></span>
-      }
-      <button class="btn btn-ghost btn-sm btn-circle" (click)="load()" title="รีเฟรช"><span class="icon text-lg!">refresh</span></button>
-    </div>
-
-    <div class="overflow-x-auto">
-      <table class="table">
-        <thead>
-          <tr class="border-base-300 text-base-content/65">
-            <th>#</th>
-            <th>ลูกค้า</th>
-            <th class="hidden lg:table-cell">ที่อยู่</th>
-            <th>กล่อง</th>
-            <th class="text-right">ห่างร้าน</th>
-            <th>สถานะ</th>
-            <th class="hidden md:table-cell">เวลา</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (o of shown(); track o.id) {
-            <tr class="border-base-300 hover:bg-primary/5">
-              <td class="num text-base-content/65">{{ o.id }}</td>
-              <td>
-                <div class="font-medium">{{ o.firstname }} {{ o.lastname }}</div>
-                <div class="num text-xs text-base-content/65">{{ o.phone }}</div>
-              </td>
-              <td class="hidden max-w-xs lg:table-cell">
-                <div class="line-clamp-1 text-sm text-base-content/70">{{ o.address }}</div>
-              </td>
-              <td>
-                <select #q class="select select-sm w-16" (change)="changeQuantity(o, q)" [disabled]="saving() || simulating()">
-                  <option value="1" [selected]="o.quantity === 1">1</option>
-                  <option value="2" [selected]="o.quantity === 2">2</option>
-                  <option value="3" [selected]="o.quantity === 3">3</option>
-                </select>
-              </td>
-              <td class="num text-right whitespace-nowrap">{{ km(o.distance_km !== undefined ? o.distance_km : distanceOf(o)) }} <span class="text-base-content/65">กม.</span></td>
-              <td>
-                @if (problemOf(o)) {
-                  <span class="badge badge-warning badge-soft badge-sm whitespace-nowrap">{{ problemOf(o) }}</span>
-                } @else {
-                  <span class="badge badge-success badge-soft badge-sm">พร้อม</span>
-                }
-              </td>
-              <td class="num hidden text-sm whitespace-nowrap text-base-content/65 md:table-cell">{{ dateTime(o.order_date) }}</td>
-              <td class="text-right">
-                <button class="btn btn-ghost btn-sm btn-circle text-error" title="ลบ" (click)="deleting.set(o)"><span class="icon text-lg!">delete</span></button>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="8" class="py-14 text-center text-base-content/65">{{ loading() ? 'กำลังโหลด…' : 'ยังไม่มีออเดอร์' }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  @if (orders().length > 0) {
-    <div class="mt-6 flex justify-end">
-      <a routerLink="/owner/routes" class="btn btn-primary btn-lg"><span class="icon">alt_route</span> จัดเส้นทาง</a>
-    </div>
-  }
+<div class="mt-4 flex flex-wrap gap-2">
+  <input type="number" class="input w-24" [(ngModel)]="simulateAmount" />
+  <button class="btn btn-primary" (click)="simulate()">สุ่มออเดอร์ (20-30)</button>
+  <button class="btn" (click)="openAdd()">เพิ่มออเดอร์</button>
+  <button class="btn" (click)="nearby()">ในระยะ 2 กม.</button>
+  <button class="btn" (click)="load()">ทั้งหมด</button>
+  <button class="btn btn-error" (click)="clearAll()">ล้างทั้งหมด</button>
 </div>
 
 @if (addOpen()) {
-  <div class="modal modal-open modal-bottom sm:modal-middle">
-    <div role="dialog" aria-modal="true" class="modal-box">
-      <h3 class="text-xl font-semibold">เพิ่มออเดอร์</h3>
-      <select class="select mt-5 w-full" [(ngModel)]="addCustomerId">
-        <option [ngValue]="0" disabled>เลือกลูกค้า</option>
+  <div class="card mt-4 bg-base-200">
+    <div class="card-body">
+      <h2 class="card-title">เพิ่มออเดอร์</h2>
+      <select class="select w-full" [(ngModel)]="addCustomerId">
+        <option [ngValue]="0">เลือกลูกค้า</option>
         @for (c of customers(); track c.id) {
           <option [ngValue]="c.id">{{ c.firstname }} {{ c.lastname }}</option>
         }
       </select>
-      <div class="join mt-3 w-full">
-        <button class="btn join-item flex-1" [class.btn-primary]="addQuantity() === 1" (click)="addQuantity.set(1)">1 กล่อง</button>
-        <button class="btn join-item flex-1" [class.btn-primary]="addQuantity() === 2" (click)="addQuantity.set(2)">2 กล่อง</button>
-        <button class="btn join-item flex-1" [class.btn-primary]="addQuantity() === 3" (click)="addQuantity.set(3)">3 กล่อง</button>
-      </div>
-      <div class="modal-action">
-        <button class="btn btn-ghost" (click)="addOpen.set(false)">ยกเลิก</button>
-        <button class="btn btn-primary" (click)="add()" [disabled]="saving()">เพิ่ม</button>
+      <select class="select w-full" [(ngModel)]="addQuantity">
+        <option [ngValue]="1">1 กล่อง</option>
+        <option [ngValue]="2">2 กล่อง</option>
+        <option [ngValue]="3">3 กล่อง</option>
+      </select>
+      <div class="card-actions">
+        <button class="btn btn-primary" (click)="add()">เพิ่ม</button>
+        <button class="btn" (click)="addOpen.set(false)">ยกเลิก</button>
       </div>
     </div>
-    <div class="modal-backdrop bg-base-content/40" (click)="addOpen.set(false)"></div>
   </div>
 }
 
-@if (deleting()) {
-  <div class="modal modal-open">
-    <div role="dialog" aria-modal="true" class="modal-box">
-      <h3 class="text-lg font-semibold">ลบออเดอร์ #{{ deleting().id }}?</h3>
-      <p class="mt-2 text-sm text-base-content/70">{{ deleting().firstname }} · {{ deleting().quantity }} กล่อง</p>
-      <div class="modal-action">
-        <button class="btn btn-ghost" (click)="deleting.set(undefined)">ยกเลิก</button>
-        <button class="btn btn-error" (click)="confirmDelete()" [disabled]="saving()">ลบ</button>
-      </div>
-    </div>
-    <div class="modal-backdrop bg-base-content/40" (click)="deleting.set(undefined)"></div>
-  </div>
-}
-
-@if (clearOpen()) {
-  <div class="modal modal-open">
-    <div role="dialog" aria-modal="true" class="modal-box">
-      <h3 class="text-lg font-semibold">ล้างออเดอร์ทั้งหมด {{ orders().length }} รายการ?</h3>
-      <p class="mt-2 text-sm text-base-content/70">ใบงานที่ยืนยันแล้วไม่หาย</p>
-      <div class="modal-action">
-        <button class="btn btn-ghost" (click)="clearOpen.set(false)">ยกเลิก</button>
-        <button class="btn btn-error" (click)="confirmClear()" [disabled]="saving()">ล้าง</button>
-      </div>
-    </div>
-    <div class="modal-backdrop bg-base-content/40" (click)="clearOpen.set(false)"></div>
-  </div>
-}
+<div class="mt-4 overflow-x-auto">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>ลูกค้า</th>
+        <th>ที่อยู่</th>
+        <th>กล่อง</th>
+        <th>เวลาสั่ง</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (o of orders(); track o.id) {
+        <tr>
+          <td>{{ o.id }}</td>
+          <td>{{ o.firstname }} {{ o.lastname }}<br />{{ o.phone }}</td>
+          <td>{{ o.address }}</td>
+          <td>
+            <select #q class="select select-sm w-20" (change)="changeQuantity(o, q)">
+              <option value="1" [selected]="o.quantity === 1">1</option>
+              <option value="2" [selected]="o.quantity === 2">2</option>
+              <option value="3" [selected]="o.quantity === 3">3</option>
+            </select>
+          </td>
+          <td>{{ dateTime(o.order_date) }}</td>
+          <td><button class="btn btn-sm btn-error" (click)="remove(o)">ลบ</button></td>
+        </tr>
+      } @empty {
+        <tr><td colspan="6">ยังไม่มีออเดอร์</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

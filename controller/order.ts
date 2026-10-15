@@ -35,7 +35,7 @@ router.get("/", async (req, res) => {
     res.status(200).json(orders);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });
 
@@ -45,7 +45,7 @@ router.get("/nearby", async (req, res) => {
     const lng = Number(req.query.lng);
 
     if (!req.query.lat || !req.query.lng || isNaN(lat) || isNaN(lng)) {
-      return res.status(400).json({ error: "Please send lat and lng" });
+      return res.status(400).json({ error: "กรุณาส่งพิกัด lat และ lng" });
     }
 
     const [rows] = await conn.query(SELECT_ORDER_DETAIL + " ORDER BY orders.id");
@@ -61,7 +61,7 @@ router.get("/nearby", async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });
 
@@ -73,12 +73,12 @@ router.get("/:id", async (req, res) => {
     const orders = rows as OrderDetail[];
 
     if (orders.length === 0) {
-      return res.status(404).json({ error: "Order not found" });
+      return res.status(404).json({ error: "ไม่พบออเดอร์" });
     }
     res.status(200).json(orders[0]);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });
 
@@ -90,14 +90,14 @@ router.post("/simulate", async (req, res) => {
     }
 
     if (!Number.isInteger(amount) || amount < MIN_SIMULATE || amount > MAX_SIMULATE) {
-      return res.status(400).json({ error: "amount must be 20 - 30" });
+      return res.status(400).json({ error: "จำนวนต้องอยู่ระหว่าง 20 - 30" });
     }
 
     const [rows] = await conn.query("SELECT * FROM customer");
     const customers = rows as Customer[];
 
     if (customers.length === 0) {
-      return res.status(400).json({ error: "Please add customers first" });
+      return res.status(400).json({ error: "ยังไม่มีลูกค้า กรุณาเพิ่มลูกค้าก่อน" });
     }
 
     let totalBox = 0;
@@ -115,7 +115,7 @@ router.post("/simulate", async (req, res) => {
     res.status(201).json({ created_order: amount, total_box: totalBox });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });
 
@@ -128,7 +128,7 @@ router.post("/", async (req, res) => {
     };
 
     if (!order.customer_id || !isValidQuantity(order.quantity)) {
-      return res.status(400).json({ error: "Please send customer_id and quantity (1-3)" });
+      return res.status(400).json({ error: "กรุณาเลือกลูกค้าและจำนวนกล่อง (1-3)" });
     }
 
     const [rows] = await conn.query("SELECT * FROM customer WHERE id = ?", [
@@ -136,7 +136,7 @@ router.post("/", async (req, res) => {
     ]);
     const customers = rows as Customer[];
     if (customers.length === 0) {
-      return res.status(404).json({ error: "Customer not found" });
+      return res.status(404).json({ error: "ไม่พบลูกค้า" });
     }
 
     const [result] = await conn.query(
@@ -151,7 +151,7 @@ router.post("/", async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });
 
@@ -161,7 +161,7 @@ router.put("/:id", async (req, res) => {
     const quantity = Number(body.quantity);
 
     if (!isValidQuantity(quantity)) {
-      return res.status(400).json({ error: "quantity must be 1-3" });
+      return res.status(400).json({ error: "จำนวนกล่องต้องเป็น 1-3" });
     }
 
     const [result] = await conn.query("UPDATE orders SET quantity = ? WHERE id = ?", [
@@ -171,12 +171,12 @@ router.put("/:id", async (req, res) => {
     const updateResult = result as any;
 
     if (updateResult.affectedRows === 0) {
-      return res.status(404).json({ error: "Order not found" });
+      return res.status(404).json({ error: "ไม่พบออเดอร์" });
     }
     res.status(200).json({ affected_row: updateResult.affectedRows });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });
 
@@ -187,7 +187,7 @@ router.delete("/", async (req, res) => {
     res.status(200).json({ affected_row: deleteResult.affectedRows });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });
 
@@ -199,11 +199,11 @@ router.delete("/:id", async (req, res) => {
     const deleteResult = result as any;
 
     if (deleteResult.affectedRows === 0) {
-      return res.status(404).json({ error: "Order not found" });
+      return res.status(404).json({ error: "ไม่พบออเดอร์" });
     }
     res.status(200).json({ affected_row: deleteResult.affectedRows });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });

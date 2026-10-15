@@ -15,4 +15,3 @@ export const DEFAULT_SHOP: Shop = {
   deadlineTime: '12:30',
 };
 
-export const SERVICE_RADIUS_KM = 3;

@@ -1,42 +1,27 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { SERVICE_RADIUS_KM } from '../../../config/shop';
 import { Customer } from '../../../model/customer';
 import { Order } from '../../../model/order';
 import { Api } from '../../../service/api';
 import { AppData } from '../../../service/app-data';
 import { Notify } from '../../../service/notify';
-import { dateTime, int, km } from '../../../utils/format';
-import { distanceKm } from '../../../utils/geo';
+import { dateTime } from '../../../utils/format';
 
 @Component({
   selector: 'app-orders',
-  imports: [FormsModule, RouterModule],
+  imports: [FormsModule],
   templateUrl: './orders.html',
   styleUrl: './orders.css',
 })
 export class Orders {
   orders = signal<Order[]>([]);
   customers = signal<Customer[]>([]);
-  loading = signal(false);
-  nearbyOnly = signal(false);
-  keyword = signal('');
-
-  simulateAmount = signal<number | null>(25);
-  simulating = signal(false);
+  simulateAmount = signal(25);
 
   addOpen = signal(false);
   addCustomerId = signal(0);
   addQuantity = signal(1);
-  saving = signal(false);
 
-  deleting = signal<any>(undefined);
-  clearOpen = signal(false);
-
-  radius = SERVICE_RADIUS_KM;
-  int = int;
-  km = km;
   dateTime = dateTime;
 
   constructor(
@@ -48,33 +33,20 @@ export class Orders {
   }
 
   async load() {
-    this.loading.set(true);
     try {
-      if (this.nearbyOnly()) {
-        const shop = this.appData.shop();
-        this.orders.set(await this.api.getNearbyOrders(shop.latitude, shop.longitude));
-      } else {
-        this.orders.set(await this.api.getOrders());
-      }
+      this.orders.set(await this.api.getOrders());
     } catch (error: any) {
       this.notify.error(error.message);
     }
-    this.loading.set(false);
   }
 
-  toggleNearby() {
-    this.nearbyOnly.set(!this.nearbyOnly());
-    this.load();
-  }
-
-  shown(): Order[] {
-    const k = this.keyword().trim();
-    if (k === '') {
-      return this.orders();
+  async nearby() {
+    try {
+      const shop = this.appData.shop();
+      this.orders.set(await this.api.getNearbyOrders(shop.latitude, shop.longitude));
+    } catch (error: any) {
+      this.notify.error(error.message);
     }
-    return this.orders().filter(
-      (o) => (o.firstname + ' ' + o.lastname).includes(k) || o.phone.includes(k) || String(o.id) === k,
-    );
   }
 
   totalBox(): number {
@@ -85,44 +57,14 @@ export class Orders {
     return sum;
   }
 
-  distanceOf(o: Order): number {
-    const shop = this.appData.shop();
-    return distanceKm(shop.latitude, shop.longitude, o.latitude, o.longitude);
-  }
-
-  problemOf(o: Order): string {
-    if (!Number.isInteger(o.quantity) || o.quantity < 1 || o.quantity > 3) {
-      return 'กล่องต้อง 1-3';
-    }
-    if (!Number.isFinite(o.latitude) || !Number.isFinite(o.longitude) || Math.abs(o.latitude) > 90 || Math.abs(o.longitude) > 180) {
-      return 'ไม่มีพิกัด';
-    }
-    if (this.distanceOf(o) > this.radius) {
-      return 'นอกรัศมี';
-    }
-    return '';
-  }
-
-  problemCount(): number {
-    return this.orders().filter((o) => this.problemOf(o) !== '').length;
-  }
-
   async simulate() {
-    if (this.simulating() || this.saving()) return;
-    const amount = Number(this.simulateAmount());
-    if (!Number.isInteger(amount) || amount < 20 || amount > 30) {
-      this.notify.error('ใส่จำนวน 20-30');
-      return;
-    }
-    this.simulating.set(true);
     try {
-      const result = await this.api.simulateOrders(amount);
-      this.notify.success('+' + result.created_order + ' ออเดอร์ · ' + result.total_box + ' กล่อง');
-      await this.load();
+      const result = await this.api.simulateOrders(Number(this.simulateAmount()));
+      this.notify.success('เพิ่ม ' + result.created_order + ' ออเดอร์');
+      this.load();
     } catch (error: any) {
       this.notify.error(error.message);
     }
-    this.simulating.set(false);
   }
 
   async openAdd() {
@@ -137,73 +79,53 @@ export class Orders {
   }
 
   async add() {
-    if (this.saving() || this.simulating()) return;
-    if (!this.customers().some((c) => c.id === Number(this.addCustomerId()))) {
+    if (Number(this.addCustomerId()) === 0) {
       this.notify.error('เลือกลูกค้าก่อน');
       return;
     }
-    const quantity = Number(this.addQuantity());
-    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 3) {
-      this.notify.error('จำนวนกล่องต้องอยู่ระหว่าง 1-3');
-      return;
-    }
-    this.saving.set(true);
     try {
-      const result = await this.api.addOrder(Number(this.addCustomerId()), Number(this.addQuantity()));
-      this.notify.success('เพิ่มออเดอร์ #' + result.last_id);
+      await this.api.addOrder(Number(this.addCustomerId()), Number(this.addQuantity()));
+      this.notify.success('เพิ่มออเดอร์แล้ว');
       this.addOpen.set(false);
-      await this.load();
+      this.load();
     } catch (error: any) {
       this.notify.error(error.message);
     }
-    this.saving.set(false);
   }
 
   async changeQuantity(o: Order, select: HTMLSelectElement) {
-    if (this.saving() || this.simulating()) {
-      select.value = String(o.quantity);
+    try {
+      await this.api.updateOrder(o.id, Number(select.value));
+      this.notify.success('แก้ออเดอร์ #' + o.id + ' แล้ว');
+      this.load();
+    } catch (error: any) {
+      this.notify.error(error.message);
+    }
+  }
+
+  async remove(o: Order) {
+    if (!confirm('ลบออเดอร์ #' + o.id + ' ?')) {
       return;
     }
-    const quantity = Number(select.value);
-    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 3) return;
-    this.saving.set(true);
-    try {
-      await this.api.updateOrder(o.id, quantity);
-      this.notify.success('#' + o.id + ' → ' + quantity + ' กล่อง');
-      await this.load();
-    } catch (error: any) {
-      this.notify.error(error.message);
-      select.value = String(o.quantity);
-    }
-    this.saving.set(false);
-  }
-
-  async confirmDelete() {
-    if (this.saving() || this.simulating() || !this.deleting()) return;
-    const o = this.deleting() as Order;
-    this.saving.set(true);
     try {
       await this.api.deleteOrder(o.id);
-      this.notify.success('ลบ #' + o.id);
-      this.deleting.set(undefined);
-      await this.load();
+      this.notify.success('ลบแล้ว');
+      this.load();
     } catch (error: any) {
       this.notify.error(error.message);
     }
-    this.saving.set(false);
   }
 
-  async confirmClear() {
-    if (this.saving() || this.simulating()) return;
-    this.saving.set(true);
+  async clearAll() {
+    if (!confirm('ล้างออเดอร์ทั้งหมด ?')) {
+      return;
+    }
     try {
-      const result = await this.api.clearOrders();
-      this.notify.success('ล้าง ' + result.affected_row + ' ออเดอร์');
-      this.clearOpen.set(false);
-      await this.load();
+      await this.api.clearOrders();
+      this.notify.success('ล้างออเดอร์แล้ว');
+      this.load();
     } catch (error: any) {
       this.notify.error(error.message);
     }
-    this.saving.set(false);
   }
 }

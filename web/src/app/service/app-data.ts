@@ -21,23 +21,12 @@ const DEFAULT_RIDERS: Rider[] = [
 })
 export class AppData {
   shop = signal<Shop>(DEFAULT_SHOP);
-  riders = signal<Rider[]>([]);
+  riders = signal<Rider[]>(DEFAULT_RIDERS);
 
   constructor() {
-    let riders = DEFAULT_RIDERS;
     if (localStorage.getItem('riders')) {
-      try {
-        const saved = JSON.parse(localStorage.getItem('riders')!);
-        if (Array.isArray(saved) && saved.every((r: any) => r &&
-          Number.isSafeInteger(r.no) && r.no > 0 && typeof r.name === 'string' &&
-          typeof r.phone === 'string' && typeof r.available === 'boolean') &&
-          new Set(saved.map((r: Rider) => r.no)).size === saved.length) {
-          riders = saved;
-        }
-      } catch (error) {
-      }
+      this.riders.set(JSON.parse(localStorage.getItem('riders')!));
     }
-    this.riders.set(riders);
   }
 
   saveRiders(riders: Rider[]) {
@@ -74,48 +63,14 @@ export class AppData {
   }
 
   deliveredOf(jobId: number): number[] {
-    const key = 'delivered-' + jobId;
-    if (localStorage.getItem(key)) {
-      try {
-        const saved = JSON.parse(localStorage.getItem(key)!);
-        return Array.isArray(saved)
-          ? [...new Set<number>(saved.filter((no: any) => Number.isSafeInteger(no) && no > 0))]
-          : [];
-      } catch (error) {
-        return [];
-      }
+    const saved = localStorage.getItem('delivered-' + jobId);
+    if (saved) {
+      return JSON.parse(saved);
     }
     return [];
   }
 
-  saveDelivered(jobId: number, orderIds: number[]) {
-    localStorage.setItem('delivered-' + jobId, JSON.stringify(orderIds));
-  }
-
-  recentJobs(): string[] {
-    try {
-      const saved = JSON.parse(localStorage.getItem('recentJobs') || '[]');
-      return Array.isArray(saved)
-        ? [...new Set<string>(saved.filter((no: any) => typeof no === 'string' && /^[1-9][0-9]*$/.test(no)))].slice(0, 5)
-        : [];
-    } catch (error) {
-      return [];
-    }
-  }
-
-  draftOption(): number | null {
-    if (sessionStorage.getItem('draftOption')) {
-      const option = Number(sessionStorage.getItem('draftOption'));
-      return Number.isSafeInteger(option) && option >= 0 ? option : null;
-    }
-    return null;
-  }
-
-  saveDraftOption(option: number | null) {
-    if (option === null) {
-      sessionStorage.removeItem('draftOption');
-    } else {
-      sessionStorage.setItem('draftOption', String(option));
-    }
+  saveDelivered(jobId: number, stopNos: number[]) {
+    localStorage.setItem('delivered-' + jobId, JSON.stringify(stopNos));
   }
 }

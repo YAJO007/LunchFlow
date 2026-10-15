@@ -1,67 +1,45 @@
-import { Component, input, signal, OnChanges } from '@angular/core';
+import { Component, input, signal, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { RouteMap } from '../../../components/route-map/route-map';
 import { RiderJob, RouteStop } from '../../../model/route';
 import { Api } from '../../../service/api';
 import { AppData } from '../../../service/app-data';
-import { km, money } from '../../../utils/format';
+import { km } from '../../../utils/format';
 import { navigateLink } from '../../../utils/geo';
 
 @Component({
   selector: 'app-job-sheet',
-  imports: [RouterModule],
+  imports: [RouterModule, RouteMap],
   templateUrl: './job-sheet.html',
   styleUrl: './job-sheet.css',
 })
-export class JobSheet implements OnChanges {
+export class JobSheet implements OnInit {
   id = input.required<string>();
 
-  job = signal<any>(undefined);
-  loading = signal(true);
+  job = signal<RiderJob | undefined>(undefined);
   error = signal('');
   delivered = signal<number[]>([]);
 
   km = km;
-  money = money;
   navigateLink = navigateLink;
 
   constructor(
     private api: Api,
-    private appData: AppData,
+    public appData: AppData,
   ) {}
 
-  ngOnChanges() {
+  ngOnInit() {
     this.load();
   }
 
   async load() {
-    const id = this.id();
-    this.loading.set(true);
     try {
-      if (!/^[1-9][0-9]*$/.test(id) || !Number.isSafeInteger(Number(id))) {
-        throw new Error('เลขใบงานต้องเป็นจำนวนเต็มบวก');
-      }
-      const job = await this.api.getJob(Number(id));
-      if (id !== this.id()) return;
+      const job = await this.api.getJob(Number(this.id()));
       this.job.set(job);
-      this.error.set('');
-      this.delivered.set(this.appData.deliveredOf(job.id!).filter((no) => job.stops.some((s) => s.stop_no === no)));
-      this.saveRecent(String(job.id));
+      this.delivered.set(this.appData.deliveredOf(job.id!));
     } catch (error: any) {
-      if (id !== this.id()) return;
-      this.job.set(undefined);
       this.error.set(error.message);
     }
-    this.loading.set(false);
-  }
-
-  saveRecent(no: string) {
-    let list = this.appData.recentJobs();
-    list = [no, ...list.filter((x) => x !== no)].slice(0, 5);
-    localStorage.setItem('recentJobs', JSON.stringify(list));
-  }
-
-  j(): RiderJob {
-    return this.job() as RiderJob;
   }
 
   isDelivered(stop: RouteStop): boolean {
@@ -76,24 +54,6 @@ export class JobSheet implements OnChanges {
       list = [...list, stop.stop_no];
     }
     this.delivered.set(list);
-    this.appData.saveDelivered(this.j().id!, list);
-  }
-
-  nextStop(): RouteStop | undefined {
-    return this.j().stops.find((s) => !this.isDelivered(s));
-  }
-
-  deliveredBox(): number {
-    let sum = 0;
-    for (const s of this.j().stops) {
-      if (this.isDelivered(s)) {
-        sum += s.quantity;
-      }
-    }
-    return sum;
-  }
-
-  progress(): number {
-    return this.j().stops.length === 0 ? 0 : (this.delivered().length / this.j().stops.length) * 100;
+    this.appData.saveDelivered(this.job()!.id!, list);
   }
 }

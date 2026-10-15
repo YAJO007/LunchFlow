@@ -1,50 +1,40 @@
-<div class="mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
-  <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-    <h1 class="text-3xl font-bold">ไรเดอร์</h1>
-    <div class="flex gap-2">
-      <button class="btn" (click)="setAll(true)">พร้อมทุกคน</button>
-      <button class="btn btn-square" (click)="reset()" title="ค่าเริ่มต้น" aria-label="ค่าเริ่มต้น"><span class="icon">restart_alt</span></button>
-    </div>
-  </div>
+<h1 class="text-2xl font-bold">ไรเดอร์</h1>
 
-  <div class="mb-6 grid grid-cols-3 gap-3">
-    <div class="panel p-5">
-      <div class="text-sm text-base-content/70">พร้อม</div>
-      <div class="num mt-1 text-2xl font-bold sm:text-3xl text-success">{{ appData.availableRiders().length }}</div>
-    </div>
-    <div class="panel p-5">
-      <div class="text-sm text-base-content/70">ไม่พร้อม</div>
-      <div class="num mt-1 text-2xl font-bold sm:text-3xl text-base-content/65">{{ appData.riders().length - appData.availableRiders().length }}</div>
-    </div>
-    <div class="panel p-5">
-      <div class="text-sm text-base-content/70">รับได้</div>
-      <div class="num mt-1 text-2xl font-bold sm:text-3xl">{{ appData.availableRiders().length * appData.shop().maxOrdersPerRider }}</div>
-    </div>
-  </div>
+<p class="mt-2">
+  พร้อมรับงาน {{ appData.availableRiders().length }} คน ·
+  รับได้สูงสุด {{ appData.availableRiders().length * appData.shop().maxOrdersPerRider }} ออเดอร์
+</p>
 
-  <section class="panel overflow-hidden">
-    <ul>
+<div class="mt-4 flex flex-wrap gap-2">
+  <input type="text" class="input" placeholder="ชื่อไรเดอร์" [(ngModel)]="newName" />
+  <input type="text" class="input" placeholder="เบอร์โทร" [(ngModel)]="newPhone" />
+  <button class="btn btn-primary" (click)="add()">เพิ่ม</button>
+  <button class="btn" (click)="appData.resetRiders()">ค่าเริ่มต้น</button>
+</div>
+
+<div class="mt-4 overflow-x-auto">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>ชื่อ</th>
+        <th>เบอร์โทร</th>
+        <th>พร้อมรับงาน</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
       @for (r of appData.riders(); track r.no) {
-        <li class="flex items-center gap-4 border-b border-base-300 px-5 py-3 last:border-b-0">
-          <div class="num grid size-10 shrink-0 place-items-center rounded-full font-bold" [class]="r.available ? 'bg-primary text-white border-2 border-base-content' : 'bg-base-200 text-base-content/30 border-2 border-base-300'">
-            {{ r.no }}
-          </div>
-          <div class="min-w-0 flex-1" [class.opacity-50]="!r.available">
-            <div class="font-medium">{{ r.name }}</div>
-            <div class="num text-sm text-base-content/65">{{ r.phone || '-' }}</div>
-          </div>
-          <input type="checkbox" class="toggle toggle-primary" [checked]="r.available" (change)="toggle(r)" [attr.aria-label]="r.name" />
-          <button class="btn btn-ghost btn-sm btn-circle text-error" title="ลบ" (click)="remove(r)"><span class="icon text-lg!">delete</span></button>
-        </li>
+        <tr>
+          <td>{{ r.no }}</td>
+          <td>{{ r.name }}</td>
+          <td>{{ r.phone }}</td>
+          <td><input type="checkbox" class="toggle" [checked]="r.available" (change)="toggle(r)" /></td>
+          <td><button class="btn btn-sm btn-error" (click)="remove(r)">ลบ</button></td>
+        </tr>
       } @empty {
-        <li class="py-12 text-center text-base-content/65">ยังไม่มีไรเดอร์</li>
+        <tr><td colspan="5">ยังไม่มีไรเดอร์</td></tr>
       }
-    </ul>
-
-    <div class="flex flex-wrap items-center gap-2 border-t-2 border-base-content bg-base-200 px-5 py-4">
-      <input type="text" class="input w-full sm:w-60" placeholder="ชื่อไรเดอร์" [(ngModel)]="newName" />
-      <input type="tel" class="input w-full sm:w-40" placeholder="เบอร์โทร" maxlength="10" [(ngModel)]="newPhone" />
-      <button class="btn btn-primary" (click)="add()"><span class="icon">person_add</span> เพิ่ม</button>
-    </div>
-  </section>
+    </tbody>
+  </table>
 </div>

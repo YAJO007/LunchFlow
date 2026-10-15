@@ -6,5 +6,4 @@ export interface Customer {
   address: string;
   latitude: number;
   longitude: number;
-  distance_km?: number;
 }

@@ -6,7 +6,6 @@ import { Shop } from '../../model/shop';
 export interface MapPoint {
   lat: number;
   lng: number;
-  label: string;
   color: string;
 }
 
@@ -20,7 +19,6 @@ export class RouteMap {
   @Input() jobs: RiderJob[] = [];
   @Input() points: MapPoint[] = [];
   @Input() shop: Shop = DEFAULT_SHOP;
-  @Input() highlight: number = 0;
 
   size = 400;
   rings = [1, 2, 3];
@@ -60,9 +58,5 @@ export class RouteMap {
       text += ' ' + this.x(stop.longitude) + ',' + this.y(stop.latitude);
     }
     return text;
-  }
-
-  isDim(job: RiderJob): boolean {
-    return this.highlight !== 0 && this.highlight !== job.rider_no;
   }
 }

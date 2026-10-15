@@ -1,52 +1,26 @@
-<svg [attr.viewBox]="'0 0 ' + size + ' ' + size" class="h-full w-full select-none bg-base-100" role="img" aria-label="แผนที่เส้นทาง">
-  <defs>
-    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-      <path d="M 20 0 L 0 0 0 20" class="fill-none stroke-primary/10" stroke-width="1" />
-    </pattern>
-  </defs>
-
-  
-  <rect [attr.width]="size" [attr.height]="size" fill="url(#grid)" />
-
+<svg [attr.viewBox]="'0 0 ' + size + ' ' + size" class="h-full w-full">
   
   @for (r of rings; track r) {
-    <circle [attr.cx]="size / 2" [attr.cy]="size / 2" [attr.r]="r * scale()" class="fill-none stroke-primary/30" stroke-dasharray="4 4" />
-    <text [attr.x]="size / 2 + 4" [attr.y]="size / 2 - r * scale() + 12" class="fill-primary/60 text-[9px]">{{ r }} กม.</text>
+    <circle [attr.cx]="size / 2" [attr.cy]="size / 2" [attr.r]="r * scale()" fill="none" stroke="#cccccc" stroke-dasharray="4 4" />
   }
 
   
   @for (job of jobs; track job.rider_no) {
-    <polyline
-      [attr.points]="linePoints(job)"
-      [attr.stroke]="job.color"
-      [attr.opacity]="isDim(job) ? 0.1 : 0.95"
-      class="fill-none"
-      stroke-width="3"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
+    <polyline [attr.points]="linePoints(job)" [attr.stroke]="job.color" fill="none" stroke-width="3" />
   }
 
   
   @for (p of points; track $index) {
-    <circle [attr.cx]="x(p.lng)" [attr.cy]="y(p.lat)" r="5" [attr.fill]="p.color" class="stroke-base-content" stroke-width="1.5">
-      <title>{{ p.label }}</title>
-    </circle>
+    <circle [attr.cx]="x(p.lng)" [attr.cy]="y(p.lat)" r="5" [attr.fill]="p.color" />
   }
 
   
   @for (job of jobs; track job.rider_no) {
     @for (stop of job.stops; track stop.stop_no) {
-      <g [attr.opacity]="isDim(job) ? 0.15 : 1">
-        <circle [attr.cx]="x(stop.longitude)" [attr.cy]="y(stop.latitude)" r="9" [attr.fill]="job.color" class="stroke-base-content" stroke-width="2">
-          <title>ไรเดอร์ {{ job.rider_no }} · {{ stop.stop_no }}. {{ stop.customer_name }} ({{ stop.quantity }} กล่อง) {{ stop.arrival_time }}</title>
-        </circle>
-        <text [attr.x]="x(stop.longitude)" [attr.y]="y(stop.latitude) + 3.5" text-anchor="middle" class="pointer-events-none fill-white text-[10px] font-bold">{{ stop.stop_no }}</text>
-      </g>
+      <circle [attr.cx]="x(stop.longitude)" [attr.cy]="y(stop.latitude)" r="6" [attr.fill]="job.color" />
     }
   }
 
   
-  <circle [attr.cx]="x(shop.longitude)" [attr.cy]="y(shop.latitude)" r="14" class="fill-primary stroke-base-content" stroke-width="2.5" />
-  <text [attr.x]="x(shop.longitude)" [attr.y]="y(shop.latitude) + 7" text-anchor="middle" class="icon pointer-events-none fill-white text-[18px]!">storefront</text>
+  <circle [attr.cx]="x(shop.longitude)" [attr.cy]="y(shop.latitude)" r="10" fill="black" />
 </svg>

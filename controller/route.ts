@@ -135,17 +135,17 @@ router.post("/calculate", async (req, res) => {
   try {
     const option = readOption(req.body || {});
     if (option === null) {
-      return res.status(400).json({ error: "option must be 0, 1, 2, ..." });
+      return res.status(400).json({ error: "เลขแผนไม่ถูกต้อง" });
     }
 
     const result = await getPlanOption(option);
     if (!result) {
-      return res.status(400).json({ error: "No orders. Please add or simulate orders first" });
+      return res.status(400).json({ error: "ยังไม่มีออเดอร์ กรุณาเพิ่มหรือสุ่มออเดอร์ก่อน" });
     }
     res.status(200).json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });
 
@@ -153,12 +153,12 @@ router.post("/confirm", async (req, res) => {
   try {
     const option = readOption(req.body || {});
     if (option === null) {
-      return res.status(400).json({ error: "option must be 0, 1, 2, ..." });
+      return res.status(400).json({ error: "เลขแผนไม่ถูกต้อง" });
     }
 
     const result = await getPlanOption(option);
     if (!result) {
-      return res.status(400).json({ error: "No orders. Please add or simulate orders first" });
+      return res.status(400).json({ error: "ยังไม่มีออเดอร์ กรุณาเพิ่มหรือสุ่มออเดอร์ก่อน" });
     }
 
     const planId = await savePlan(result.plan);
@@ -166,7 +166,7 @@ router.post("/confirm", async (req, res) => {
     res.status(201).json(saved);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });
 
@@ -175,12 +175,12 @@ router.get("/latest", async (req, res) => {
     const [rows] = await conn.query("SELECT id FROM delivery_plan ORDER BY id DESC LIMIT 1");
     const plans = rows as any[];
     if (plans.length === 0) {
-      return res.status(404).json({ error: "No confirmed plan yet" });
+      return res.status(404).json({ error: "ยังไม่มีแผนที่ยืนยัน" });
     }
     const plan = await loadSavedPlan(plans[0].id);
     res.status(200).json(plan);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });

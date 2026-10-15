@@ -16,7 +16,7 @@ router.get("/:id", async (req, res) => {
     const jobs = jobRows as any[];
 
     if (jobs.length === 0) {
-      return res.status(404).json({ error: "Job not found" });
+      return res.status(404).json({ error: "ไม่พบใบงาน" });
     }
 
     const job = jobs[0];
@@ -26,6 +26,6 @@ router.get("/:id", async (req, res) => {
     res.status(200).json(job as RiderJob);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
   }
 });

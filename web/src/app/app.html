@@ -1,20 +1,9 @@
 <router-outlet></router-outlet>
 
-<div class="toast toast-end toast-bottom z-[100]">
-  @for (t of notify.toasts(); track t.id) {
-    <div
-      role="alert"
-      class="alert max-w-sm shadow-lg"
-      [class.alert-success]="t.type === 'success'"
-      [class.alert-error]="t.type === 'error'"
-      [class.alert-warning]="t.type === 'warning'"
-      [class.alert-info]="t.type === 'info'"
-    >
-      <span class="icon">{{ iconOf(t.type) }}</span>
-      <span class="text-sm whitespace-normal">{{ t.text }}</span>
-      <button class="btn btn-ghost btn-xs btn-circle" (click)="notify.close(t.id)" aria-label="ปิด">
-        <span class="icon text-base!">close</span>
-      </button>
+@if (notify.text()) {
+  <div class="toast toast-end">
+    <div class="alert" [class.alert-success]="notify.type() === 'success'" [class.alert-error]="notify.type() === 'error'">
+      <span>{{ notify.text() }}</span>
     </div>
-  }
-</div>
+  </div>
+}
