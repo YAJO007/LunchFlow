@@ -9,8 +9,8 @@ router.get("/:id", async (req, res) => {
   try {
     const [jobRows] = await conn.query(
       "SELECT delivery_job.*, delivery_plan.created_at, delivery_plan.departure_time, delivery_plan.deadline_time " +
-        "FROM delivery_job JOIN delivery_plan ON delivery_job.plan_id = delivery_plan.id " +
-        "WHERE delivery_job.id = ?",
+      "FROM delivery_job JOIN delivery_plan ON delivery_job.plan_id = delivery_plan.id " +
+      "WHERE delivery_job.id = ?",
       [req.params.id]
     );
     const jobs = jobRows as any[];

@@ -1,0 +1,19 @@
+<header class="border-b border-slate-300 bg-white">
+  <div class="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+    <div>
+      <p class="text-lg font-semibold text-slate-900">ระบบจัดส่งอาหาร</p>
+      <p class="text-sm text-slate-600">จัดการลูกค้า ออเดอร์ และงานจัดส่ง</p>
+    </div>
+
+    <nav class="flex flex-wrap gap-2" aria-label="เมนูหลัก">
+      <a routerLink="/customers" routerLinkActive="active" class="nav-link">ลูกค้า</a>
+      <a routerLink="/orders" routerLinkActive="active" class="nav-link">ออเดอร์</a>
+      <a routerLink="/route" routerLinkActive="active" class="nav-link">วางแผนเส้นทาง</a>
+      <a routerLink="/jobs" routerLinkActive="active" class="nav-link">ใบงานจัดส่ง</a>
+    </nav>
+  </div>
+</header>
+
+<main class="min-h-screen bg-slate-50">
+  <router-outlet></router-outlet>
+</main>
