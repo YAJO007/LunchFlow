@@ -1,40 +1,98 @@
-<h1 class="text-2xl font-bold">ไรเดอร์</h1>
+<div class="text-[#202124]">
+  <!-- หัวข้อ + ปุ่มค่าเริ่มต้น -->
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="text-[28px] leading-snug font-normal">ไรเดอร์</h1>
+    </div>
+    <button (click)="appData.resetRiders()"
+      class="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full border border-[#dadce0] px-5 text-sm font-medium text-[#1e8e3e] transition hover:bg-[#e6f4ea] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1e8e3e]">
+      <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+      ค่าเริ่มต้น
+    </button>
+  </div>
 
-<p class="mt-2">
-  พร้อมรับงาน {{ appData.availableRiders().length }} คน ·
-  รับได้สูงสุด {{ appData.availableRiders().length * appData.shop().maxOrdersPerRider }} ออเดอร์
-</p>
+  <!-- สรุปตัวเลข -->
+  <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
+    <div class="flex items-center gap-3 rounded-2xl border border-[#dadce0] bg-white p-3 sm:p-4">
+      <div class="hidden size-10 shrink-0 place-items-center rounded-full bg-[#e6f4ea] text-[#1e8e3e] sm:grid">
+        <i class="fa-solid fa-motorcycle" aria-hidden="true"></i>
+      </div>
+      <div>
+        <div class="text-xs text-[#5f6368] sm:text-sm">พร้อมรับงาน</div>
+        <div class="text-xl font-medium tabular-nums sm:text-2xl">
+          {{ appData.availableRiders().length }}
+          <span class="text-base font-normal text-[#5f6368]">/ {{ appData.riders().length }} คน</span>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 rounded-2xl bg-[#e6f4ea] p-3 sm:p-4">
+      <div class="hidden size-10 shrink-0 place-items-center rounded-full bg-[#1e8e3e] text-white sm:grid">
+        <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
+      </div>
+      <div>
+        <div class="text-xs text-[#5f6368] sm:text-sm">รับได้สูงสุด</div>
+        <div class="text-xl font-medium text-[#137333] tabular-nums sm:text-2xl">
+          {{ appData.availableRiders().length * appData.shop().maxOrdersPerRider }}
+          <span class="text-base font-normal">ออเดอร์</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<div class="mt-4 flex flex-wrap gap-2">
-  <input type="text" class="input" placeholder="ชื่อไรเดอร์" [(ngModel)]="newName" />
-  <input type="text" class="input" placeholder="เบอร์โทร" [(ngModel)]="newPhone" />
-  <button class="btn btn-primary" (click)="add()">เพิ่ม</button>
-  <button class="btn" (click)="appData.resetRiders()">ค่าเริ่มต้น</button>
-</div>
+  <!-- ฟอร์มเพิ่มไรเดอร์: กด Enter ก็เพิ่มได้ -->
+  <form (ngSubmit)="add()"
+    class="mt-6 flex flex-col gap-4 rounded-2xl border border-[#dadce0] bg-white p-4 sm:flex-row sm:items-center sm:p-5">
+    <div class="relative flex-1">
+      <input id="rider-name" name="rider-name" type="text" placeholder=" " [(ngModel)]="newName"
+        class="peer h-14 w-full rounded border border-[#dadce0] bg-transparent px-[15px] text-base outline-none hover:border-[#202124] focus:border-2 focus:border-[#1e8e3e] focus:px-[14px]" />
+      <label for="rider-name"
+        class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 bg-white px-1 text-base text-[#5f6368] transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-[#1e8e3e] peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs">ชื่อไรเดอร์</label>
+    </div>
+    <div class="relative flex-1">
+      <input id="rider-phone" name="rider-phone" type="tel" placeholder=" " [(ngModel)]="newPhone"
+        class="peer h-14 w-full rounded border border-[#dadce0] bg-transparent px-[15px] text-base outline-none hover:border-[#202124] focus:border-2 focus:border-[#1e8e3e] focus:px-[14px]" />
+      <label for="rider-phone"
+        class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 bg-white px-1 text-base text-[#5f6368] transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-[#1e8e3e] peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs">เบอร์โทร</label>
+    </div>
+    <button type="submit"
+      class="inline-flex h-10 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#1e8e3e] px-6 text-sm font-medium text-white transition hover:bg-[#137333] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1e8e3e]">
+      <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+      เพิ่มไรเดอร์
+    </button>
+  </form>
 
-<div class="mt-4 overflow-x-auto">
-  <table class="table">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>ชื่อ</th>
-        <th>เบอร์โทร</th>
-        <th>พร้อมรับงาน</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (r of appData.riders(); track r.no) {
-        <tr>
-          <td>{{ r.no }}</td>
-          <td>{{ r.name }}</td>
-          <td>{{ r.phone }}</td>
-          <td><input type="checkbox" class="toggle" [checked]="r.available" (change)="toggle(r)" /></td>
-          <td><button class="btn btn-sm btn-error" (click)="remove(r)">ลบ</button></td>
-        </tr>
-      } @empty {
-        <tr><td colspan="5">ยังไม่มีไรเดอร์</td></tr>
-      }
-    </tbody>
-  </table>
+  <!-- การ์ดไรเดอร์ -->
+  <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    @for (r of appData.riders(); track r.no) {
+      <div class="flex items-center gap-4 rounded-2xl border border-[#dadce0] bg-white p-4">
+        <div class="grid size-12 shrink-0 place-items-center rounded-full bg-[#e6f4ea] text-lg text-[#1e8e3e]">
+          <i class="fa-solid fa-motorcycle" aria-hidden="true"></i>
+        </div>
+
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2">
+            <span class="truncate font-medium">{{ r.name }}</span>
+            <span class="shrink-0 text-xs text-[#5f6368] tabular-nums">#{{ r.no }}</span>
+          </div>
+          @if (r.phone) {
+            <div class="mt-0.5 flex items-center gap-1.5 text-sm text-[#5f6368] tabular-nums">
+              <i class="fa-solid fa-phone text-[10px]" aria-hidden="true"></i>
+              {{ r.phone }}
+            </div>
+          }
+        </div>
+
+        <button (click)="remove(r)" title="ลบ" [attr.aria-label]="'ลบ ' + r.name"
+          class="grid size-9 shrink-0 cursor-pointer place-items-center rounded-full text-[#5f6368] transition hover:bg-[#fce8e6] hover:text-[#d93025]">
+          <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+        </button>
+      </div>
+    } @empty {
+      <div class="rounded-2xl border border-dashed border-[#dadce0] px-4 py-12 text-center text-[#5f6368] sm:col-span-2 lg:col-span-3">
+        <i class="fa-solid fa-motorcycle mb-2 block text-2xl" aria-hidden="true"></i>
+        ยังไม่มีไรเดอร์
+        <div class="mt-1 text-xs">เพิ่มไรเดอร์ด้านบน หรือกด "ค่าเริ่มต้น"</div>
+      </div>
+    }
+  </div>
 </div>
