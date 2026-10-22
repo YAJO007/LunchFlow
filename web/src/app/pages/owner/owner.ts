@@ -3,6 +3,8 @@ import { Router, RouterModule } from '@angular/router';
 import { Api } from '../../service/api';
 import { AppData } from '../../service/app-data';
 
+// หน้า owner = "กรอบ" ของฝั่งเจ้าของร้าน
+// มีแถบเมนูด้านบน ส่วนตรงกลางจะสลับไปแสดงหน้าย่อย (ภาพรวม, ลูกค้า, ออเดอร์ ...)
 @Component({
   selector: 'app-owner',
   imports: [RouterModule],
@@ -10,26 +12,44 @@ import { AppData } from '../../service/app-data';
   styleUrl: './owner.css',
 })
 export class Owner {
+  // รายการเมนูบนแถบด้านบน
+  // link = กดแล้วไปหน้าไหน, label = ข้อความที่โชว์บนปุ่ม
+  menu = [
+    { link: '/owner', label: 'ภาพรวม' },
+    { link: '/owner/customers', label: 'ลูกค้า' },
+    { link: '/owner/orders', label: 'ออเดอร์' },
+    { link: '/owner/riders', label: 'ไรเดอร์' },
+    { link: '/owner/routes', label: 'จัดเส้นทาง' },
+    { link: '/owner/report', label: 'กำไร' },
+  ];
+
+  // ทำงานทันทีตอนเปิดหน้านี้
   constructor(
-    private router: Router,
-    private api: Api,
-    private appData: AppData,
+    private router: Router, // ตัวช่วยเปลี่ยนหน้า
+    private api: Api, // ตัวช่วยคุยกับหลังบ้าน (Web API)
+    private appData: AppData, // กล่องเก็บข้อมูลที่ทุกหน้าใช้ร่วมกัน
   ) {
+    // ยังไม่ได้ล็อกอิน → ส่งกลับไปหน้าล็อกอิน แล้วหยุดตรงนี้
     if (!this.appData.isLoggedIn()) {
       this.router.navigate(['/login']);
       return;
     }
+    // ล็อกอินแล้ว → โหลดข้อมูลร้าน
     this.loadShop();
   }
 
+  // ขอข้อมูลร้านจาก API (เวลาออกจากร้าน, เวลาที่ต้องส่งถึง, ราคาต่อกล่อง ...)
+  // แล้วเก็บไว้ใน appData ให้หน้าย่อยทุกหน้าหยิบไปใช้ได้
   async loadShop() {
     try {
       this.appData.shop.set(await this.api.getShop());
     } catch (error) {
+      // ถ้าดึงไม่สำเร็จ แค่เขียนลง console ไว้ดู หน้าเว็บยังใช้ค่าตั้งต้นต่อได้
       console.log(error);
     }
   }
 
+  // ปุ่ม "ออกจากระบบ": ลบสถานะล็อกอิน แล้วพากลับไปหน้าล็อกอิน
   logout() {
     this.appData.logout();
     this.router.navigate(['/login']);

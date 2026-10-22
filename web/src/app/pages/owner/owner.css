@@ -1,0 +1,144 @@
+:host {
+  --green: #1e8e3e;
+  --green-dark: #137333;
+  --green-tint: #e6f4ea;
+  --text: #202124;
+  --muted: #5f6368;
+  --outline: #dadce0;
+  --hover: #f1f3f4;
+  --surface: #ffffff;
+  /* daisyUI primary color for the owner pages inside */
+  --color-primary: #1e8e3e;
+  --color-primary-content: #ffffff;
+  display: block;
+  min-height: 100vh;
+  background: var(--surface);
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1100; /* above the map's own layers (up to 1000) */
+  background: var(--surface);
+  border-bottom: 1px solid var(--outline);
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 72rem;
+  height: 64px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  color: var(--green);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.nav {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  margin-left: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.nav::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 18px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav-link:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.nav-link.active {
+  background: var(--green-tint);
+  color: var(--green-dark);
+}
+
+.logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--outline);
+  border-radius: 18px;
+  background: transparent;
+  color: var(--green);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.logout-btn:hover {
+  background: var(--green-tint);
+}
+
+.nav-link:focus-visible,
+.logo:focus-visible,
+.logout-btn:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+.content {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+/* mobile: logo + logout on the first row, scrollable tabs below */
+@media (max-width: 768px) {
+  .topbar-inner {
+    flex-wrap: wrap;
+    height: auto;
+    row-gap: 0;
+    padding-top: 8px;
+  }
+
+  .logo {
+    flex: 1;
+    height: 48px;
+  }
+
+  .logout-btn {
+    padding: 0 12px;
+  }
+
+  .logout-btn span {
+    display: none;
+  }
+
+  .nav {
+    order: 3;
+    flex-basis: 100%;
+    margin: 0 -16px;
+    padding: 0 12px 8px;
+  }
+}

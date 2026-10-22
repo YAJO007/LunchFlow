@@ -1,49 +1,106 @@
-<h1 class="text-2xl font-bold">ภาพรวม</h1>
-
-@if (error()) {
-  <div class="alert alert-error mt-4">{{ error() }}</div>
-}
-
-<p class="mt-2">
-  ออกจากร้าน {{ appData.shop().departureTime }} ต้องส่งถึงลูกค้าทุกคนก่อน {{ appData.shop().deadlineTime }}
+<h1 class="title">ภาพรวม</h1>
+<p class="subtitle">
+  ออกจากร้าน <b>{{ appData.shop().departureTime }}</b> · ต้องส่งถึงลูกค้าทุกคนก่อน <b>{{ appData.shop().deadlineTime }}</b>
 </p>
 
-<div class="stats stats-vertical mt-4 w-full bg-base-200 sm:stats-horizontal">
-  <div class="stat">
-    <div class="stat-title">ลูกค้า</div>
-    <div class="stat-value">{{ customers().length }}</div>
+@if (error()) {
+  <div class="error-banner">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z" />
+    </svg>
+    {{ error() }}
   </div>
-  <div class="stat">
-    <div class="stat-title">ออเดอร์</div>
-    <div class="stat-value">{{ orders().length }}</div>
+}
+
+<div class="kpis">
+  <div class="kpi">
+    <div class="kpi-icon">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0h-1c1.2.9 2 2 2 3.5V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z" />
+      </svg>
+    </div>
+    <div class="kpi-label">ลูกค้า</div>
+    <div class="kpi-value">{{ customers().length }}</div>
   </div>
-  <div class="stat">
-    <div class="stat-title">กล่อง</div>
-    <div class="stat-value">{{ totalBox() }}</div>
+
+  <div class="kpi">
+    <div class="kpi-icon">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M19 3h-4.2A3 3 0 0 0 12 1a3 3 0 0 0-2.8 2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm2 14H7v-2h7zm3-4H7v-2h10zm0-4H7V7h10z" />
+      </svg>
+    </div>
+    <div class="kpi-label">ออเดอร์</div>
+    <div class="kpi-value">{{ orders().length }}</div>
   </div>
-  <div class="stat">
-    <div class="stat-title">ไรเดอร์พร้อม</div>
-    <div class="stat-value">{{ appData.availableRiders().length }}</div>
+
+  <div class="kpi">
+    <div class="kpi-icon">
+      <svg viewBox="0 -960 960 960" aria-hidden="true">
+        <path fill="currentColor" d="M610-510v-250h210q24 0 42 18t18 42v190H610ZM140-200q-24 0-42-18t-18-42v-440q0-24 18-42t42-18h410v560H140Zm175-230q21 0 35.5-15t14.5-35q0-21-14.5-35.5T315-530q-20 0-35 14.5T265-480q0 20 15 35t35 15Zm295 230v-250h270v190q0 24-18 42t-42 18H610Z" />
+      </svg>
+    </div>
+    <div class="kpi-label">กล่อง</div>
+    <div class="kpi-value">{{ totalBox() }}</div>
   </div>
-  <div class="stat">
-    <div class="stat-title">ยอดขาย (บาท)</div>
-    <div class="stat-value">{{ totalBox() * appData.shop().pricePerBox }}</div>
+
+  <div class="kpi">
+    <div class="kpi-icon">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M5 11a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm14-6a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zM15 5h-3v2h2.4l1.7 3H9.4L8 8H5v2h2l1.6 3h4.8l1.9-3.4L16 13l1.7-1-3.3-5.6z" />
+      </svg>
+    </div>
+    <div class="kpi-label">ไรเดอร์พร้อม</div>
+    <div class="kpi-value">{{ appData.availableRiders().length }}</div>
+  </div>
+
+  <div class="kpi highlight">
+    <div class="kpi-icon">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1.4 15.9V19h-2.7v-1.1c-1.6-.4-2.9-1.4-3-3.2h2c.1 1 .8 1.7 2.5 1.7 1.8 0 2.2-.9 2.2-1.5 0-.8-.4-1.5-2.5-2-2.4-.6-4-1.5-4-3.5 0-1.6 1.3-2.7 2.8-3V5h2.7v1.2c1.6.4 2.5 1.6 2.5 3.1h-2c0-1-.6-1.7-2.1-1.7-1.4 0-2.2.6-2.2 1.5 0 .8.6 1.3 2.5 1.8s4 1.3 4 3.6c0 1.7-1.3 2.7-2.7 3.4z" />
+      </svg>
+    </div>
+    <div class="kpi-label">ยอดขาย (บาท)</div>
+    <div class="kpi-value">{{ totalBox() * appData.shop().pricePerBox }}</div>
   </div>
 </div>
 
-<h2 class="mt-6 text-xl font-bold">แผนล่าสุดที่ยืนยันแล้ว</h2>
-@if (latestPlan()) {
-  <p class="mt-2">
-    แผน #{{ latestPlan()!.id }} · ไรเดอร์ {{ latestPlan()!.rider_count }} คน ·
-    กำไร {{ money(latestPlan()!.profit) }} บาท · ส่งเสร็จ {{ latestPlan()!.last_arrival_time }}
-  </p>
-  <p class="mt-2">ใบงาน:
-    @for (job of latestPlan()!.jobs; track job.id) {
-      <a [routerLink]="['/rider/job', job.id]" class="link mr-2">{{ job.id }}</a>
-    }
-  </p>
-} @else {
-  <p class="mt-2">ยังไม่มีแผน</p>
-}
+<section class="panel">
+  <h2>แผนล่าสุดที่ยืนยันแล้ว</h2>
 
-<a routerLink="/owner/routes" class="btn btn-primary mt-4">ไปจัดเส้นทาง</a>
+  @if (latestPlan()) {
+    <div class="plan-facts">
+      <div>
+        <span class="fact-label">แผน</span>
+        <span class="fact-value">#{{ latestPlan()!.id }}</span>
+      </div>
+      <div>
+        <span class="fact-label">ไรเดอร์</span>
+        <span class="fact-value">{{ latestPlan()!.rider_count }} คน</span>
+      </div>
+      <div>
+        <span class="fact-label">กำไร</span>
+        <span class="fact-value profit">{{ money(latestPlan()!.profit) }} บาท</span>
+      </div>
+      <div>
+        <span class="fact-label">ส่งเสร็จ</span>
+        <span class="fact-value">{{ latestPlan()!.last_arrival_time }}</span>
+      </div>
+    </div>
+
+    <div class="fact-label">ใบงาน</div>
+    <div class="chips">
+      @for (job of latestPlan()!.jobs; track job.id) {
+        <a [routerLink]="['/rider/job', job.id]" class="chip">{{ job.id }}</a>
+      }
+    </div>
+  } @else {
+    <p class="empty">ยังไม่มีแผน</p>
+  }
+
+  <a routerLink="/owner/routes" class="primary-btn">
+    ไปจัดเส้นทาง
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path fill="currentColor" d="M12 4l-1.4 1.4 5.6 5.6H4v2h12.2l-5.6 5.6L12 20l8-8z" />
+    </svg>
+  </a>
+</section>
