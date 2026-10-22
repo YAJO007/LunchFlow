@@ -38,6 +38,10 @@
   font-weight: 600;
 }
 
+.logo i {
+  font-size: 22px;
+}
+
 h1 {
   margin-top: 24px;
   font-size: 32px;

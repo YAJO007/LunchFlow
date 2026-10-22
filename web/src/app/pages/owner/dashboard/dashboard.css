@@ -66,9 +66,8 @@
   color: var(--green);
 }
 
-.kpi-icon svg {
-  width: 22px;
-  height: 22px;
+.kpi-icon i {
+  font-size: 18px;
 }
 
 .kpi-label {

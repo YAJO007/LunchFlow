@@ -1,9 +1,7 @@
 <div class="page">
   <form class="card" (ngSubmit)="login()">
     <div class="logo">
-      <svg viewBox="0 -960 960 960" width="28" height="28" aria-hidden="true">
-        <path fill="currentColor" d="M610-510v-250h210q24 0 42 18t18 42v190H610ZM140-200q-24 0-42-18t-18-42v-440q0-24 18-42t42-18h410v560H140Zm175-230q21 0 35.5-15t14.5-35q0-21-14.5-35.5T315-530q-20 0-35 14.5T265-480q0 20 15 35t35 15Zm295 230v-250h270v190q0 24-18 42t-42 18H610Z" />
-      </svg>
+      <i class="fa-solid fa-bowl-rice" aria-hidden="true"></i>
       <span>LunchFlow</span>
     </div>
 
@@ -24,9 +22,7 @@
 
     @if (error()) {
       <p class="error">
-        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-          <path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z" />
-        </svg>
+        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
         {{ error() }}
       </p>
     }

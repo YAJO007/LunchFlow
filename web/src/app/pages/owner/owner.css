@@ -43,6 +43,10 @@
   font-weight: 600;
 }
 
+.logo i {
+  font-size: 22px;
+}
+
 .nav {
   display: flex;
   gap: 4px;
