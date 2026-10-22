@@ -1,15 +1,46 @@
-<div class="mx-auto max-w-sm p-6">
-  <h1 class="text-2xl font-bold">เข้าสู่ระบบเจ้าของร้าน</h1>
+<div class="page">
+  <form class="card" (ngSubmit)="login()">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+        <path fill="currentColor" d="M4 7h16v2H4zm1 4h14l-1.2 8.1a1 1 0 0 1-1 .9H7.2a1 1 0 0 1-1-.9zM9 3h6l1 3H8z" />
+      </svg>
+      <span>LunchFlow</span>
+    </div>
 
-  <div class="mt-4 flex flex-col gap-3">
-    <input type="text" placeholder="ชื่อผู้ใช้" class="input w-full" [(ngModel)]="username" />
-    <input type="password" placeholder="รหัสผ่าน" class="input w-full" [(ngModel)]="password" />
+    <h1>เข้าสู่ระบบ</h1>
+    <p class="subtitle">ใช้บัญชีเจ้าของร้านเพื่อจัดการออเดอร์และเส้นทาง</p>
+
+    <div class="field" [class.invalid]="error()">
+      <input id="username" name="username" type="text" placeholder=" " autocomplete="username"
+        [(ngModel)]="username" />
+      <label for="username">ชื่อผู้ใช้</label>
+    </div>
+
+    <div class="field" [class.invalid]="error()">
+      <input id="password" name="password" [type]="showPassword() ? 'text' : 'password'" placeholder=" "
+        autocomplete="current-password" [(ngModel)]="password" />
+      <label for="password">รหัสผ่าน</label>
+    </div>
+
     @if (error()) {
-      <p class="text-error">{{ error() }}</p>
+      <p class="error">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z" />
+        </svg>
+        {{ error() }}
+      </p>
     }
-    <button class="btn btn-primary" (click)="login()">เข้าสู่ระบบ</button>
-  </div>
 
-  <p class="mt-4 text-sm">ทดลอง: owner / 1234</p>
-  <a routerLink="/" class="link mt-2 block text-sm">กลับหน้าแรก</a>
+    <label class="show-password">
+      <input type="checkbox" [checked]="showPassword()" (change)="showPassword.set(!showPassword())" />
+      แสดงรหัสผ่าน
+    </label>
+
+    <p class="hint">บัญชีทดลอง: <b>owner</b> / <b>1234</b></p>
+
+    <div class="actions">
+      <a routerLink="/" class="text-btn">กลับหน้าแรก</a>
+      <button type="submit" class="primary-btn">ถัดไป</button>
+    </div>
+  </form>
 </div>

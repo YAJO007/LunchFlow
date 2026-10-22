@@ -13,6 +13,7 @@ export class Login {
   username = signal('');
   password = signal('');
   error = signal('');
+  showPassword = signal(false);
 
   constructor(
     private router: Router,
