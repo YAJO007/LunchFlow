@@ -40,9 +40,18 @@ export class Customers {
     }
   }
 
-  async search(fn: HTMLInputElement, ln: HTMLInputElement) {
+  // ค้นจากชื่อเต็ม (ชื่อ + นามสกุล) ด้วยคำบางส่วน
+  // พิมพ์หลายคำคั่นด้วยช่องว่างได้ ต้องเจอครบทุกคำ เช่น "ชาย ดี" เจอ "สมชาย ใจดี"
+  async search(text: string) {
+    const words = text.trim().toLowerCase().split(/\s+/).filter((w) => w !== '');
     try {
-      this.customers.set(await this.api.searchCustomers(fn.value, ln.value));
+      const all = await this.api.getCustomers();
+      this.customers.set(
+        all.filter((c) => {
+          const fullName = (c.firstname + ' ' + c.lastname).toLowerCase();
+          return words.every((w) => fullName.includes(w));
+        }),
+      );
     } catch (error: any) {
       this.notify.error(error.message);
     }

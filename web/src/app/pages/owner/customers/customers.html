@@ -17,12 +17,10 @@
     <div
       class="flex h-12 min-w-0 flex-1 basis-80 items-center gap-3 rounded-full bg-[#f1f3f4] pr-1.5 pl-5 transition focus-within:bg-white focus-within:shadow-md">
       <i class="fa-solid fa-magnifying-glass text-[#5f6368]" aria-hidden="true"></i>
-      <input #fn type="text" placeholder="ชื่อ" aria-label="ชื่อ" (keydown.enter)="search(fn, ln)"
+      <input #q type="search" placeholder="ค้นหาชื่อหรือนามสกุล" aria-label="ค้นหาลูกค้า"
+        (keydown.enter)="search(q.value)"
         class="w-0 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-[#5f6368]" />
-      <span class="h-6 w-px shrink-0 bg-[#dadce0]"></span>
-      <input #ln type="text" placeholder="นามสกุล" aria-label="นามสกุล" (keydown.enter)="search(fn, ln)"
-        class="w-0 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-[#5f6368]" />
-      <button (click)="search(fn, ln)"
+      <button (click)="search(q.value)"
         class="h-9 shrink-0 cursor-pointer rounded-full px-4 text-sm font-medium text-[#1e8e3e] transition hover:bg-[#e6f4ea]">
         ค้นหา
       </button>
