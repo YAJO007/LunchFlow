@@ -58,7 +58,7 @@ export class Customers {
   }
 
   points(): MapPoint[] {
-    return this.customers().map((c) => ({ lat: c.latitude, lng: c.longitude, color: '#7c3aed' }));
+    return this.customers().map((c) => ({ lat: c.latitude, lng: c.longitude, color: '#1e8e3e' }));
   }
 
   openAdd() {

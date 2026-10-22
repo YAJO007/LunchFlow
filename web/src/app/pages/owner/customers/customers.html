@@ -1,71 +1,189 @@
-<h1 class="text-2xl font-bold">ลูกค้า</h1>
-
-<div class="mt-4 flex flex-wrap gap-2">
-  <input #fn type="text" class="input" placeholder="ชื่อ" />
-  <input #ln type="text" class="input" placeholder="นามสกุล" />
-  <button class="btn" (click)="search(fn, ln)">ค้นหา</button>
-  <button class="btn" (click)="nearby()">ใกล้ร้าน 1 กม.</button>
-  <button class="btn" (click)="loadAll()">ทั้งหมด</button>
-  <button class="btn btn-primary" (click)="openAdd()">เพิ่มลูกค้า</button>
-</div>
-
-@if (formOpen()) {
-  <div class="card mt-4 bg-base-200">
-    <div class="card-body">
-      <h2 class="card-title">{{ editId() === 0 ? 'เพิ่มลูกค้า' : 'แก้ไขลูกค้า #' + editId() }}</h2>
-      <div class="grid gap-2 sm:grid-cols-2">
-        <input type="text" class="input w-full" placeholder="ชื่อ" [(ngModel)]="firstname" />
-        <input type="text" class="input w-full" placeholder="นามสกุล" [(ngModel)]="lastname" />
-        <input type="text" class="input w-full" placeholder="เบอร์โทร" [(ngModel)]="phone" />
-        <input type="text" class="input w-full" placeholder="ที่อยู่" [(ngModel)]="address" />
-        <input type="text" class="input w-full" placeholder="ละติจูด เช่น 16.2459" [(ngModel)]="latitude" />
-        <input type="text" class="input w-full" placeholder="ลองจิจูด เช่น 103.2525" [(ngModel)]="longitude" />
-      </div>
-      <div class="card-actions mt-2">
-        <button class="btn btn-primary" (click)="save()">บันทึก</button>
-        <button class="btn" (click)="formOpen.set(false)">ยกเลิก</button>
-      </div>
-    </div>
-  </div>
-}
-
-<div class="mt-4 grid gap-4 lg:grid-cols-3">
+<div class="text-[#202124]">
   
-  <div class="overflow-x-auto lg:col-span-2">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>ชื่อ</th>
-          <th>เบอร์โทร</th>
-          <th>ที่อยู่</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (c of customers(); track c.id) {
-          <tr>
-            <td>{{ c.id }}</td>
-            <td>{{ c.firstname }} {{ c.lastname }}</td>
-            <td>{{ c.phone }}</td>
-            <td>{{ c.address }}</td>
-            <td class="whitespace-nowrap">
-              <button class="btn btn-sm" (click)="openEdit(c)">แก้ไข</button>
-              <button class="btn btn-sm btn-error ml-1" (click)="remove(c)">ลบ</button>
-            </td>
-          </tr>
-        } @empty {
-          <tr><td colspan="5">ไม่มีข้อมูล</td></tr>
-        }
-      </tbody>
-    </table>
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="text-[28px] leading-snug font-normal">ลูกค้า</h1>
+      <p class="mt-1 text-[15px] text-[#5f6368]">แสดง {{ customers().length }} คน</p>
+    </div>
+    <button (click)="openAdd()"
+      class="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-[#1e8e3e] px-6 text-sm font-medium text-white transition hover:bg-[#137333] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1e8e3e]">
+      <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+      เพิ่มลูกค้า
+    </button>
   </div>
 
   
-  <div>
-    <p class="mb-2">แผนที่บ้านลูกค้า (จุดใหญ่ตรงกลางคือร้าน)</p>
-    <div class="aspect-square border">
-      <app-route-map [points]="points()" [shop]="appData.shop()"></app-route-map>
+  <div class="mt-6 flex flex-wrap items-center gap-3">
+    <div
+      class="flex h-12 min-w-0 flex-1 basis-80 items-center gap-3 rounded-full bg-[#f1f3f4] pr-1.5 pl-5 transition focus-within:bg-white focus-within:shadow-md">
+      <i class="fa-solid fa-magnifying-glass text-[#5f6368]" aria-hidden="true"></i>
+      <input #fn type="text" placeholder="ชื่อ" aria-label="ชื่อ" (keydown.enter)="search(fn, ln)"
+        class="w-0 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-[#5f6368]" />
+      <span class="h-6 w-px shrink-0 bg-[#dadce0]"></span>
+      <input #ln type="text" placeholder="นามสกุล" aria-label="นามสกุล" (keydown.enter)="search(fn, ln)"
+        class="w-0 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-[#5f6368]" />
+      <button (click)="search(fn, ln)"
+        class="h-9 shrink-0 cursor-pointer rounded-full px-4 text-sm font-medium text-[#1e8e3e] transition hover:bg-[#e6f4ea]">
+        ค้นหา
+      </button>
     </div>
+
+    <div class="flex gap-2">
+      <button (click)="loadAll()"
+        class="inline-flex h-8 cursor-pointer items-center gap-2 rounded-lg border border-[#dadce0] px-3 text-sm font-medium text-[#5f6368] transition hover:border-[#1e8e3e] hover:bg-[#e6f4ea] hover:text-[#137333]">
+        <i class="fa-solid fa-list" aria-hidden="true"></i>
+        ทั้งหมด
+      </button>
+      <button (click)="nearby()"
+        class="inline-flex h-8 cursor-pointer items-center gap-2 rounded-lg border border-[#dadce0] px-3 text-sm font-medium text-[#5f6368] transition hover:border-[#1e8e3e] hover:bg-[#e6f4ea] hover:text-[#137333]">
+        <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+        ใกล้ร้าน 1 กม.
+      </button>
+    </div>
+  </div>
+
+ 
+  @if (formOpen()) {
+    <section class="mt-6 rounded-2xl border border-[#dadce0] bg-white p-5 sm:p-6">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-medium">{{ editId() === 0 ? 'เพิ่มลูกค้า' : 'แก้ไขลูกค้า #' + editId() }}</h2>
+        <button (click)="formOpen.set(false)" title="ปิด" aria-label="ปิด"
+          class="grid size-9 cursor-pointer place-items-center rounded-full text-[#5f6368] transition hover:bg-[#f1f3f4]">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <div class="mt-5 grid gap-x-4 gap-y-5 sm:grid-cols-2">
+        <div class="relative">
+          <input id="c-firstname" type="text" placeholder=" " [(ngModel)]="firstname"
+            class="peer h-14 w-full rounded border border-[#dadce0] bg-transparent px-[15px] text-base outline-none hover:border-[#202124] focus:border-2 focus:border-[#1e8e3e] focus:px-[14px]" />
+          <label for="c-firstname"
+            class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 bg-white px-1 text-base text-[#5f6368] transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-[#1e8e3e] peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs">ชื่อ</label>
+        </div>
+        <div class="relative">
+          <input id="c-lastname" type="text" placeholder=" " [(ngModel)]="lastname"
+            class="peer h-14 w-full rounded border border-[#dadce0] bg-transparent px-[15px] text-base outline-none hover:border-[#202124] focus:border-2 focus:border-[#1e8e3e] focus:px-[14px]" />
+          <label for="c-lastname"
+            class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 bg-white px-1 text-base text-[#5f6368] transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-[#1e8e3e] peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs">นามสกุล</label>
+        </div>
+        <div class="relative">
+          <input id="c-phone" type="tel" placeholder=" " [(ngModel)]="phone"
+            class="peer h-14 w-full rounded border border-[#dadce0] bg-transparent px-[15px] text-base outline-none hover:border-[#202124] focus:border-2 focus:border-[#1e8e3e] focus:px-[14px]" />
+          <label for="c-phone"
+            class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 bg-white px-1 text-base text-[#5f6368] transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-[#1e8e3e] peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs">เบอร์โทร</label>
+        </div>
+        <div class="relative">
+          <input id="c-address" type="text" placeholder=" " [(ngModel)]="address"
+            class="peer h-14 w-full rounded border border-[#dadce0] bg-transparent px-[15px] text-base outline-none hover:border-[#202124] focus:border-2 focus:border-[#1e8e3e] focus:px-[14px]" />
+          <label for="c-address"
+            class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 bg-white px-1 text-base text-[#5f6368] transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-[#1e8e3e] peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs">ที่อยู่</label>
+        </div>
+        <div>
+          <div class="relative">
+            <input id="c-lat" type="text" inputmode="decimal" placeholder=" " [(ngModel)]="latitude"
+              class="peer h-14 w-full rounded border border-[#dadce0] bg-transparent px-[15px] text-base outline-none hover:border-[#202124] focus:border-2 focus:border-[#1e8e3e] focus:px-[14px]" />
+            <label for="c-lat"
+              class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 bg-white px-1 text-base text-[#5f6368] transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-[#1e8e3e] peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs">ละติจูด</label>
+          </div>
+          <p class="mt-1 px-4 text-xs text-[#5f6368]">เช่น 16.2459</p>
+        </div>
+        <div>
+          <div class="relative">
+            <input id="c-lng" type="text" inputmode="decimal" placeholder=" " [(ngModel)]="longitude"
+              class="peer h-14 w-full rounded border border-[#dadce0] bg-transparent px-[15px] text-base outline-none hover:border-[#202124] focus:border-2 focus:border-[#1e8e3e] focus:px-[14px]" />
+            <label for="c-lng"
+              class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 bg-white px-1 text-base text-[#5f6368] transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-[#1e8e3e] peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs">ลองจิจูด</label>
+          </div>
+          <p class="mt-1 px-4 text-xs text-[#5f6368]">เช่น 103.2525</p>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end gap-2">
+        <button (click)="formOpen.set(false)"
+          class="h-10 cursor-pointer rounded-full px-5 text-sm font-medium text-[#1e8e3e] transition hover:bg-[#e6f4ea]">
+          ยกเลิก
+        </button>
+        <button (click)="save()"
+          class="h-10 cursor-pointer rounded-full bg-[#1e8e3e] px-6 text-sm font-medium text-white transition hover:bg-[#137333] hover:shadow-md">
+          บันทึก
+        </button>
+      </div>
+    </section>
+  }
+
+  <div class="mt-6 grid items-start gap-4 lg:grid-cols-3">
+   
+    <div class="overflow-hidden rounded-2xl border border-[#dadce0] bg-white lg:col-span-2">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr class="border-b border-[#dadce0] text-[#5f6368]">
+              <th class="h-12 px-4 font-medium">#</th>
+              <th class="h-12 px-4 font-medium">ชื่อ</th>
+              <th class="h-12 px-4 font-medium">เบอร์โทร</th>
+              <th class="h-12 px-4 font-medium">ที่อยู่</th>
+              <th class="h-12 px-4"><span class="sr-only">จัดการ</span></th>
+            </tr>
+          </thead>
+          <tbody class="[&>tr:last-child]:border-0">
+            @for (c of customers(); track c.id) {
+              <tr class="border-b border-[#f1f3f4] transition-colors hover:bg-[#f8faf9]">
+                <td class="px-4 py-3 text-[#5f6368] tabular-nums">{{ c.id }}</td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="grid size-9 shrink-0 place-items-center rounded-full bg-[#e6f4ea] text-[#1e8e3e]">
+                      <i class="fa-solid fa-user text-sm" aria-hidden="true"></i>
+                    </div>
+                    <span class="font-medium whitespace-nowrap">{{ c.firstname }} {{ c.lastname }}</span>
+                  </div>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap tabular-nums">{{ c.phone }}</td>
+                <td class="min-w-[200px] px-4 py-3 text-[#5f6368]">{{ c.address }}</td>
+                <td class="px-2 py-3">
+                  <div class="flex justify-end gap-1">
+                    <button (click)="openEdit(c)" title="แก้ไข" aria-label="แก้ไข"
+                      class="grid size-9 cursor-pointer place-items-center rounded-full text-[#5f6368] transition hover:bg-[#e6f4ea] hover:text-[#137333]">
+                      <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                    </button>
+                    <button (click)="remove(c)" title="ลบ" aria-label="ลบ"
+                      class="grid size-9 cursor-pointer place-items-center rounded-full text-[#5f6368] transition hover:bg-[#fce8e6] hover:text-[#d93025]">
+                      <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="px-4 py-12 text-center text-[#5f6368]">
+                  <i class="fa-solid fa-users-slash mb-2 block text-2xl" aria-hidden="true"></i>
+                  ไม่มีข้อมูล
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+   
+    <section class="rounded-2xl border border-[#dadce0] bg-white p-4 lg:sticky lg:top-24">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-map-location-dot text-[#1e8e3e]" aria-hidden="true"></i>
+        <h2 class="font-medium">แผนที่บ้านลูกค้า</h2>
+      </div>
+      <div class="mt-2 flex gap-4 text-xs text-[#5f6368]">
+        <span class="inline-flex items-center gap-1.5">
+          <span class="size-3 rounded-full border-2 border-white bg-black ring-1 ring-[#dadce0]"></span>
+          ร้าน
+        </span>
+        <span class="inline-flex items-center gap-1.5">
+          <span class="size-2.5 rounded-full bg-[#1e8e3e]"></span>
+          บ้านลูกค้า
+        </span>
+      </div>
+      <div class="mt-3 aspect-square overflow-hidden rounded-xl border border-[#dadce0]">
+        <app-route-map [points]="points()" [shop]="appData.shop()"></app-route-map>
+      </div>
+    </section>
   </div>
 </div>
