@@ -3,7 +3,7 @@ import { conn } from "../dbconnect";
 import { SHOP } from "../config/shop";
 import { OrderDetail } from "../model/order";
 import { RiderJob, RoutePlan, RouteStop } from "../model/route";
-import { calculatePlans } from "../utils/route-planner";
+import { calculatePlans, planWarnings } from "../utils/route-planner";
 import { SELECT_ORDER_DETAIL } from "./order";
 
 export const router = express.Router();
@@ -16,14 +16,25 @@ function readOption(body: any): number | null {
   return option;
 }
 
-async function getPlanOption(option: number) {
+function readAvailableRiders(body: any): number | undefined | null {
+  if (body.available_riders === undefined || body.available_riders === null) {
+    return undefined;
+  }
+  const riders = Number(body.available_riders);
+  if (!Number.isInteger(riders) || riders < 0) {
+    return null;
+  }
+  return riders;
+}
+
+async function getPlanOption(option: number, availableRiders?: number) {
   const [rows] = await conn.query(SELECT_ORDER_DETAIL + " ORDER BY orders.id");
   const orders = rows as OrderDetail[];
   if (orders.length === 0) {
     return null;
   }
 
-  const plans = calculatePlans(orders);
+  const plans = calculatePlans(orders, availableRiders);
 
   const index = option % plans.length;
   return { option: index, total_options: plans.length, plan: plans[index] };
@@ -58,6 +69,7 @@ async function loadSavedPlan(planId: number): Promise<RoutePlan | null> {
   const plan = plans[0];
   plan.all_on_time = Boolean(plan.all_on_time);
   plan.jobs = jobs;
+  plan.warnings = planWarnings(plan);
   return plan as RoutePlan;
 }
 
@@ -137,8 +149,12 @@ router.post("/calculate", async (req, res) => {
     if (option === null) {
       return res.status(400).json({ error: "เลขแผนไม่ถูกต้อง" });
     }
+    const availableRiders = readAvailableRiders(req.body || {});
+    if (availableRiders === null) {
+      return res.status(400).json({ error: "จำนวนไรเดอร์ที่พร้อมรับงานไม่ถูกต้อง" });
+    }
 
-    const result = await getPlanOption(option);
+    const result = await getPlanOption(option, availableRiders);
     if (!result) {
       return res.status(400).json({ error: "ยังไม่มีออเดอร์ กรุณาเพิ่มหรือสุ่มออเดอร์ก่อน" });
     }
@@ -155,8 +171,12 @@ router.post("/confirm", async (req, res) => {
     if (option === null) {
       return res.status(400).json({ error: "เลขแผนไม่ถูกต้อง" });
     }
+    const availableRiders = readAvailableRiders(req.body || {});
+    if (availableRiders === null) {
+      return res.status(400).json({ error: "จำนวนไรเดอร์ที่พร้อมรับงานไม่ถูกต้อง" });
+    }
 
-    const result = await getPlanOption(option);
+    const result = await getPlanOption(option, availableRiders);
     if (!result) {
       return res.status(400).json({ error: "ยังไม่มีออเดอร์ กรุณาเพิ่มหรือสุ่มออเดอร์ก่อน" });
     }

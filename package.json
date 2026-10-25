@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev server.ts",
     "setup-db": "ts-node database/setup.ts",
+    "test": "ts-node test/route-planner.test.ts",
     "build": "tsc",
     "prestart": "npm run build",
     "start": "node dist/server.js"
