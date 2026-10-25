@@ -70,6 +70,20 @@ export class Customers {
     return this.customers().map((c) => ({ lat: c.latitude, lng: c.longitude, color: '#1e8e3e' }));
   }
 
+  selectedLocation(): MapPoint[] {
+    const lat = Number(this.latitude());
+    const lng = Number(this.longitude());
+    if (!this.latitude() || !this.longitude() || !Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return [];
+    }
+    return [{ lat, lng, color: '#1e8e3e' }];
+  }
+
+  selectLocation(point: MapPoint) {
+    this.latitude.set(point.lat.toFixed(6));
+    this.longitude.set(point.lng.toFixed(6));
+  }
+
   openAdd() {
     this.editId.set(0);
     this.firstname.set('');

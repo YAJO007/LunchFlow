@@ -1,4 +1,5 @@
-<svg [attr.viewBox]="'0 0 ' + size + ' ' + size" class="h-full w-full">
+<svg [attr.viewBox]="'0 0 ' + size + ' ' + size" (click)="selectPoint($event)"
+  [class.cursor-crosshair]="selectable" [class.cursor-default]="!selectable" class="h-full w-full">
   
   @for (t of tiles(); track t.url) {
     <image [attr.href]="t.url" [attr.x]="t.x" [attr.y]="t.y" width="256" height="256" />

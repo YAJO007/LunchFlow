@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DEFAULT_SHOP } from '../../config/shop';
 import { RiderJob } from '../../model/route';
 import { Shop } from '../../model/shop';
@@ -25,6 +25,8 @@ export class RouteMap {
   @Input() jobs: RiderJob[] = [];
   @Input() points: MapPoint[] = [];
   @Input() shop: Shop = DEFAULT_SHOP;
+  @Input() selectable = false;
+  @Output() pointSelected = new EventEmitter<MapPoint>();
 
   size = 400;
 
@@ -39,6 +41,9 @@ export class RouteMap {
 
   allLatLng(): number[][] {
     const list = [[this.shop.latitude, this.shop.longitude]];
+    if (this.selectable) {
+      return list;
+    }
     for (const p of this.points) {
       list.push([p.lat, p.lng]);
     }
@@ -51,6 +56,9 @@ export class RouteMap {
   }
 
   zoom(): number {
+    if (this.selectable) {
+      return 13;
+    }
     const list = this.allLatLng();
     for (let z = 17; z > 10; z--) {
       const xs = list.map((p) => this.worldX(p[1], z));
@@ -105,5 +113,24 @@ export class RouteMap {
       text += ' ' + this.x(stop.longitude) + ',' + this.y(stop.latitude);
     }
     return text;
+  }
+
+  selectPoint(event: MouseEvent) {
+    if (!this.selectable) {
+      return;
+    }
+
+    const svg = event.currentTarget as SVGSVGElement;
+    const rect = svg.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * this.size;
+    const y = ((event.clientY - rect.top) / rect.height) * this.size;
+    const worldSize = 256 * Math.pow(2, this.zoom());
+    const worldX = this.centerX() + x - this.size / 2;
+    const worldY = this.centerY() + y - this.size / 2;
+    const lng = (worldX / worldSize) * 360 - 180;
+    const mercatorY = Math.PI - (2 * Math.PI * worldY) / worldSize;
+    const lat = (180 / Math.PI) * Math.atan(Math.sinh(mercatorY));
+
+    this.pointSelected.emit({ lat, lng, color: '#1e8e3e' });
   }
 }

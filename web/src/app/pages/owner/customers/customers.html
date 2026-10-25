@@ -96,6 +96,14 @@
         </div>
       </div>
 
+      <div class="mt-6">
+        <p class="mb-2 text-sm font-medium">คลิกบนแผนที่เพื่อเลือกตำแหน่งบ้าน</p>
+        <div class="aspect-square max-w-[400px] overflow-hidden rounded-xl border border-[#dadce0]">
+          <app-route-map [points]="selectedLocation()" [shop]="appData.shop()" [selectable]="true"
+            (pointSelected)="selectLocation($event)"></app-route-map>
+        </div>
+      </div>
+
       <div class="mt-6 flex justify-end gap-2">
         <button (click)="formOpen.set(false)"
           class="h-10 cursor-pointer rounded-full px-5 text-sm font-medium text-[#1e8e3e] transition hover:bg-[#e6f4ea]">
