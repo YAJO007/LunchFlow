@@ -2,10 +2,57 @@ import express from "express";
 import { conn } from "../dbconnect";
 import { Customer, CustomerPostRequest } from "../model/customer";
 import { getDistanceKm } from "../utils/distance";
+import { SHOP } from "../config/shop";
 
 export const router = express.Router();
 
 const NEARBY_KM = 1;
+const CUSTOMER_RADIUS_KM = 3;
+
+function validateCustomer(customer: CustomerPostRequest): string | null {
+  if (
+    typeof customer.firstname !== "string" ||
+    !customer.firstname.trim() ||
+    typeof customer.lastname !== "string" ||
+    !customer.lastname.trim() ||
+    typeof customer.phone !== "string" ||
+    !customer.phone.trim() ||
+    typeof customer.address !== "string" ||
+    !customer.address.trim() ||
+    customer.latitude == null ||
+    customer.longitude == null
+  ) {
+    return "กรุณากรอกข้อมูลลูกค้าให้ครบ";
+  }
+
+  if (!/^\d{10}$/.test(customer.phone.trim())) {
+    return "เบอร์โทรต้องเป็นตัวเลข 10 หลัก";
+  }
+
+  if (
+    !Number.isFinite(customer.latitude) ||
+    !Number.isFinite(customer.longitude) ||
+    customer.latitude < -90 ||
+    customer.latitude > 90 ||
+    customer.longitude < -180 ||
+    customer.longitude > 180
+  ) {
+    return "พิกัดละติจูดหรือลองจิจูดไม่ถูกต้อง";
+  }
+
+  const distance = getDistanceKm(
+    SHOP.latitude,
+    SHOP.longitude,
+    customer.latitude,
+    customer.longitude,
+  );
+
+  if (distance > CUSTOMER_RADIUS_KM) {
+    return "พิกัดบ้านลูกค้าต้องอยู่ในรัศมี 3 กม. จากร้าน";
+  }
+
+  return null;
+}
 
 router.get("/", async (req, res) => {
   try {
@@ -82,15 +129,9 @@ router.post("/", async (req, res) => {
   try {
     const customer: CustomerPostRequest = req.body || {};
 
-    if (
-      !customer.firstname ||
-      !customer.lastname ||
-      !customer.phone ||
-      !customer.address ||
-      customer.latitude == null ||
-      customer.longitude == null
-    ) {
-      return res.status(400).json({ error: "กรุณากรอกข้อมูลลูกค้าให้ครบ" });
+    const validationError = validateCustomer(customer);
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
     }
 
     const sql =
@@ -128,6 +169,10 @@ router.put("/:id", async (req, res) => {
     }
 
     const updateCustomer = { ...result[0], ...customer };
+    const validationError = validateCustomer(updateCustomer);
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
+    }
 
     const sql =
       "UPDATE customer SET firstname=?, lastname=?, phone=?, address=?, latitude=?, longitude=? WHERE id=?";
