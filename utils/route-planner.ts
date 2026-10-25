@@ -107,6 +107,60 @@ function bestOrdering(group: OrderDetail[]): OrderDetail[] {
   return best;
 }
 
+function groupDistance(group: OrderDetail[]): number {
+  return routeDistance(bestOrdering(group));
+}
+
+function tryImprovePair(a: OrderDetail[], b: OrderDetail[]): boolean {
+  const before = groupDistance(a) + groupDistance(b);
+
+  for (let i = 0; i < a.length; i++) {
+    for (let j = 0; j < b.length; j++) {
+      const newA = [...a];
+      const newB = [...b];
+      newA[i] = b[j];
+      newB[j] = a[i];
+      if (groupDistance(newA) + groupDistance(newB) < before - 0.001) {
+        a.splice(0, a.length, ...newA);
+        b.splice(0, b.length, ...newB);
+        return true;
+      }
+    }
+  }
+
+  if (a.length > 1 && b.length < SHOP.maxOrdersPerRider) {
+    for (let i = 0; i < a.length; i++) {
+      const newA = a.filter((_, index) => index !== i);
+      const newB = [...b, a[i]];
+      if (groupDistance(newA) + groupDistance(newB) < before - 0.001) {
+        a.splice(0, a.length, ...newA);
+        b.splice(0, b.length, ...newB);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function improveBySwap(groups: OrderDetail[][]): OrderDetail[][] {
+  const result = groups.map((group) => [...group]);
+  let improved = true;
+  let round = 0;
+
+  while (improved && round < 50) {
+    improved = false;
+    round++;
+    for (let i = 0; i < result.length; i++) {
+      for (let j = 0; j < result.length; j++) {
+        if (i !== j && tryImprovePair(result[i], result[j])) {
+          improved = true;
+        }
+      }
+    }
+  }
+  return result;
+}
+
 export function riderCost(totalBox: number, distanceKm: number): number {
   return SHOP.riderBaseFee + SHOP.riderFeePerKmPerBox * totalBox * distanceKm;
 }
@@ -239,13 +293,21 @@ function groupsKey(groups: OrderDetail[][]): string {
 
 export function calculatePlans(orders: OrderDetail[]): RoutePlan[] {
 
-  const candidates = [
+  const baseCandidates = [
     { name: "กวาดรอบร้าน (เริ่มตำแหน่งที่ 1)", groups: groupBySweep(orders, 0) },
     { name: "กวาดรอบร้าน (เริ่มตำแหน่งที่ 2)", groups: groupBySweep(orders, 1) },
     { name: "กวาดรอบร้าน (เริ่มตำแหน่งที่ 3)", groups: groupBySweep(orders, 2) },
     { name: "จับกลุ่มเพื่อนบ้าน (เริ่มจากบ้านไกลสุด)", groups: groupByNearest(orders, true) },
     { name: "จับกลุ่มเพื่อนบ้าน (เริ่มจากบ้านใกล้สุด)", groups: groupByNearest(orders, false) },
   ];
+
+  const candidates = [...baseCandidates];
+  for (const candidate of baseCandidates) {
+    candidates.push({
+      name: candidate.name + " + สลับออเดอร์ลดระยะ",
+      groups: improveBySwap(candidate.groups),
+    });
+  }
 
   const plans: RoutePlan[] = [];
   const usedKeys: string[] = [];

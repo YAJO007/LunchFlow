@@ -146,6 +146,32 @@ test("ค่าส่งของแผนเท่ากับผลรวม�
   }
 });
 
+function planKey(plan: RoutePlan): string {
+  return plan.jobs
+    .map((job) => job.stops.map((stop) => stop.order_id).sort((a, b) => a - b).join("-"))
+    .sort()
+    .join("|");
+}
+
+test("คำนวณใหม่ได้แผนที่ต่างกันจริงอย่างน้อย 3 แบบ (ออเดอร์ 20-30 รายการ)", () => {
+  for (let seed = 1; seed <= 20; seed++) {
+    const plans = calculatePlans(makeOrders(20 + (seed % 11), seed));
+    const keys = new Set(plans.map(planKey));
+    assert.strictEqual(keys.size, plans.length, "seed " + seed + ": มีแผนซ้ำกัน");
+    assert.ok(plans.length >= 3, "seed " + seed + ": ได้แผนแค่ " + plans.length + " แบบ");
+  }
+});
+
+test("สุ่มออเดอร์ 20-30 รายการ ได้แผนที่ส่งทันและไม่ขาดทุนอย่างน้อย 1 แผน", () => {
+  for (let seed = 1; seed <= 20; seed++) {
+    const plans = calculatePlans(makeOrders(20 + (seed % 11), seed * 31));
+    assert.ok(
+      plans.some((plan) => plan.all_on_time && plan.profit >= 0),
+      "seed " + seed + ": ไม่มีแผนที่ส่งทันและไม่ขาดทุน"
+    );
+  }
+});
+
 console.log("\nผ่าน " + passed + " ข้อ, ไม่ผ่าน " + failed + " ข้อ");
 if (failed > 0) {
   process.exit(1);
