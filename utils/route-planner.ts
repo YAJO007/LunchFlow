@@ -107,6 +107,10 @@ function bestOrdering(group: OrderDetail[]): OrderDetail[] {
   return best;
 }
 
+export function riderCost(totalBox: number, distanceKm: number): number {
+  return SHOP.riderBaseFee + SHOP.riderFeePerKmPerBox * totalBox * distanceKm;
+}
+
 function makeMapUrl(stops: RouteStop[]): string {
   const origin = SHOP.latitude + "," + SHOP.longitude;
   const last = stops[stops.length - 1];
@@ -163,7 +167,7 @@ function buildJob(group: OrderDetail[], riderNo: number): RiderJob {
   const durationMinutes =
     (distanceSoFar / SHOP.speedKmPerHour) * 60 + (ordered.length - 1) * SHOP.minutesPerStop;
 
-  const cost = SHOP.riderBaseFee + SHOP.riderFeePerKmPerBox * totalBox * distanceSoFar;
+  const cost = riderCost(totalBox, distanceSoFar);
 
   return {
     rider_no: riderNo,

@@ -2,7 +2,7 @@ import assert from "node:assert";
 import { SHOP } from "../config/shop";
 import { OrderDetail } from "../model/order";
 import { RoutePlan } from "../model/route";
-import { calculatePlans } from "../utils/route-planner";
+import { calculatePlans, riderCost } from "../utils/route-planner";
 
 let passed = 0;
 let failed = 0;
@@ -112,6 +112,31 @@ test("สถานะส่งไม่ทันเมื่อบ้านอ�
   assert.strictEqual(plan.jobs[0].on_time, false);
   assert.strictEqual(plan.all_on_time, false);
   checkOnTime(plan);
+});
+
+test("สูตรค่าส่ง: 6 กล่อง วิ่ง 2 กม. ค่าระยะทาง 24 บาท รวม 39 บาท", () => {
+  const distancePart = SHOP.riderFeePerKmPerBox * 6 * 2;
+  assert.strictEqual(distancePart, 24);
+  assert.strictEqual(riderCost(6, 2), 39);
+  assert.strictEqual(riderCost(5, 2), 35);
+});
+
+test("ค่าส่งของแผนเท่ากับผลรวมค่าส่งของไรเดอร์ทุกคนตามสูตร", () => {
+  for (const plan of calculatePlans(makeOrders(20, 7))) {
+    let sum = 0;
+    for (const job of plan.jobs) {
+      const expected = riderCost(job.total_box, job.distance_km);
+      // distance_km ถูกปัดเป็นทศนิยม 2 ตำแหน่ง จึงยอมให้ต่างกันได้ไม่เกินผลของการปัดเศษ
+      const tolerance = SHOP.riderFeePerKmPerBox * job.total_box * 0.005 + 0.01;
+      assert.ok(Math.abs(job.cost - expected) <= tolerance, "ไรเดอร์คนที่ " + job.rider_no + " ค่าส่งไม่ตรงสูตร");
+      sum += job.cost;
+    }
+    assert.ok(Math.abs(plan.delivery_cost - sum) <= 0.01, plan.strategy + ": ค่าส่งรวมไม่ตรง");
+    assert.ok(
+      Math.abs(plan.profit - (plan.revenue - plan.food_cost - plan.delivery_cost)) <= 0.01,
+      plan.strategy + ": กำไรไม่ตรง"
+    );
+  }
 });
 
 console.log("\nผ่าน " + passed + " ข้อ, ไม่ผ่าน " + failed + " ข้อ");
