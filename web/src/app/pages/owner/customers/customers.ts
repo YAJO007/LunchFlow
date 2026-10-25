@@ -135,7 +135,7 @@ export class Customers {
   }
 
   async remove(c: Customer) {
-    if (!confirm('ลบลูกค้า ' + c.firstname + ' ?')) {
+    if (!confirm('ลบลูกค้า ' + c.firstname + ' ' + c.lastname + ' ใช่ไหม?\n\nออเดอร์ทั้งหมดของลูกค้าคนนี้จะถูกลบไปด้วย')) {
       return;
     }
     try {
