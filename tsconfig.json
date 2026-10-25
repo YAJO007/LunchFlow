@@ -9,5 +9,5 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "exclude": ["node_modules", "dist", "database", "web"]
+  "exclude": ["node_modules", "dist", "database", "web", "test"]
 }
