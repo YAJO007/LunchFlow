@@ -29,11 +29,6 @@ export class Owner {
     private api: Api, // ตัวช่วยคุยกับหลังบ้าน (Web API)
     private appData: AppData, // กล่องเก็บข้อมูลที่ทุกหน้าใช้ร่วมกัน
   ) {
-    // ยังไม่ได้ล็อกอิน → ส่งกลับไปหน้าล็อกอิน แล้วหยุดตรงนี้
-    if (!this.appData.isLoggedIn()) {
-      this.router.navigate(['/login']);
-      return;
-    }
     // ล็อกอินแล้ว → โหลดข้อมูลร้าน
     this.loadShop();
   }

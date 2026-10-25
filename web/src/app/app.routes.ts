@@ -12,6 +12,7 @@ import { Rider } from './pages/rider/rider';
 import { RiderLogin } from './pages/rider/rider-login/rider-login';
 import { JobSheet } from './pages/rider/job-sheet/job-sheet';
 import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
+import { ownerGuard } from './guards/owner.guard';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -19,6 +20,7 @@ export const routes: Routes = [
   {
     path: 'owner',
     component: Owner,
+    canActivate: [ownerGuard],
     children: [
       { path: '', component: Dashboard },
       { path: 'customers', component: Customers },
