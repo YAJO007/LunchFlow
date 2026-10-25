@@ -164,8 +164,11 @@ function buildJob(group: OrderDetail[], riderNo: number): RiderJob {
     previous = order;
   }
 
-  const durationMinutes =
-    (distanceSoFar / SHOP.speedKmPerHour) * 60 + (ordered.length - 1) * SHOP.minutesPerStop;
+  // ลูกค้าได้ของตอนไรเดอร์ถึงบ้าน จึงไม่นับเวลาแวะของจุดสุดท้าย
+  // และตัดสินส่งทันจากเวลาถึงของทุกจุด ซึ่งเป็นเวลาเดียวกับที่แสดงบนใบงาน
+  const lastStop = stops[stops.length - 1];
+  const durationMinutes = timeToMinutes(lastStop.arrival_time) - startMinutes;
+  const onTime = stops.every((stop) => timeToMinutes(stop.arrival_time) <= deadlineMinutes);
 
   const cost = riderCost(totalBox, distanceSoFar);
 
@@ -174,10 +177,10 @@ function buildJob(group: OrderDetail[], riderNo: number): RiderJob {
     color: RIDER_COLORS[(riderNo - 1) % RIDER_COLORS.length],
     total_box: totalBox,
     distance_km: round2(distanceSoFar),
-    duration_min: Math.ceil(durationMinutes),
+    duration_min: durationMinutes,
     cost: round2(cost),
-    finish_time: minutesToTime(startMinutes + durationMinutes),
-    on_time: startMinutes + durationMinutes <= deadlineMinutes,
+    finish_time: lastStop.arrival_time,
+    on_time: onTime,
     map_url: makeMapUrl(stops),
     stops: stops,
   };

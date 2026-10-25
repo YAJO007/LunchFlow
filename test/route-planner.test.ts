@@ -71,6 +71,13 @@ function checkPlanStructure(plan: RoutePlan, orders: OrderDetail[]) {
 
 function checkOnTime(plan: RoutePlan) {
   for (const job of plan.jobs) {
+    const lastStop = job.stops[job.stops.length - 1];
+    assert.strictEqual(job.finish_time, lastStop.arrival_time, plan.strategy + ": เวลาส่งเสร็จไม่ตรงกับจุดสุดท้าย");
+    assert.strictEqual(
+      job.on_time,
+      job.stops.every((stop) => stop.arrival_time <= SHOP.deadlineTime),
+      plan.strategy + ": สถานะส่งทันไม่ตรงกับเวลาถึงของแต่ละจุด"
+    );
     assert.strictEqual(
       job.on_time,
       job.finish_time <= SHOP.deadlineTime,
