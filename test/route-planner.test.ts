@@ -119,6 +119,19 @@ test("สถานะส่งไม่ทันเมื่อบ้านอ�
   assert.strictEqual(plan.jobs[0].on_time, false);
   assert.strictEqual(plan.all_on_time, false);
   checkOnTime(plan);
+  assert.ok(
+    plan.warnings.some((warning) => warning.includes("ไรเดอร์คนที่ 1") && warning.includes("#1")),
+    "ไม่มีเหตุผลบอกว่าออเดอร์ไหนทำให้เลท"
+  );
+  assert.ok(plan.warnings.some((warning) => warning.includes("ขาดทุน")), "ไม่มีเหตุผลเรื่องขาดทุน");
+});
+
+test("แผนที่ส่งทันและมีกำไรไม่มีคำเตือน", () => {
+  for (const plan of calculatePlans(makeOrders(20, 5))) {
+    if (plan.all_on_time && plan.profit >= 0) {
+      assert.strictEqual(plan.warnings.length, 0, plan.strategy + ": มีคำเตือนทั้งที่แผนปกติ");
+    }
+  }
 });
 
 test("สูตรค่าส่ง: 6 กล่อง วิ่ง 2 กม. ค่าระยะทาง 24 บาท รวม 39 บาท", () => {

@@ -46,6 +46,7 @@ export interface RoutePlan {
   deadline_time: string;
   last_arrival_time: string;
   all_on_time: boolean;
+  warnings?: string[];
   jobs: RiderJob[];
 }
 

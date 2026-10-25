@@ -240,6 +240,30 @@ function buildJob(group: OrderDetail[], riderNo: number): RiderJob {
   };
 }
 
+export function planWarnings(plan: RoutePlan): string[] {
+  const warnings: string[] = [];
+
+  if (plan.profit < 0) {
+    warnings.push(
+      "แผนนี้ขาดทุน " + Math.abs(plan.profit).toFixed(2) + " บาท (ยอดขาย " + plan.revenue +
+        " บาท ต้นทุนอาหาร " + plan.food_cost + " บาท ค่าส่ง " + plan.delivery_cost + " บาท)"
+    );
+  }
+
+  for (const job of plan.jobs) {
+    for (const stop of job.stops) {
+      if (stop.arrival_time > plan.deadline_time) {
+        warnings.push(
+          "ไรเดอร์คนที่ " + job.rider_no + " ส่งไม่ทัน: จุดที่ " + stop.stop_no + " " +
+            stop.customer_name + " (ออเดอร์ #" + stop.order_id + ") ถึง " + stop.arrival_time +
+            " เกินเวลา " + plan.deadline_time
+        );
+      }
+    }
+  }
+  return warnings;
+}
+
 function buildPlan(groups: OrderDetail[][], strategy: string): RoutePlan {
   const jobs = groups.map((group, index) => buildJob(group, index + 1));
 
@@ -266,7 +290,7 @@ function buildPlan(groups: OrderDetail[][], strategy: string): RoutePlan {
   const revenue = totalBox * SHOP.pricePerBox;
   const foodCost = totalBox * SHOP.foodCostPerBox;
 
-  return {
+  const plan: RoutePlan = {
     strategy: strategy,
     rider_count: jobs.length,
     total_order: totalOrder,
@@ -280,8 +304,11 @@ function buildPlan(groups: OrderDetail[][], strategy: string): RoutePlan {
     deadline_time: SHOP.deadlineTime,
     last_arrival_time: lastArrival,
     all_on_time: allOnTime,
+    warnings: [],
     jobs: jobs,
   };
+  plan.warnings = planWarnings(plan);
+  return plan;
 }
 
 function groupsKey(groups: OrderDetail[][]): string {

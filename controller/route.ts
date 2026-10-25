@@ -3,7 +3,7 @@ import { conn } from "../dbconnect";
 import { SHOP } from "../config/shop";
 import { OrderDetail } from "../model/order";
 import { RiderJob, RoutePlan, RouteStop } from "../model/route";
-import { calculatePlans } from "../utils/route-planner";
+import { calculatePlans, planWarnings } from "../utils/route-planner";
 import { SELECT_ORDER_DETAIL } from "./order";
 
 export const router = express.Router();
@@ -58,6 +58,7 @@ async function loadSavedPlan(planId: number): Promise<RoutePlan | null> {
   const plan = plans[0];
   plan.all_on_time = Boolean(plan.all_on_time);
   plan.jobs = jobs;
+  plan.warnings = planWarnings(plan);
   return plan as RoutePlan;
 }
 
