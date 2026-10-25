@@ -240,8 +240,15 @@ function buildJob(group: OrderDetail[], riderNo: number): RiderJob {
   };
 }
 
-export function planWarnings(plan: RoutePlan): string[] {
+export function planWarnings(plan: RoutePlan, availableRiders?: number): string[] {
   const warnings: string[] = [];
+
+  if (availableRiders !== undefined && plan.rider_count > availableRiders) {
+    warnings.push(
+      "ต้องใช้ไรเดอร์ " + plan.rider_count + " คน แต่มีไรเดอร์พร้อมรับงาน " + availableRiders +
+        " คน (ขาด " + (plan.rider_count - availableRiders) + " คน)"
+    );
+  }
 
   if (plan.profit < 0) {
     warnings.push(
@@ -264,7 +271,7 @@ export function planWarnings(plan: RoutePlan): string[] {
   return warnings;
 }
 
-function buildPlan(groups: OrderDetail[][], strategy: string): RoutePlan {
+function buildPlan(groups: OrderDetail[][], strategy: string, availableRiders?: number): RoutePlan {
   const jobs = groups.map((group, index) => buildJob(group, index + 1));
 
   let totalOrder = 0;
@@ -307,7 +314,7 @@ function buildPlan(groups: OrderDetail[][], strategy: string): RoutePlan {
     warnings: [],
     jobs: jobs,
   };
-  plan.warnings = planWarnings(plan);
+  plan.warnings = planWarnings(plan, availableRiders);
   return plan;
 }
 
@@ -318,7 +325,10 @@ function groupsKey(groups: OrderDetail[][]): string {
     .join("|");
 }
 
-export function calculatePlans(orders: OrderDetail[]): RoutePlan[] {
+export function calculatePlans(orders: OrderDetail[], availableRiders?: number): RoutePlan[] {
+  if (orders.length === 0) {
+    return [];
+  }
 
   const baseCandidates = [
     { name: "กวาดรอบร้าน (เริ่มตำแหน่งที่ 1)", groups: groupBySweep(orders, 0) },
@@ -342,7 +352,7 @@ export function calculatePlans(orders: OrderDetail[]): RoutePlan[] {
     const key = groupsKey(candidate.groups);
     if (usedKeys.indexOf(key) === -1) {
       usedKeys.push(key);
-      plans.push(buildPlan(candidate.groups, candidate.name));
+      plans.push(buildPlan(candidate.groups, candidate.name, availableRiders));
     }
   }
 

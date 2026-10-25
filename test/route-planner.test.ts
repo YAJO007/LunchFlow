@@ -185,6 +185,41 @@ test("สุ่มออเดอร์ 20-30 รายการ ได้แผ
   }
 });
 
+test("กรณีพิเศษ: ไม่มีออเดอร์ ได้รายการแผนว่าง", () => {
+  assert.deepStrictEqual(calculatePlans([]), []);
+});
+
+test("กรณีพิเศษ: ออเดอร์เดียว ได้ไรเดอร์ 1 คน 1 จุดส่ง", () => {
+  const plans = calculatePlans(makeOrders(1, 3));
+  assert.strictEqual(plans.length, 1);
+  assert.strictEqual(plans[0].rider_count, 1);
+  assert.strictEqual(plans[0].jobs[0].stops.length, 1);
+  assert.strictEqual(plans[0].jobs[0].map_url.includes("waypoints"), false);
+});
+
+test("กรณีพิเศษ: ออเดอร์ 30 รายการเต็ม ใช้ไรเดอร์ 10 คน", () => {
+  const orders = makeOrders(30, 30);
+  const plans = calculatePlans(orders);
+  assert.ok(plans.length >= 3);
+  for (const plan of plans) {
+    checkPlanStructure(plan, orders);
+    assert.strictEqual(plan.rider_count, 10);
+  }
+});
+
+test("กรณีพิเศษ: ไรเดอร์พร้อมรับงานไม่พอ มีคำเตือนบอกจำนวนที่ขาด", () => {
+  const plans = calculatePlans(makeOrders(10, 9), 2);
+  for (const plan of plans) {
+    assert.ok(
+      plan.warnings.some((warning) => warning.includes("ขาด " + (plan.rider_count - 2) + " คน")),
+      plan.strategy + ": ไม่มีคำเตือนไรเดอร์ไม่พอ"
+    );
+  }
+  for (const plan of calculatePlans(makeOrders(10, 9), 10)) {
+    assert.ok(!plan.warnings.some((warning) => warning.includes("ไรเดอร์พร้อมรับงาน")));
+  }
+});
+
 console.log("\nผ่าน " + passed + " ข้อ, ไม่ผ่าน " + failed + " ข้อ");
 if (failed > 0) {
   process.exit(1);
