@@ -5,6 +5,7 @@ import { router as customer } from "./controller/customer";
 import { router as order } from "./controller/order";
 import { router as route } from "./controller/route";
 import { router as job } from "./controller/job";
+import { router as rider } from "./controller/rider";
 
 export const app = express();
 
@@ -23,3 +24,4 @@ app.use("/customer", customer);
 app.use("/order", order);
 app.use("/route", route);
 app.use("/job", job);
+app.use("/rider", rider);

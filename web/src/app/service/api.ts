@@ -4,6 +4,7 @@ import { Customer } from '../model/customer';
 import { Order } from '../model/order';
 import { PlanOption, RiderJob, RoutePlan } from '../model/route';
 import { Shop } from '../model/shop';
+import { Rider, RiderPostRequest, RiderPutRequest } from '../model/rider';
 
 @Injectable({
   providedIn: 'root',
@@ -46,6 +47,22 @@ export class Api {
     return this.request('DELETE', '/customer/' + id);
   }
 
+  getRiders(): Promise<Rider[]> {
+    return this.request('GET', '/rider');
+  }
+
+  addRider(rider: RiderPostRequest) {
+    return this.request('POST', '/rider', rider);
+  }
+
+  updateRider(no: number, rider: RiderPutRequest) {
+    return this.request('PUT', '/rider/' + no, rider);
+  }
+
+  deleteRider(no: number) {
+    return this.request('DELETE', '/rider/' + no);
+  }
+
   getOrders(): Promise<Order[]> {
     return this.request('GET', '/order');
   }
@@ -78,12 +95,18 @@ export class Api {
     return this.request('GET', '/route/shop');
   }
 
-  calculateRoute(option: number): Promise<PlanOption> {
-    return this.request('POST', '/route/calculate', { option: option });
+  calculateRoute(option: number, availableRiders?: number): Promise<PlanOption> {
+    return this.request('POST', '/route/calculate', {
+      option: option,
+      available_riders: availableRiders,
+    });
   }
 
-  confirmRoute(option: number): Promise<RoutePlan> {
-    return this.request('POST', '/route/confirm', { option: option });
+  confirmRoute(option: number, availableRiders?: number): Promise<RoutePlan> {
+    return this.request('POST', '/route/confirm', {
+      option: option,
+      available_riders: availableRiders,
+    });
   }
 
   getLatestPlan(): Promise<RoutePlan> {

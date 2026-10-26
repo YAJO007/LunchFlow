@@ -17,35 +17,50 @@ export class Riders {
   constructor(
     public appData: AppData,
     private notify: Notify,
-  ) {}
-
-  toggle(rider: Rider) {
-    const riders = this.appData.riders().map((r) => {
-      if (r.no === rider.no) {
-        return { no: r.no, name: r.name, phone: r.phone, available: !r.available };
-      }
-      return r;
-    });
-    this.appData.saveRiders(riders);
+  ) {
+    this.load();
   }
 
-  add() {
-    if (!this.newName()) {
+  async load() {
+    try {
+      await this.appData.loadRiders();
+    } catch (error: any) {
+      this.notify.error(error.message);
+    }
+  }
+
+  async toggle(rider: Rider) {
+    try {
+      await this.appData.updateRider(rider.no, { available: !rider.available });
+      this.notify.success('อัปเดตสถานะแล้ว');
+    } catch (error: any) {
+      this.notify.error(error.message);
+    }
+  }
+
+  async add() {
+    const name = this.newName().trim();
+    if (!name) {
       this.notify.error('กรอกชื่อไรเดอร์');
       return;
     }
-    const riders = this.appData.riders();
-    let no = 1;
-    if (riders.length > 0) {
-      no = riders[riders.length - 1].no + 1;
+
+    try {
+      await this.appData.addRider({ name: name, phone: this.newPhone().trim() });
+      this.newName.set('');
+      this.newPhone.set('');
+      this.notify.success('เพิ่มไรเดอร์แล้ว');
+    } catch (error: any) {
+      this.notify.error(error.message);
     }
-    const rider: Rider = { no: no, name: this.newName(), phone: this.newPhone(), available: true };
-    this.appData.saveRiders([...riders, rider]);
-    this.newName.set('');
-    this.newPhone.set('');
   }
 
-  remove(rider: Rider) {
-    this.appData.saveRiders(this.appData.riders().filter((r) => r.no !== rider.no));
+  async remove(rider: Rider) {
+    try {
+      await this.appData.deleteRider(rider.no);
+      this.notify.success('ลบไรเดอร์แล้ว');
+    } catch (error: any) {
+      this.notify.error(error.message);
+    }
   }
 }

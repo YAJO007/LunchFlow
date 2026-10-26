@@ -1,41 +1,41 @@
 import { Injectable, signal } from '@angular/core';
 import { DEFAULT_SHOP } from '../config/shop';
-import { Rider } from '../model/rider';
+import { Rider, RiderPostRequest, RiderPutRequest } from '../model/rider';
 import { Shop } from '../model/shop';
-
-const DEFAULT_RIDERS: Rider[] = [
-  { no: 1, name: 'สมศักดิ์ ใจดี', phone: '0811111111', available: true },
-  { no: 2, name: 'วิชัย มีสุข', phone: '0822222222', available: true },
-  { no: 3, name: 'อนุชา แสนดี', phone: '0833333333', available: true },
-  { no: 4, name: 'ประยุทธ ขยัน', phone: '0844444444', available: true },
-  { no: 5, name: 'ธนพล รักงาน', phone: '0855555555', available: true },
-  { no: 6, name: 'กิตติ ว่องไว', phone: '0866666666', available: true },
-  { no: 7, name: 'สุริยา ทองดี', phone: '0877777777', available: true },
-  { no: 8, name: 'ณัฐพล บุญมา', phone: '0888888888', available: true },
-  { no: 9, name: 'พงศกร ศรีสุข', phone: '0899999999', available: true },
-  { no: 10, name: 'อภิชาติ คำดี', phone: '0810101010', available: true },
-];
+import { Api } from './api';
+import { Notify } from './notify';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AppData {
   shop = signal<Shop>(DEFAULT_SHOP);
-  riders = signal<Rider[]>(DEFAULT_RIDERS);
+  riders = signal<Rider[]>([]);
 
-  constructor() {
-    if (localStorage.getItem('riders')) {
-      this.riders.set(JSON.parse(localStorage.getItem('riders')!));
-    }
+  constructor(
+    private api: Api,
+    private notify: Notify,
+  ) {
+    this.loadRiders().catch((error: any) => this.notify.error(error.message));
   }
 
-  saveRiders(riders: Rider[]) {
-    this.riders.set(riders);
-    localStorage.setItem('riders', JSON.stringify(riders));
+  async loadRiders() {
+    this.riders.set(await this.api.getRiders());
   }
 
-  resetRiders() {
-    this.saveRiders(DEFAULT_RIDERS);
+  async addRider(rider: RiderPostRequest) {
+    await this.api.addRider(rider);
+    await this.loadRiders();
+  }
+
+  async updateRider(no: number, rider: RiderPutRequest) {
+    await this.api.updateRider(no, rider);
+    await this.loadRiders();
+  }
+
+  async deleteRider(no: number) {
+    await this.api.deleteRider(no);
+    await this.loadRiders();
   }
 
   availableRiders(): Rider[] {

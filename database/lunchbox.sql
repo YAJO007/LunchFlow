@@ -1,5 +1,6 @@
 
 DROP TABLE IF EXISTS `delivery_stop`;
+DROP TABLE IF EXISTS `rider`;
 DROP TABLE IF EXISTS `delivery_job`;
 DROP TABLE IF EXISTS `delivery_plan`;
 DROP TABLE IF EXISTS `orders`;
@@ -16,6 +17,25 @@ CREATE TABLE `customer` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `rider` (
+  `no` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100) NOT NULL,
+  `phone` VARCHAR(20) NOT NULL,
+  `available` TINYINT NOT NULL DEFAULT 1,
+  PRIMARY KEY (`no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `rider` (`name`, `phone`, `available`) VALUES
+('สมศักดิ์ ใจดี', '0811111111', 1),
+('วิชัย มีสุข', '0822222222', 1),
+('อนุชา แสนดี', '0833333333', 1),
+('ประยุทธ ขยัน', '0844444444', 1),
+('ธนพล รักงาน', '0855555555', 1),
+('กิตติ ว่องไว', '0866666666', 1),
+('สุริยา ทองดี', '0877777777', 1),
+('ณัฐพล บุญมา', '0888888888', 1),
+('พงศกร ศรีสุข', '0899999999', 1),
+('อภิชาติ คำดี', '0810101010', 1);
 CREATE TABLE `orders` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `customer_id` INT NOT NULL,
