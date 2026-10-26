@@ -4,3 +4,9 @@ export interface Rider {
   phone: string;
   available: boolean;
 }
+
+export interface RiderPostRequest {
+  name: string;
+  phone: string;
+  available: boolean;
+}
