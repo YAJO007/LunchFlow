@@ -8,5 +8,10 @@ export interface Rider {
 export interface RiderPostRequest {
   name: string;
   phone: string;
-  available: boolean;
+}
+
+export interface RiderPutRequest {
+  name?: string;
+  phone?: string;
+  available?: boolean;
 }

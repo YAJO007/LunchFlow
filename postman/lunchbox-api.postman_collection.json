@@ -543,6 +543,115 @@
           }
         }
       ]
+    },
+{
+      "name": "Rider",
+      "item": [
+        {
+          "name": "ไรเดอร์ทั้งหมด",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rider",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rider"
+              ]
+            }
+          }
+        },
+        {
+          "name": "เพิ่มไรเดอร์",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ไรเดอร์ใหม่\",\n  \"phone\": \"0812345678\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rider",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rider"
+              ]
+            }
+          }
+        },
+        {
+          "name": "เปลี่ยนสถานะไรเดอร์",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"available\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rider/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rider",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "ลบไรเดอร์",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rider/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rider",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
     }
   ]
 }
