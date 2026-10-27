@@ -1,0 +1,102 @@
+<h1 class="text-3xl">กำไร</h1>
+
+@if (loading()) {
+  <p class="mt-2 text-base-content/70">กำลังโหลด...</p>
+}
+
+@if (!loading() && !plan()) {
+  <div class="card mt-6 border border-dashed border-base-300">
+    <div class="card-body items-center py-12 text-center text-base-content/70">
+      <i class="fa-solid fa-chart-line text-4xl text-primary"></i>
+      <p>ยังไม่มีแผนที่ยืนยัน ไปจัดเส้นทางและกดยืนยันแผนก่อน</p>
+      <a routerLink="/owner/routes" class="btn btn-primary mt-2">ไปจัดเส้นทาง</a>
+    </div>
+  </div>
+}
+
+@if (plan()) {
+  <p class="mt-1 text-base-content/70">
+    แผน #{{ plan()!.id }} · {{ dateTime(plan()!.created_at) }} ·
+    ออก {{ plan()!.departure_time }} ส่งเสร็จ {{ plan()!.last_arrival_time }}
+  </p>
+
+  <!-- ตัวเลขหลัก -->
+  <div class="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+    <div class="card border border-base-300">
+      <div class="card-body">
+        <p class="text-base-content/70">ยอดขาย</p>
+        <p class="text-2xl">{{ money(plan()!.revenue) }}</p>
+      </div>
+    </div>
+    <div class="card border border-base-300">
+      <div class="card-body">
+        <p class="text-base-content/70">ค่าอาหาร</p>
+        <p class="text-2xl">{{ money(plan()!.food_cost) }}</p>
+      </div>
+    </div>
+    <div class="card border border-base-300">
+      <div class="card-body">
+        <p class="text-base-content/70">ค่าไรเดอร์</p>
+        <p class="text-2xl">{{ money(plan()!.delivery_cost) }}</p>
+      </div>
+    </div>
+    <div class="card" [class.bg-secondary]="plan()!.profit >= 0" [class.text-secondary-content]="plan()!.profit >= 0"
+      [class.bg-error]="plan()!.profit < 0" [class.text-error-content]="plan()!.profit < 0">
+      <div class="card-body">
+        <p>{{ plan()!.profit >= 0 ? 'กำไร' : 'ขาดทุน' }}</p>
+        <p class="text-2xl font-semibold">{{ money(plan()!.profit) }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6 grid items-start gap-4 lg:grid-cols-[1fr_18rem]">
+    <!-- กำไรแยกตามไรเดอร์ -->
+    <div class="overflow-x-auto rounded-box border border-base-300">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ใบงาน</th>
+            <th>ไรเดอร์</th>
+            <th class="text-right">จุดส่ง</th>
+            <th class="text-right">กล่อง</th>
+            <th class="text-right">กม.</th>
+            <th class="text-right">ค่าไรเดอร์</th>
+            <th class="text-right">กำไร</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (job of plan()!.jobs; track job.id) {
+            <tr class="hover:bg-base-200">
+              <td>
+                <span class="mr-2 inline-block size-3 rounded-full" [style.background-color]="job.color"></span>
+                <a class="link" [routerLink]="['/rider/job', job.id]">{{ job.id }}</a>
+              </td>
+              <td class="whitespace-nowrap">{{ riderName(job) }}</td>
+              <td class="text-right">{{ job.stops.length }}</td>
+              <td class="text-right">{{ job.total_box }}</td>
+              <td class="text-right">{{ km(job.distance_km) }}</td>
+              <td class="text-right">{{ money(job.cost) }}</td>
+              <td class="text-right" [class.text-error]="jobProfit(job) < 0">{{ money(jobProfit(job)) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- วิธีคิด -->
+    <div class="card border border-base-300">
+      <div class="card-body">
+        <h2 class="card-title">วิธีคิด</h2>
+        <ul class="space-y-2">
+          <li>ยอดขาย = {{ plan()!.total_box }} กล่อง × {{ appData.shop().pricePerBox }} บาท</li>
+          <li>ค่าอาหาร = {{ plan()!.total_box }} กล่อง × {{ appData.shop().foodCostPerBox }} บาท</li>
+          <li>
+            ค่าไรเดอร์ (ต่อคน) = {{ appData.shop().riderBaseFee }} + {{ appData.shop().riderFeePerKmPerBox }} × กล่อง × กม.
+            <span class="text-base-content/70">· {{ plan()!.rider_count }} คน รวม {{ km(plan()!.total_distance_km) }} กม.</span>
+          </li>
+          <li class="font-semibold">กำไร = ยอดขาย - ค่าอาหาร - ค่าไรเดอร์</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+}
