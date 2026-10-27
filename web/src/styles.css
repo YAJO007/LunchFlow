@@ -1,8 +1,51 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap');
 @import "tailwindcss";
 @plugin "daisyui";
 
+/* ธีมสีของเว็บ (โทนเดียวกับ Google: พื้นขาว ขอบเทาอ่อน ปุ่มสีเขียว) */
+@plugin "daisyui/theme" {
+  name: "lunchflow";
+  default: true;
+  color-scheme: light;
+
+  --color-base-100: #ffffff;
+  --color-base-200: #f1f3f4;
+  --color-base-300: #dadce0;
+  --color-base-content: #202124;
+
+  --color-primary: #188038;
+  --color-primary-content: #ffffff;
+  --color-secondary: #e6f4ea;
+  --color-secondary-content: #137333;
+  --color-accent: #1a73e8;
+  --color-accent-content: #ffffff;
+  --color-neutral: #3c4043;
+  --color-neutral-content: #ffffff;
+
+  --color-info: #1a73e8;
+  --color-info-content: #ffffff;
+  --color-success: #188038;
+  --color-success-content: #ffffff;
+  --color-warning: #f9ab00;
+  --color-warning-content: #202124;
+  --color-error: #d93025;
+  --color-error-content: #ffffff;
+
+  --radius-selector: 1rem;
+  --radius-field: 0.5rem;
+  --radius-box: 1rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
 body {
   font-family: 'Noto Sans Thai', sans-serif;
+  background-color: var(--color-base-100);
+}
+
+/* ปุ่มทรงแคปซูลแบบ Google */
+.btn {
+  border-radius: 9999px;
+  font-weight: 500;
 }
