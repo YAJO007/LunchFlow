@@ -8,7 +8,7 @@ import { AppData } from '../../../service/app-data';
 import { money } from '../../../utils/format';
 
 // หน้า "ภาพรวม" = หน้าแรกหลังล็อกอินของเจ้าของร้าน
-// สรุปตัวเลขสำคัญ (ลูกค้า, ออเดอร์, กล่อง, ไรเดอร์, ยอดขาย) และแผนส่งล่าสุด
+// สรุปตัวเลขสำคัญ (ลูกค้า, ออเดอร์, กล่อง, ยอดขาย) และแผนส่งล่าสุด
 @Component({
   selector: 'app-dashboard',
   imports: [RouterModule],
@@ -28,7 +28,7 @@ export class Dashboard {
   // ทำงานทันทีตอนเปิดหน้านี้ → เริ่มโหลดข้อมูล
   constructor(
     private api: Api, // ตัวช่วยคุยกับหลังบ้าน (Web API)
-    public appData: AppData, // ข้อมูลที่ใช้ร่วมกันทุกหน้า (ข้อมูลร้าน, ไรเดอร์)
+    public appData: AppData, // ข้อมูลที่ใช้ร่วมกันทุกหน้า (ข้อมูลร้าน)
   ) {
     this.load();
   }

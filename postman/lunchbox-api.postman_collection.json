@@ -57,7 +57,7 @@
           }
         },
         {
-          "name": "ค้นหาชื่อ/นามสกุล",
+          "name": "ค้นหาลูกค้าจากชื่อ",
           "request": {
             "method": "GET",
             "header": [
@@ -67,7 +67,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/customer/search?firstname=สม&lastname=",
+              "raw": "{{baseUrl}}/customer/search?name=สม",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -77,44 +77,8 @@
               ],
               "query": [
                 {
-                  "key": "firstname",
+                  "key": "name",
                   "value": "สม"
-                },
-                {
-                  "key": "lastname",
-                  "value": ""
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "ลูกค้าในระยะ 1 กม.",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/customer/nearby?lat=16.2459&lng=103.2525",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "customer",
-                "nearby"
-              ],
-              "query": [
-                {
-                  "key": "lat",
-                  "value": "16.2459"
-                },
-                {
-                  "key": "lng",
-                  "value": "103.2525"
                 }
               ]
             }
@@ -237,38 +201,6 @@
               "path": [
                 "order",
                 "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "ออเดอร์ในระยะ 2 กม.",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/order/nearby?lat=16.2459&lng=103.2525",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "order",
-                "nearby"
-              ],
-              "query": [
-                {
-                  "key": "lat",
-                  "value": "16.2459"
-                },
-                {
-                  "key": "lng",
-                  "value": "103.2525"
-                }
               ]
             }
           }
@@ -538,115 +470,6 @@
               "path": [
                 "job",
                 "1001"
-              ]
-            }
-          }
-        }
-      ]
-    },
-{
-      "name": "Rider",
-      "item": [
-        {
-          "name": "ไรเดอร์ทั้งหมด",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/rider",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "rider"
-              ]
-            }
-          }
-        },
-        {
-          "name": "เพิ่มไรเดอร์",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"ไรเดอร์ใหม่\",\n  \"phone\": \"0812345678\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/rider",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "rider"
-              ]
-            }
-          }
-        },
-        {
-          "name": "เปลี่ยนสถานะไรเดอร์",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"available\": false\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/rider/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "rider",
-                "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "ลบไรเดอร์",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/rider/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "rider",
-                "1"
               ]
             }
           }
