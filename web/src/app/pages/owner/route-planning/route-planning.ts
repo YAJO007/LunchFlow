@@ -22,6 +22,10 @@ export class RoutePlanning {
   totalOptions = signal(0);
   confirmed = signal(false);
 
+  // กำลังรอ API อยู่ไหม (ระหว่างนี้ล็อกปุ่ม กันกดซ้ำแล้วได้แผนซ้อนกันหลายแผน)
+  calculating = signal(false);
+  saving = signal(false);
+
   // จำนวนไรเดอร์ที่เลือกเอง (undefined = ให้ระบบเลือกให้)
   riderCount = signal<number | undefined>(undefined);
   minRiders = signal(0);
@@ -41,7 +45,16 @@ export class RoutePlanning {
     private router: Router,
   ) {}
 
+  // ปุ่มทุกปุ่มในหน้านี้ต้องล็อกไหม
+  busy(): boolean {
+    return this.calculating() || this.saving();
+  }
+
   async calculate(option: number) {
+    if (this.busy()) {
+      return;
+    }
+    this.calculating.set(true);
     try {
       const result = await this.routeApi.calculateRoute(option, this.riderCount());
       this.previous.set(this.plan());
@@ -54,6 +67,7 @@ export class RoutePlanning {
     } catch (error: any) {
       this.notify.apiError(error);
     }
+    this.calculating.set(false);
   }
 
   next() {
@@ -87,9 +101,10 @@ export class RoutePlanning {
   }
 
   async confirm() {
-    if (!confirm('ยืนยันแผนนี้ ?')) {
+    if (this.busy() || !confirm('ยืนยันแผนนี้ ?')) {
       return;
     }
+    this.saving.set(true);
     try {
       // ส่งชื่อให้ครบทุกคน ช่องไหนยังไม่กรอกส่งเป็น ''
       const names = this.plan()!.jobs.map((job) => this.typedName(job.rider_no));
@@ -102,5 +117,6 @@ export class RoutePlanning {
     } catch (error: any) {
       this.notify.apiError(error);
     }
+    this.saving.set(false);
   }
 }

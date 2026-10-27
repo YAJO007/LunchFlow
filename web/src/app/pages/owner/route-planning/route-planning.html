@@ -9,14 +9,19 @@
   </div>
   <div class="flex flex-wrap gap-2">
     @if (plan() && !confirmed()) {
-      <button class="btn btn-outline" (click)="next()">
+      <button class="btn btn-outline" (click)="next()" [disabled]="busy()">
         <i class="fa-solid fa-rotate"></i>
         คำนวณใหม่ (แผนถัดไป)
       </button>
     }
-    <button class="btn btn-primary" (click)="calculateAuto()">
-      <i class="fa-solid fa-route"></i>
-      คำนวณเส้นทาง
+    <button class="btn btn-primary" (click)="calculateAuto()" [disabled]="busy()">
+      @if (calculating()) {
+        <span class="loading loading-spinner loading-sm"></span>
+        กำลังคำนวณ...
+      } @else {
+        <i class="fa-solid fa-route"></i>
+        คำนวณเส้นทาง
+      }
     </button>
   </div>
 </div>
@@ -87,10 +92,10 @@
                   <!-- ปุ่ม − / + เพิ่มลดจำนวนไรเดอร์ แล้วระบบแบ่งออเดอร์ใหม่ -->
                   <div class="join">
                     <button class="btn btn-sm join-item" (click)="changeRiders(-1)"
-                      [disabled]="plan()!.rider_count <= minRiders()" title="ลดไรเดอร์ 1 คน">−</button>
+                      [disabled]="busy() || plan()!.rider_count <= minRiders()" title="ลดไรเดอร์ 1 คน">−</button>
                     <span class="btn btn-sm join-item pointer-events-none">{{ plan()!.rider_count }} คน</span>
                     <button class="btn btn-sm join-item" (click)="changeRiders(1)"
-                      [disabled]="plan()!.rider_count >= maxRiders()" title="เพิ่มไรเดอร์ 1 คน">+</button>
+                      [disabled]="busy() || plan()!.rider_count >= maxRiders()" title="เพิ่มไรเดอร์ 1 คน">+</button>
                   </div>
                 }
               </td>
@@ -128,9 +133,14 @@
         }
 
         @if (!confirmed()) {
-          <button class="btn btn-primary mt-2 w-full" (click)="confirm()">
-            <i class="fa-solid fa-check"></i>
-            ยืนยันแผนและสร้างใบงาน
+          <button class="btn btn-primary mt-2 w-full" (click)="confirm()" [disabled]="busy()">
+            @if (saving()) {
+              <span class="loading loading-spinner loading-sm"></span>
+              กำลังบันทึก...
+            } @else {
+              <i class="fa-solid fa-check"></i>
+              ยืนยันแผนและสร้างใบงาน
+            }
           </button>
         }
       </div>
