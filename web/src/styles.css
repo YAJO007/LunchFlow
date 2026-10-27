@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap');
 @import "tailwindcss";
-@plugin "daisyui";
+/* themes: false = ไม่ใช้ธีมสำเร็จรูปของ daisyUI (กันเครื่องที่ตั้งโหมดมืดได้สีม่วงชมพู) */
+@plugin "daisyui" {
+  themes: false;
+}
 
 /* ธีมสีของเว็บ: โทนเขียวทั้งเว็บ พื้นเทาอมเขียวอ่อน ปุ่มเขียวเข้ม เตือนด้วยสีส้มอำพัน */
 @plugin "daisyui/theme" {
