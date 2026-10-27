@@ -51,6 +51,39 @@ function groupBySweep(orders: OrderDetail[], startIndex: number): OrderDetail[][
   return groups;
 }
 
+// วิธีที่ 3 "กวาดรอบร้านแบ่งเท่าๆ กัน": ใช้ตอนเจ้าของร้านเลือกจำนวนไรเดอร์เอง (riderCount คน)
+// เรียงบ้านตามทิศรอบร้านเหมือนวิธีที่ 1 แล้วแบ่งให้ไรเดอร์ riderCount คน คนละจำนวนใกล้ๆ กัน
+// เช่น 25 ออเดอร์ 12 คน → 1 คนได้ 3 ออเดอร์ อีก 11 คนได้ 2 ออเดอร์
+function groupBySweepEven(orders: OrderDetail[], riderCount: number, startIndex: number): OrderDetail[][] {
+  const angleOf = (order: OrderDetail) =>
+    Math.atan2(order.longitude - SHOP.longitude, order.latitude - SHOP.latitude);
+
+  const sorted = [...orders].sort((a, b) => angleOf(a) - angleOf(b));
+  const rotated = [...sorted.slice(startIndex), ...sorted.slice(0, startIndex)];
+
+  const groups: OrderDetail[][] = [];
+  let index = 0;
+  for (let i = 0; i < riderCount; i++) {
+    // ทุกคนได้เท่ากันก่อน แล้วเศษที่เหลือแจกให้คนแรกๆ คนละ 1
+    let size = Math.floor(orders.length / riderCount);
+    if (i < orders.length % riderCount) {
+      size++;
+    }
+    groups.push(rotated.slice(index, index + size));
+    index += size;
+  }
+  return groups;
+}
+
+// จำนวนไรเดอร์ที่เลือกได้: น้อยสุด = ออเดอร์ ÷ 3 ปัดขึ้น (คนละไม่เกิน 3), มากสุด = 1 คน 1 ออเดอร์
+export function minRiders(orderCount: number): number {
+  return Math.ceil(orderCount / SHOP.maxOrdersPerRider);
+}
+
+export function maxRiders(orderCount: number): number {
+  return orderCount;
+}
+
 // วิธีที่ 2 "จับกลุ่มเพื่อนบ้าน": เลือกบ้านตั้งต้น 1 หลัง (ไกลสุดหรือใกล้สุดจากร้าน)
 // แล้วหยิบบ้านที่ใกล้บ้านตั้งต้นที่สุดมาเข้ากลุ่มจนครบ 3 ออเดอร์ ทำซ้ำจนครบทุกออเดอร์
 function groupByNearest(orders: OrderDetail[], startFromFarthest: boolean): OrderDetail[][] {
@@ -345,18 +378,30 @@ function groupsKey(groups: OrderDetail[][]): string {
 
 // ฟังก์ชันหลัก: ลองแบ่งงานหลายวิธี แล้วเรียงแผนจากดีที่สุดไปแย่สุด
 // (ส่งทันทุกบ้านมาก่อน แล้วค่าไรเดอร์ถูกสุดมาก่อน)
-export function calculatePlans(orders: OrderDetail[]): RoutePlan[] {
+// riderCount = จำนวนไรเดอร์ที่เจ้าของร้านเลือกเอง (ไม่ส่งมา = ให้ระบบเลือกให้)
+export function calculatePlans(orders: OrderDetail[], riderCount?: number): RoutePlan[] {
   if (orders.length === 0) {
     return [];
   }
 
-  const baseCandidates = [
+  let baseCandidates = [
     { name: "กวาดรอบร้าน (เริ่มตำแหน่งที่ 1)", groups: groupBySweep(orders, 0) },
     { name: "กวาดรอบร้าน (เริ่มตำแหน่งที่ 2)", groups: groupBySweep(orders, 1) },
     { name: "กวาดรอบร้าน (เริ่มตำแหน่งที่ 3)", groups: groupBySweep(orders, 2) },
     { name: "จับกลุ่มเพื่อนบ้าน (เริ่มจากบ้านไกลสุด)", groups: groupByNearest(orders, true) },
     { name: "จับกลุ่มเพื่อนบ้าน (เริ่มจากบ้านใกล้สุด)", groups: groupByNearest(orders, false) },
   ];
+
+  // เลือกจำนวนไรเดอร์เอง: ใช้วิธีที่ 3 แทน โดยลองเริ่มแบ่งจากบ้านต่างกัน 5 แบบ
+  if (riderCount !== undefined) {
+    baseCandidates = [];
+    for (let start = 0; start < 5 && start < orders.length; start++) {
+      baseCandidates.push({
+        name: "แบ่งให้ไรเดอร์ " + riderCount + " คน (เริ่มตำแหน่งที่ " + (start + 1) + ")",
+        groups: groupBySweepEven(orders, riderCount, start),
+      });
+    }
+  }
 
   const candidates = [...baseCandidates];
   for (const candidate of baseCandidates) {

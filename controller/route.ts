@@ -3,7 +3,7 @@ import { conn } from "../dbconnect";
 import { SHOP } from "../config/shop";
 import { OrderDetail } from "../model/order";
 import { RiderJob, RoutePlan, RouteStop } from "../model/route";
-import { calculatePlans, planWarnings } from "../utils/route-planner";
+import { calculatePlans, maxRiders, minRiders, planWarnings } from "../utils/route-planner";
 import { addRoadPaths } from "../utils/road-path";
 import { SELECT_ORDER_DETAIL } from "./order";
 
@@ -17,17 +17,43 @@ function readOption(body: any): number | null {
   return option;
 }
 
-async function getPlanOption(option: number) {
+// อ่านจำนวนไรเดอร์ที่เลือกเอง ไม่ส่งมา = undefined (ให้ระบบเลือก), ส่งมาผิด = null
+function readRiderCount(body: any): number | undefined | null {
+  if (body.rider_count === undefined || body.rider_count === null || body.rider_count === "") {
+    return undefined;
+  }
+  const riderCount = Number(body.rider_count);
+  if (!Number.isInteger(riderCount)) {
+    return null;
+  }
+  return riderCount;
+}
+
+// คำนวณแผนทั้งหมด แล้วหยิบแผนที่ option ออกมา
+// ถ้ามีปัญหาจะได้ { error: "ข้อความ" } กลับไป
+async function getPlanOption(option: number, riderCount?: number) {
   const [rows] = await conn.query(SELECT_ORDER_DETAIL + " ORDER BY orders.id");
   const orders = rows as OrderDetail[];
   if (orders.length === 0) {
-    return null;
+    return { error: "ยังไม่มีออเดอร์ กรุณาเพิ่มหรือสุ่มออเดอร์ก่อน" };
   }
 
-  const plans = calculatePlans(orders);
+  const min = minRiders(orders.length);
+  const max = maxRiders(orders.length);
+  if (riderCount !== undefined && (riderCount < min || riderCount > max)) {
+    return { error: "จำนวนไรเดอร์ต้องอยู่ระหว่าง " + min + " - " + max + " คน" };
+  }
+
+  const plans = calculatePlans(orders, riderCount);
 
   const index = option % plans.length;
-  return { option: index, total_options: plans.length, plan: plans[index] };
+  return {
+    option: index,
+    total_options: plans.length,
+    min_riders: min,
+    max_riders: max,
+    plan: plans[index],
+  };
 }
 
 export async function loadJobStops(jobId: number): Promise<RouteStop[]> {
@@ -141,9 +167,14 @@ router.post("/calculate", async (req, res) => {
       return res.status(400).json({ error: "เลขแผนไม่ถูกต้อง" });
     }
 
-    const result = await getPlanOption(option);
-    if (!result) {
-      return res.status(400).json({ error: "ยังไม่มีออเดอร์ กรุณาเพิ่มหรือสุ่มออเดอร์ก่อน" });
+    const riderCount = readRiderCount(req.body || {});
+    if (riderCount === null) {
+      return res.status(400).json({ error: "จำนวนไรเดอร์ไม่ถูกต้อง" });
+    }
+
+    const result = await getPlanOption(option, riderCount);
+    if ("error" in result) {
+      return res.status(400).json({ error: result.error });
     }
     await addRoadPaths(result.plan.jobs);
     res.status(200).json(result);
@@ -160,9 +191,14 @@ router.post("/confirm", async (req, res) => {
       return res.status(400).json({ error: "เลขแผนไม่ถูกต้อง" });
     }
 
-    const result = await getPlanOption(option);
-    if (!result) {
-      return res.status(400).json({ error: "ยังไม่มีออเดอร์ กรุณาเพิ่มหรือสุ่มออเดอร์ก่อน" });
+    const riderCount = readRiderCount(req.body || {});
+    if (riderCount === null) {
+      return res.status(400).json({ error: "จำนวนไรเดอร์ไม่ถูกต้อง" });
+    }
+
+    const result = await getPlanOption(option, riderCount);
+    if ("error" in result) {
+      return res.status(400).json({ error: result.error });
     }
 
     // ชื่อไรเดอร์ที่กรอกมา เรียงตามไรเดอร์คนที่ 1, 2, 3, ... (ไม่กรอกก็ได้)

@@ -207,6 +207,25 @@ test("กรณีพิเศษ: ออเดอร์ 30 รายการ�
   }
 });
 
+test("เลือกจำนวนไรเดอร์เอง: 30 ออเดอร์ ไรเดอร์ 12 คน ทุกแผนใช้ 12 คนพอดี", () => {
+  const orders = makeOrders(30, 31);
+  const plans = calculatePlans(orders, 12);
+  assert.ok(plans.length >= 1);
+  for (const plan of plans) {
+    checkPlanStructure(plan, orders);
+    assert.strictEqual(plan.rider_count, 12);
+  }
+});
+
+test("เลือกจำนวนไรเดอร์เอง: 1 คน 1 ออเดอร์ (ไรเดอร์เท่ากับจำนวนออเดอร์)", () => {
+  const orders = makeOrders(20, 32);
+  for (const plan of calculatePlans(orders, 20)) {
+    checkPlanStructure(plan, orders);
+    assert.strictEqual(plan.rider_count, 20);
+    assert.ok(plan.jobs.every((job) => job.stops.length === 1));
+  }
+});
+
 console.log("\nผ่าน " + passed + " ข้อ, ไม่ผ่าน " + failed + " ข้อ");
 if (failed > 0) {
   process.exit(1);

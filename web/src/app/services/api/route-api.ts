@@ -22,18 +22,21 @@ export class RouteApi {
   }
 
   // คำนวณเส้นทาง option = แผนที่ 0, 1, 2, ... (ยังไม่บันทึก)
-  public async calculateRoute(option: number) {
+  // riderCount = จำนวนไรเดอร์ที่เลือกเอง (ไม่ส่ง = ให้ระบบเลือกให้)
+  public async calculateRoute(option: number, riderCount?: number) {
     const url = `${this.apiEndpoint}/route/calculate`;
-    const response = await lastValueFrom(this.http.post(url, { option: option }));
+    const response = await lastValueFrom(
+      this.http.post(url, { option: option, rider_count: riderCount }),
+    );
     return response as PlanOption;
   }
 
   // ยืนยันแผน = บันทึกลงฐานข้อมูลและออกเลขใบงาน
   // riderNames = ชื่อไรเดอร์คนที่ 1, 2, 3, ... (ช่องไหนไม่กรอกส่งเป็น '' ได้)
-  public async confirmRoute(option: number, riderNames: string[]) {
+  public async confirmRoute(option: number, riderNames: string[], riderCount?: number) {
     const url = `${this.apiEndpoint}/route/confirm`;
     const response = await lastValueFrom(
-      this.http.post(url, { option: option, rider_names: riderNames }),
+      this.http.post(url, { option: option, rider_names: riderNames, rider_count: riderCount }),
     );
     return response as RoutePlan;
   }

@@ -14,7 +14,7 @@
         คำนวณใหม่ (แผนถัดไป)
       </button>
     }
-    <button class="btn btn-primary" (click)="calculate(0)">
+    <button class="btn btn-primary" (click)="calculateAuto()">
       <i class="fa-solid fa-route"></i>
       คำนวณเส้นทาง
     </button>
@@ -49,9 +49,9 @@
     </div>
   }
 
-  <div class="mt-4 grid items-start gap-4 lg:grid-cols-3">
+  <div class="mt-4 grid items-start gap-4 lg:grid-cols-[1fr_21rem]">
     <!-- แผนที่ขนาดใหญ่ -->
-    <div class="card border border-base-300 lg:col-span-2">
+    <div class="card border border-base-300">
       <div class="card-body p-4">
         <div class="aspect-square overflow-hidden rounded-box border border-base-300">
           <app-route-map [jobs]="plan()!.jobs" [shop]="appData.shop()"></app-route-map>
@@ -78,7 +78,23 @@
         <h2 class="card-title">สรุปแผนนี้</h2>
         <table class="table">
           <tbody>
-            <tr><td>ไรเดอร์</td><td class="text-right">{{ plan()!.rider_count }} คน</td></tr>
+            <tr>
+              <td>ไรเดอร์</td>
+              <td class="text-right">
+                @if (confirmed()) {
+                  {{ plan()!.rider_count }} คน
+                } @else {
+                  <!-- ปุ่ม − / + เพิ่มลดจำนวนไรเดอร์ แล้วระบบแบ่งออเดอร์ใหม่ -->
+                  <div class="join">
+                    <button class="btn btn-sm join-item" (click)="changeRiders(-1)"
+                      [disabled]="plan()!.rider_count <= minRiders()" title="ลดไรเดอร์ 1 คน">−</button>
+                    <span class="btn btn-sm join-item pointer-events-none">{{ plan()!.rider_count }} คน</span>
+                    <button class="btn btn-sm join-item" (click)="changeRiders(1)"
+                      [disabled]="plan()!.rider_count >= maxRiders()" title="เพิ่มไรเดอร์ 1 คน">+</button>
+                  </div>
+                }
+              </td>
+            </tr>
             <tr><td>ออเดอร์ / กล่อง</td><td class="text-right">{{ plan()!.total_order }} / {{ plan()!.total_box }}</td></tr>
             <tr><td>ระยะทางรวม</td><td class="text-right">{{ km(plan()!.total_distance_km) }} กม.</td></tr>
             <tr><td>ส่งเสร็จคนสุดท้าย</td><td class="text-right">{{ plan()!.last_arrival_time }}</td></tr>

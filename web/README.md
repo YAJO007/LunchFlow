@@ -24,7 +24,7 @@ npm start          # เปิด http://localhost:4200
 | `/owner` | ภาพรวม | `GET /customer`, `GET /order`, `GET /route/latest` |
 | `/owner/customers` | ลูกค้า: แสดง ค้นหา เพิ่ม แก้ไข ลบ + แผนที่ | `/customer`, `/customer/search` |
 | `/owner/orders` | ออเดอร์: สุ่ม 20-30 เพิ่ม แก้จำนวนกล่อง ลบ ลบทั้งหมด | `/order`, `/order/simulate` |
-| `/owner/routes` | จัดเส้นทาง: คำนวณ คำนวณใหม่ เทียบแผน สรุปกำไร/ขาดทุน กรอกชื่อไรเดอร์ ยืนยัน | `/route/calculate`, `/route/confirm` |
+| `/owner/routes` | จัดเส้นทาง: คำนวณ คำนวณใหม่ เพิ่ม/ลดไรเดอร์ เทียบแผน สรุปกำไร/ขาดทุน กรอกชื่อไรเดอร์ ยืนยันแล้วไปหน้ากำไร | `/route/calculate`, `/route/confirm` |
 | `/owner/riders` | ไรเดอร์ทุกคนในแผนล่าสุด พร้อมใบงาน + กรอกเลขเปิดใบงาน | `GET /route/latest` |
 | `/owner/profit` | กำไร: ยอดขาย ต้นทุน ค่าไรเดอร์ กำไรรวมและรายไรเดอร์ ของแผนล่าสุด | `GET /route/latest` |
 | `/rider` | ไรเดอร์กรอกเลขใบงาน | - |

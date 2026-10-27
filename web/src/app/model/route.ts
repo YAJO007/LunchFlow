@@ -55,5 +55,7 @@ export interface RoutePlan {
 export interface PlanOption {
   option: number;
   total_options: number;
+  min_riders: number; // ไรเดอร์น้อยสุดที่เลือกได้ (คนละไม่เกิน 3 ออเดอร์)
+  max_riders: number; // ไรเดอร์มากสุดที่เลือกได้ (1 คน 1 ออเดอร์)
   plan: RoutePlan;
 }
