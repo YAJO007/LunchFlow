@@ -1,34 +1,63 @@
 @if (error()) {
-  <div class="alert alert-error">ใบงาน {{ id() }}: {{ error() }}</div>
-  <a routerLink="/rider" class="btn mt-4">กรอกใหม่</a>
+  <div class="alert alert-error">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    ใบงาน {{ id() }}: {{ error() }}
+  </div>
+  <a routerLink="/rider" class="btn btn-outline mt-4 w-full">กรอกเลขใบงานใหม่</a>
 }
 
 @if (job()) {
-  <h1 class="text-3xl font-bold">ใบงาน {{ job()!.id }}</h1>
-  <p class="mt-2 text-xl">
-    หยิบ <b>{{ job()!.total_box }} กล่อง</b> · ส่ง {{ job()!.stops.length }} จุด · {{ km(job()!.distance_km) }} กม.
-  </p>
-  <p>ออกจากร้าน {{ job()!.departure_time }} · ส่งเสร็จประมาณ {{ job()!.finish_time }} (ต้องก่อน {{ job()!.deadline_time }})</p>
+  <!-- สรุปงานวันนี้ -->
+  <div class="card bg-base-100">
+    <div class="card-body">
+      <h1 class="card-title text-2xl">ใบงาน {{ job()!.id }}</h1>
+      <div class="rounded-box bg-secondary p-4 text-secondary-content">
+        <p>วันนี้ต้องหยิบข้าวกล่อง</p>
+        <p class="text-4xl font-semibold">{{ job()!.total_box }} กล่อง</p>
+      </div>
+      <ul class="mt-2 space-y-1">
+        <li><i class="fa-solid fa-location-dot w-6 text-primary"></i> ส่ง {{ job()!.stops.length }} จุด · {{ km(job()!.distance_km) }} กม.</li>
+        <li><i class="fa-solid fa-clock w-6 text-primary"></i> ออกจากร้าน {{ job()!.departure_time }}</li>
+        <li><i class="fa-solid fa-flag-checkered w-6 text-primary"></i> ส่งเสร็จประมาณ {{ job()!.finish_time }} (ต้องก่อน {{ job()!.deadline_time }})</li>
+      </ul>
+      <a class="btn btn-primary btn-lg mt-2 w-full" [href]="job()!.map_url" target="_blank">
+        <i class="fa-solid fa-map"></i>
+        เปิด Google Maps นำทางทั้งเส้น
+      </a>
+    </div>
+  </div>
 
-  <a class="btn mt-4 min-h-14 w-full text-lg border-none bg-green-700 text-white hover:bg-green-800"
-   [href]="job()!.map_url" target="_blank" rel="noopener noreferrer">เปิด Google Maps นำทางทั้งเส้น</a>
-
+  <!-- จุดส่งเรียงตามลำดับ -->
+  <h2 class="mt-6 mb-2 text-lg">ลำดับการส่ง</h2>
   @for (stop of job()!.stops; track stop.stop_no) {
-    <div class="card mt-4 bg-base-200">
-      <div class="card-body">
-        <h2 class="card-title">{{ stop.stop_no }}. {{ stop.customer_name }}</h2>
+    <div class="card mb-3 bg-base-100">
+      <div class="card-body p-4">
+        <h3 class="card-title">
+          <span class="badge badge-primary">จุดที่ {{ stop.stop_no }}</span>
+          คุณ{{ stop.customer_name }}
+        </h3>
         <p>{{ stop.quantity }} กล่อง · ถึงประมาณ {{ stop.arrival_time }}</p>
-        <p>{{ stop.address }}</p>
-        <div class="card-actions">
-          <a class="btn min-h-11" [href]="'tel:' + stop.phone">โทร {{ stop.phone }}</a>
-          <a class="btn min-h-11" [href]="navigateLink(stop.latitude, stop.longitude)" target="_blank" rel="noopener noreferrer">นำทาง</a>
+        <p class="text-sm text-base-content/70">{{ stop.address }}</p>
+        <div class="card-actions mt-1">
+          <a class="btn btn-outline flex-1" [href]="'tel:' + stop.phone">
+            <i class="fa-solid fa-phone"></i>
+            โทร
+          </a>
+          <a class="btn btn-secondary flex-1" [href]="navigateLink(stop.latitude, stop.longitude)" target="_blank">
+            <i class="fa-solid fa-diamond-turn-right"></i>
+            นำทาง
+          </a>
         </div>
       </div>
     </div>
   }
 
-
-  <div class="mt-4 aspect-square border">
-    <app-route-map [jobs]="[job()!]" [shop]="appData.shop()"></app-route-map>
+  <!-- แผนที่เส้นทาง -->
+  <div class="card bg-base-100">
+    <div class="card-body p-4">
+      <div class="aspect-square overflow-hidden rounded-box border border-base-300">
+        <app-route-map [jobs]="[job()!]" [shop]="appData.shop()"></app-route-map>
+      </div>
+    </div>
   </div>
 }
