@@ -24,16 +24,4 @@ export class AppData {
   logout() {
     sessionStorage.removeItem('owner');
   }
-
-  deliveredOf(jobId: number): number[] {
-    const saved = localStorage.getItem('delivered-' + jobId);
-    if (saved) {
-      return JSON.parse(saved);
-    }
-    return [];
-  }
-
-  saveDelivered(jobId: number, stopNos: number[]) {
-    localStorage.setItem('delivered-' + jobId, JSON.stringify(stopNos));
-  }
 }
