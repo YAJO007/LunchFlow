@@ -114,12 +114,12 @@ export class Orders {
   }
 
   async clearAll() {
-    if (!confirm('ล้างออเดอร์ทั้งหมด ?')) {
+    if (!confirm('ลบออเดอร์ทั้งหมดใช่ไหม?')) {
       return;
     }
     try {
       await this.api.clearOrders();
-      this.notify.success('ล้างออเดอร์แล้ว');
+      this.notify.success('ลบออเดอร์ทั้งหมดแล้ว');
       await this.load();
     } catch (error: any) {
       this.notify.apiError(error);
