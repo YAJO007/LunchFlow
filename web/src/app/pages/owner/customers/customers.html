@@ -81,15 +81,14 @@
   </div>
 }
 
-<div class="mt-6 grid items-start gap-4 lg:grid-cols-3">
+<div class="mt-6 grid items-start gap-4 lg:grid-cols-[1fr_18rem]">
   <!-- ตารางลูกค้า -->
-  <div class="overflow-x-auto rounded-box border border-base-300 lg:col-span-2">
+  <div class="overflow-x-auto rounded-box border border-base-300">
     <table class="table">
       <thead>
         <tr>
           <th>#</th>
-          <th>ชื่อ</th>
-          <th>เบอร์โทร</th>
+          <th>ชื่อ / เบอร์โทร</th>
           <th>ที่อยู่</th>
           <th>ห่างร้าน</th>
           <th></th>
@@ -99,9 +98,11 @@
         @for (c of customers(); track c.id) {
           <tr class="hover:bg-base-200">
             <td>{{ c.id }}</td>
-            <td class="whitespace-nowrap">{{ c.firstname }} {{ c.lastname }}</td>
-            <td>{{ c.phone }}</td>
-            <td class="min-w-48 text-base-content/70">{{ c.address }}</td>
+            <td class="whitespace-nowrap">
+              {{ c.firstname }} {{ c.lastname }}
+              <div class="text-sm text-base-content/70">{{ c.phone }}</div>
+            </td>
+            <td class="text-base-content/70">{{ c.address }}</td>
             <td class="whitespace-nowrap">{{ distanceFromShop(c) }} กม.</td>
             <td>
               <div class="flex justify-end">
@@ -119,7 +120,7 @@
           </tr>
         } @empty {
           <tr>
-            <td colspan="6" class="py-10 text-center text-base-content/70">ไม่พบลูกค้า</td>
+            <td colspan="5" class="py-10 text-center text-base-content/70">ไม่พบลูกค้า</td>
           </tr>
         }
       </tbody>
