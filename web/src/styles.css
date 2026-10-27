@@ -39,8 +39,14 @@
   --noise: 0;
 }
 
+/* ขนาดตัวอักษรหลัก 18px (ปกติ 16px) ทุกอย่างในเว็บจะใหญ่ขึ้นตาม อ่านง่ายขึ้น */
+html {
+  font-size: 18px;
+}
+
 body {
   font-family: 'Noto Sans Thai', sans-serif;
+  line-height: 1.6;
   background-color: var(--color-base-100);
 }
 
