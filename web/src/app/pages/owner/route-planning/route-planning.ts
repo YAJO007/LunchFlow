@@ -46,18 +46,6 @@ export class RoutePlanning {
     this.calculate(this.option() + 1);
   }
 
-  enoughRiders(): boolean {
-    return this.plan()!.rider_count <= this.appData.availableRiders().length;
-  }
-
-  riderName(riderNo: number): string {
-    const rider = this.appData.riderOf(riderNo);
-    if (rider) {
-      return rider.name;
-    }
-    return 'ไม่มีไรเดอร์';
-  }
-
   async confirm() {
     if (!confirm('ยืนยันแผนนี้ ?')) {
       return;

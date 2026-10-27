@@ -6,7 +6,6 @@ import { Customer } from '../model/customer';
 import { Order } from '../model/order';
 import { PlanOption, RiderJob, RoutePlan } from '../model/route';
 import { Shop } from '../model/shop';
-import { Rider, RiderPostRequest, RiderPutRequest } from '../model/rider';
 
 // รวมทุกเส้น API ไว้ที่เดียว (ตามบท API Endpoint)
 // หน้าไหนอยากคุยกับหลังบ้าน ก็ inject(Api) แล้วเรียกฟังก์ชันในนี้
@@ -37,31 +36,6 @@ export class Api {
 
   async deleteCustomer(id: number) {
     const url = `${API_URL}/customer/${id}`;
-    const response = await lastValueFrom(this.http.delete(url));
-    return response;
-  }
-
-  // ---------- ไรเดอร์ ----------
-  async getRiders() {
-    const url = `${API_URL}/rider`;
-    const response = await lastValueFrom(this.http.get(url));
-    return response as Rider[];
-  }
-
-  async addRider(rider: RiderPostRequest) {
-    const url = `${API_URL}/rider`;
-    const response = await lastValueFrom(this.http.post(url, rider));
-    return response;
-  }
-
-  async updateRider(no: number, rider: RiderPutRequest) {
-    const url = `${API_URL}/rider/${no}`;
-    const response = await lastValueFrom(this.http.put(url, rider));
-    return response;
-  }
-
-  async deleteRider(no: number) {
-    const url = `${API_URL}/rider/${no}`;
     const response = await lastValueFrom(this.http.delete(url));
     return response;
   }
@@ -110,18 +84,18 @@ export class Api {
     return response as Shop;
   }
 
-  async calculateRoute(option: number, availableRiders?: number) {
+  async calculateRoute(option: number) {
     const url = `${API_URL}/route/calculate`;
     const response = await lastValueFrom(
-      this.http.post(url, { option: option, available_riders: availableRiders }),
+      this.http.post(url, { option: option }),
     );
     return response as PlanOption;
   }
 
-  async confirmRoute(option: number, availableRiders?: number) {
+  async confirmRoute(option: number) {
     const url = `${API_URL}/route/confirm`;
     const response = await lastValueFrom(
-      this.http.post(url, { option: option, available_riders: availableRiders }),
+      this.http.post(url, { option: option }),
     );
     return response as RoutePlan;
   }

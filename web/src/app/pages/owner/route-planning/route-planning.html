@@ -17,11 +17,6 @@
   </p>
 
   
-  @if (!enoughRiders()) {
-    <div class="alert alert-error mt-4">
-      ไรเดอร์ไม่พอ: ต้องใช้ {{ plan()!.rider_count }} คน แต่พร้อมแค่ {{ appData.availableRiders().length }} คน
-    </div>
-  }
   @if (!plan()!.all_on_time) {
     <div class="alert alert-warning mt-4">
       เสี่ยงส่งไม่ทัน: คนสุดท้ายถึง {{ plan()!.last_arrival_time }} (ต้องก่อน {{ plan()!.deadline_time }})
@@ -64,7 +59,7 @@
   }
 
   @if (!confirmed()) {
-    <button class="btn btn-primary mt-4" (click)="confirm()" [disabled]="!enoughRiders()">ยืนยันแผนและสร้างใบงาน</button>
+    <button class="btn btn-primary mt-4" (click)="confirm()">ยืนยันแผนและสร้างใบงาน</button>
   }
 
   
@@ -81,7 +76,6 @@
           <h3 class="card-title">
             {{ job.id ? 'ใบงาน ' + job.id : 'ไรเดอร์ ' + job.rider_no }}
           </h3>
-          <p>{{ riderName(job.rider_no) }}</p>
           <p>{{ job.total_box }} กล่อง · {{ km(job.distance_km) }} กม. · ค่าไรเดอร์ {{ money(job.cost) }} บาท</p>
           <p>ส่งเสร็จ {{ job.finish_time }} {{ job.on_time ? '' : '(ช้า)' }}</p>
           <ol class="list-decimal pl-5">

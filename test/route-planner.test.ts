@@ -207,19 +207,6 @@ test("กรณีพิเศษ: ออเดอร์ 30 รายการ�
   }
 });
 
-test("กรณีพิเศษ: ไรเดอร์พร้อมรับงานไม่พอ มีคำเตือนบอกจำนวนที่ขาด", () => {
-  const plans = calculatePlans(makeOrders(10, 9), 2);
-  for (const plan of plans) {
-    assert.ok(
-      plan.warnings.some((warning) => warning.includes("ขาด " + (plan.rider_count - 2) + " คน")),
-      plan.strategy + ": ไม่มีคำเตือนไรเดอร์ไม่พอ"
-    );
-  }
-  for (const plan of calculatePlans(makeOrders(10, 9), 10)) {
-    assert.ok(!plan.warnings.some((warning) => warning.includes("ไรเดอร์พร้อมรับงาน")));
-  }
-});
-
 console.log("\nผ่าน " + passed + " ข้อ, ไม่ผ่าน " + failed + " ข้อ");
 if (failed > 0) {
   process.exit(1);

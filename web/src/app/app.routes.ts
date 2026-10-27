@@ -5,7 +5,6 @@ import { Owner } from './pages/owner/owner';
 import { Dashboard } from './pages/owner/dashboard/dashboard';
 import { Customers } from './pages/owner/customers/customers';
 import { Orders } from './pages/owner/orders/orders';
-import { Riders } from './pages/owner/riders/riders';
 import { RoutePlanning } from './pages/owner/route-planning/route-planning';
 import { Report } from './pages/owner/report/report';
 import { Rider } from './pages/rider/rider';
@@ -25,7 +24,6 @@ export const routes: Routes = [
       { path: '', component: Dashboard },
       { path: 'customers', component: Customers },
       { path: 'orders', component: Orders },
-      { path: 'riders', component: Riders },
       { path: 'routes', component: RoutePlanning },
       { path: 'report', component: Report },
     ],
