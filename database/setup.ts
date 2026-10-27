@@ -3,7 +3,6 @@ import { conn } from "../dbconnect";
 
 async function setup() {
   try {
-
     const sqlText = fs.readFileSync("database/lunchbox.sql", "utf8").replace(/\r/g, "");
     const commands = sqlText
       .split(";\n")
@@ -24,8 +23,10 @@ async function setup() {
     console.log("สร้างตารางสำเร็จ มีลูกค้าทั้งหมด", (rows as any)[0].total, "คน");
   } catch (error) {
     console.error("สร้างตารางไม่สำเร็จ:", error);
+    process.exitCode = 1;
+  } finally {
+    await conn.end();
   }
-  await conn.end();
 }
 
 setup();

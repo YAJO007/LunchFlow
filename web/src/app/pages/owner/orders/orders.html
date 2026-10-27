@@ -49,7 +49,7 @@
    
     <div class="flex h-10 items-center rounded-full bg-[#f1f3f4] pl-4 transition focus-within:bg-white focus-within:shadow-md">
       <label for="simulate-amount" class="text-sm text-[#5f6368]">จำนวน</label>
-      <input id="simulate-amount" type="number" min="1" [(ngModel)]="simulateAmount"
+      <input id="simulate-amount" type="number" min="20" max="30" step="1" [(ngModel)]="simulateAmount"
         class="w-14 bg-transparent px-2 text-center text-sm font-medium tabular-nums outline-none" />
       <button (click)="simulate()"
         class="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-[#e6f4ea] px-4 text-sm font-medium text-[#137333] transition hover:bg-[#ceead6]">
@@ -91,7 +91,7 @@
       </div>
 
       <div class="mt-5 grid gap-x-4 gap-y-5 sm:grid-cols-[1fr_200px]">
-   
+
         <div class="relative">
           <select id="add-customer" [(ngModel)]="addCustomerId"
             class="h-14 w-full cursor-pointer appearance-none rounded border border-[#dadce0] bg-transparent pr-10 pl-[15px] text-base outline-none hover:border-[#202124] focus:border-2 focus:border-[#1e8e3e] focus:pl-[14px]">

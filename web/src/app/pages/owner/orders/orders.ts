@@ -58,10 +58,16 @@ export class Orders {
   }
 
   async simulate() {
+    const amount = Number(this.simulateAmount());
+    if (!Number.isInteger(amount) || amount < 20 || amount > 30) {
+      this.notify.error('จำนวนออเดอร์ที่สุ่มได้ต้องอยู่ระหว่าง 20 - 30');
+      return;
+    }
+
     try {
-      const result = await this.api.simulateOrders(Number(this.simulateAmount()));
+      const result = await this.api.simulateOrders(amount);
       this.notify.success('เพิ่ม ' + result.created_order + ' ออเดอร์');
-      this.load();
+      await this.load();
     } catch (error: any) {
       this.notify.error(error.message);
     }
@@ -87,7 +93,7 @@ export class Orders {
       await this.api.addOrder(Number(this.addCustomerId()), Number(this.addQuantity()));
       this.notify.success('เพิ่มออเดอร์แล้ว');
       this.addOpen.set(false);
-      this.load();
+      await this.load();
     } catch (error: any) {
       this.notify.error(error.message);
     }
@@ -97,7 +103,7 @@ export class Orders {
     try {
       await this.api.updateOrder(o.id, Number(select.value));
       this.notify.success('แก้ออเดอร์ #' + o.id + ' แล้ว');
-      this.load();
+      await this.load();
     } catch (error: any) {
       this.notify.error(error.message);
     }
@@ -110,7 +116,7 @@ export class Orders {
     try {
       await this.api.deleteOrder(o.id);
       this.notify.success('ลบแล้ว');
-      this.load();
+      await this.load();
     } catch (error: any) {
       this.notify.error(error.message);
     }
@@ -123,7 +129,7 @@ export class Orders {
     try {
       await this.api.clearOrders();
       this.notify.success('ล้างออเดอร์แล้ว');
-      this.load();
+      await this.load();
     } catch (error: any) {
       this.notify.error(error.message);
     }

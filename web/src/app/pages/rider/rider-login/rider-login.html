@@ -1,9 +1,9 @@
 <h1 class="text-2xl font-bold">ใบงานของฉัน</h1>
 
 <div class="mt-4 flex flex-col gap-3">
-  <input #jobNo type="number" placeholder="เลขใบงาน เช่น 1001" class="input w-full" />
+  <input #jobNo type="number" min="1" step="1" inputmode="numeric" placeholder="เลขใบงาน เช่น 1001" class="input min-h-14 w-full text-lg" />
   @if (error()) {
     <p class="text-error">{{ error() }}</p>
   }
-  <button class="btn btn-primary" (click)="open(jobNo)">เปิดใบงาน</button>
+  <button class="btn btn-primary min-h-14 text-lg" (click)="open(jobNo)">เปิดใบงาน</button>
 </div>

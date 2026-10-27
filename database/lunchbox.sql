@@ -42,6 +42,7 @@ CREATE TABLE `orders` (
   `quantity` INT NOT NULL,
   `order_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  CONSTRAINT `chk_orders_quantity` CHECK (`quantity` BETWEEN 1 AND 3),
   CONSTRAINT `fk_orders_customer`
     FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`)
     ON DELETE CASCADE

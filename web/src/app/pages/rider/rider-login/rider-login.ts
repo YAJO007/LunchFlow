@@ -13,10 +13,12 @@ export class RiderLogin {
   constructor(private router: Router) {}
 
   open(jobNo: HTMLInputElement) {
-    if (jobNo.value === '') {
-      this.error.set('กรอกเลขใบงาน เช่น 1001');
+    const id = Number(jobNo.value);
+    if (!Number.isInteger(id) || id <= 0) {
+      this.error.set('กรุณากรอกเลขใบงานเป็นจำนวนเต็ม เช่น 1001');
       return;
     }
-    this.router.navigate(['/rider/job', jobNo.value]);
+    this.error.set('');
+    this.router.navigate(['/rider/job', id]);
   }
 }

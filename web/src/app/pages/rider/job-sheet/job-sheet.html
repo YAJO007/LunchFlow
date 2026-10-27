@@ -4,14 +4,14 @@
 }
 
 @if (job()) {
-  <h1 class="text-2xl font-bold">ใบงาน {{ job()!.id }}</h1>
-  <p class="mt-2">
+  <h1 class="text-3xl font-bold">ใบงาน {{ job()!.id }}</h1>
+  <p class="mt-2 text-xl">
     หยิบ <b>{{ job()!.total_box }} กล่อง</b> · ส่ง {{ job()!.stops.length }} จุด · {{ km(job()!.distance_km) }} กม.
   </p>
   <p>ออกจากร้าน {{ job()!.departure_time }} · ส่งเสร็จประมาณ {{ job()!.finish_time }} (ต้องก่อน {{ job()!.deadline_time }})</p>
   <p class="mt-2">ส่งแล้ว {{ delivered().length }} / {{ job()!.stops.length }} จุด</p>
 
-  <a class="btn btn-primary mt-4 w-full" [href]="job()!.map_url" target="_blank">เปิด Google Maps นำทางทั้งเส้น</a>
+  <a class="btn btn-primary mt-4 min-h-14 w-full text-lg" [href]="job()!.map_url" target="_blank" rel="noopener noreferrer">เปิด Google Maps นำทางทั้งเส้น</a>
 
   
   @for (stop of job()!.stops; track stop.stop_no) {
@@ -21,9 +21,9 @@
         <p>{{ stop.quantity }} กล่อง · ถึงประมาณ {{ stop.arrival_time }}</p>
         <p>{{ stop.address }}</p>
         <div class="card-actions">
-          <a class="btn btn-sm" [href]="'tel:' + stop.phone">โทร {{ stop.phone }}</a>
-          <a class="btn btn-sm" [href]="navigateLink(stop.latitude, stop.longitude)" target="_blank">นำทาง</a>
-          <button class="btn btn-sm btn-success" (click)="toggleDelivered(stop)">
+          <a class="btn min-h-11" [href]="'tel:' + stop.phone">โทร {{ stop.phone }}</a>
+          <a class="btn min-h-11" [href]="navigateLink(stop.latitude, stop.longitude)" target="_blank" rel="noopener noreferrer">นำทาง</a>
+          <button class="btn btn-success min-h-11" (click)="toggleDelivered(stop)">
             {{ isDelivered(stop) ? 'ยกเลิก' : 'ส่งแล้ว' }}
           </button>
         </div>
