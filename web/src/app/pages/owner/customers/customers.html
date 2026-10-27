@@ -37,6 +37,10 @@
         class="h-9 shrink-0 cursor-pointer rounded-full px-4 text-sm font-medium text-[#1e8e3e] transition hover:bg-[#e6f4ea]">
         ค้นหา
       </button>
+      <button (click)="clearSearch(q)"
+        class="h-9 shrink-0 cursor-pointer rounded-full px-4 text-sm font-medium text-[#5f6368] transition hover:bg-[#e8eaed]">
+        ล้าง
+      </button>
     </div>
 
     <div class="flex gap-2">
@@ -49,6 +53,11 @@
         class="inline-flex h-8 cursor-pointer items-center gap-2 rounded-lg border border-[#dadce0] px-3 text-sm font-medium text-[#5f6368] transition hover:border-[#1e8e3e] hover:bg-[#e6f4ea] hover:text-[#137333]">
         <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
         ใกล้ร้าน 1 กม.
+      </button>
+      <button (click)="removeAll()"
+        class="inline-flex h-8 cursor-pointer items-center gap-2 rounded-lg border border-[#dadce0] px-3 text-sm font-medium text-[#5f6368] transition hover:border-[#d93025] hover:bg-[#fce8e6] hover:text-[#d93025]">
+        <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+        ล้างลูกค้า
       </button>
     </div>
   </div>
@@ -141,6 +150,7 @@
               <th class="h-12 px-4 font-medium">ชื่อ</th>
               <th class="h-12 px-4 font-medium">เบอร์โทร</th>
               <th class="h-12 px-4 font-medium">ที่อยู่</th>
+              <th class="h-12 px-4 font-medium whitespace-nowrap">ห่างร้าน</th>
               <th class="h-12 px-4"><span class="sr-only">จัดการ</span></th>
             </tr>
           </thead>
@@ -158,8 +168,13 @@
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap tabular-nums">{{ c.phone }}</td>
                 <td class="min-w-[200px] px-4 py-3 text-[#5f6368]">{{ c.address }}</td>
+                <td class="px-4 py-3 whitespace-nowrap tabular-nums">{{ distanceFromShop(c) }} กม.</td>
                 <td class="px-2 py-3">
                   <div class="flex justify-end gap-1">
+                    <a [href]="mapLink(c)" target="_blank" rel="noopener noreferrer" title="เปิดแผนที่" aria-label="เปิดแผนที่"
+                      class="grid size-9 cursor-pointer place-items-center rounded-full text-[#5f6368] transition hover:bg-[#e6f4ea] hover:text-[#137333]">
+                      <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
+                    </a>
                     <button (click)="openEdit(c)" title="แก้ไข" aria-label="แก้ไข"
                       class="grid size-9 cursor-pointer place-items-center rounded-full text-[#5f6368] transition hover:bg-[#e6f4ea] hover:text-[#137333]">
                       <i class="fa-solid fa-pen" aria-hidden="true"></i>
@@ -173,7 +188,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="5" class="px-4 py-12 text-center text-[#5f6368]">
+                <td colspan="6" class="px-4 py-12 text-center text-[#5f6368]">
                   <i class="fa-solid fa-users-slash mb-2 block text-2xl" aria-hidden="true"></i>
                   ไม่มีข้อมูล
                 </td>

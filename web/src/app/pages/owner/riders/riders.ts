@@ -38,6 +38,21 @@ export class Riders {
     }
   }
 
+  // ตั้งให้ไรเดอร์ทุกคนพร้อมรับงาน
+  async allReady() {
+    try {
+      let riders = this.appData.riders();
+      for (let i = 0; i < riders.length; i++) {
+        if (!riders[i].available) {
+          await this.appData.updateRider(riders[i].no, { available: true });
+        }
+      }
+      this.notify.success('ไรเดอร์พร้อมทุกคนแล้ว');
+    } catch (error: any) {
+      this.notify.error(error.message);
+    }
+  }
+
   async add() {
     const name = this.newName().trim();
     if (!name) {

@@ -6,6 +6,8 @@ import { Api } from '../../../service/api';
 import { AppData } from '../../../service/app-data';
 import { Notify } from '../../../service/notify';
 import { randomCustomer } from '../../../utils/random-customer';
+import { distanceKm, navigateLink } from '../../../utils/geo';
+import { km } from '../../../utils/format';
 
 @Component({
   selector: 'app-customers',
@@ -67,6 +69,23 @@ export class Customers {
     } catch (error: any) {
       this.notify.error(error.message);
     }
+  }
+
+  // ล้างช่องค้นหา แล้วแสดงลูกค้าทั้งหมด
+  clearSearch(input: HTMLInputElement) {
+    input.value = '';
+    this.loadAll();
+  }
+
+  // ระยะจากร้านถึงบ้านลูกค้า (กม.) เช่น "0.63"
+  distanceFromShop(c: Customer): string {
+    let shop = this.appData.shop();
+    return km(distanceKm(shop.latitude, shop.longitude, c.latitude, c.longitude));
+  }
+
+  // ลิงก์เปิด Google Maps ไปบ้านลูกค้า
+  mapLink(c: Customer): string {
+    return navigateLink(c.latitude, c.longitude);
   }
 
   points(): MapPoint[] {
@@ -150,6 +169,23 @@ export class Customers {
         await this.api.addCustomer(customer);
       }
       this.notify.success('เพิ่มลูกค้าสุ่ม ' + count + ' คนแล้ว');
+      this.loadAll();
+    } catch (error: any) {
+      this.notify.error(error.message);
+    }
+  }
+
+  // ลบลูกค้าทุกคน (ออเดอร์ของลูกค้าจะถูกลบไปด้วย)
+  async removeAll() {
+    if (!confirm('ลบลูกค้าทั้งหมดใช่ไหม?\n\nออเดอร์ทั้งหมดของลูกค้าจะถูกลบไปด้วย และกู้คืนไม่ได้')) {
+      return;
+    }
+    try {
+      let all = await this.api.getCustomers();
+      for (let i = 0; i < all.length; i++) {
+        await this.api.deleteCustomer(all[i].id);
+      }
+      this.notify.success('ลบลูกค้าทั้งหมด ' + all.length + ' คนแล้ว');
       this.loadAll();
     } catch (error: any) {
       this.notify.error(error.message);

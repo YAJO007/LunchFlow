@@ -16,7 +16,16 @@ export class Api {
       headers: { 'Content-Type': 'application/json' },
       body: body ? JSON.stringify(body) : undefined,
     });
-    const data = await response.json();
+    // อ่านเป็นข้อความก่อน เพราะบางครั้งเซิร์ฟเวอร์ (เช่น Render ตอนล่มหรือรีสตาร์ท)
+    // ส่งหน้า HTML กลับมาแทน JSON ถ้าใช้ response.json() ตรง ๆ จะ error ว่า Unexpected token '<'
+    const text = await response.text();
+    let data: any;
+    try {
+      data = JSON.parse(text);
+    } catch (error) {
+      console.log(method + ' ' + path + ' ได้คำตอบเป็น:', text);
+      throw new Error('เซิร์ฟเวอร์ไม่ตอบกลับเป็น JSON (' + method + ' ' + path + ' สถานะ ' + response.status + ') ลองใหม่อีกครั้ง');
+    }
     if (!response.ok) {
       throw new Error(data.error);
     }

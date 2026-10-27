@@ -4,11 +4,18 @@
     <div>
       <h1 class="text-[28px] leading-snug font-normal">ไรเดอร์</h1>
     </div>
-    <button (click)="load()"
-      class="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full border border-[#dadce0] px-5 text-sm font-medium text-[#1e8e3e] transition hover:bg-[#e6f4ea] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1e8e3e]">
-      <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
-      โหลดข้อมูลใหม่
-    </button>
+    <div class="flex flex-wrap gap-2">
+      <button (click)="allReady()"
+        class="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-[#1e8e3e] px-5 text-sm font-medium text-white transition hover:bg-[#137333] hover:shadow-md">
+        <i class="fa-solid fa-check-double" aria-hidden="true"></i>
+        พร้อมทุกคน
+      </button>
+      <button (click)="load()"
+        class="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full border border-[#dadce0] px-5 text-sm font-medium text-[#1e8e3e] transition hover:bg-[#e6f4ea] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1e8e3e]">
+        <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+        โหลดข้อมูลใหม่
+      </button>
+    </div>
   </div>
 
   <!-- สรุปตัวเลข -->
@@ -81,6 +88,19 @@
             </div>
           }
         </div>
+
+        <!-- กดเพื่อสลับ พร้อม / ไม่พร้อม -->
+        @if (r.available) {
+          <button (click)="toggle(r)"
+            class="h-8 shrink-0 cursor-pointer rounded-full bg-[#e6f4ea] px-3 text-xs font-medium text-[#137333] transition hover:bg-[#ceead6]">
+            พร้อม
+          </button>
+        } @else {
+          <button (click)="toggle(r)"
+            class="h-8 shrink-0 cursor-pointer rounded-full bg-[#f1f3f4] px-3 text-xs font-medium text-[#5f6368] transition hover:bg-[#e8eaed]">
+            ไม่พร้อม
+          </button>
+        }
 
         <button (click)="remove(r)" title="ลบ" [attr.aria-label]="'ลบ ' + r.name"
           class="grid size-9 shrink-0 cursor-pointer place-items-center rounded-full text-[#5f6368] transition hover:bg-[#fce8e6] hover:text-[#d93025]">
