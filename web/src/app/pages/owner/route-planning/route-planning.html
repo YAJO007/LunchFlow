@@ -72,11 +72,11 @@
       </div>
     </div>
 
-    <!-- สรุปค่าใช้จ่าย กำไร และเวลา -->
-    <div class="card border border-base-300">
+    <!-- สรุปค่าใช้จ่าย กำไร และเวลา (ติดอยู่ข้างแผนที่ตอนเลื่อนจอ) -->
+    <div class="card border border-base-300 lg:sticky lg:top-20">
       <div class="card-body">
         <h2 class="card-title">สรุปแผนนี้</h2>
-        <table class="table table-sm">
+        <table class="table">
           <tbody>
             <tr><td>ไรเดอร์</td><td class="text-right">{{ plan()!.rider_count }} คน</td></tr>
             <tr><td>ออเดอร์ / กล่อง</td><td class="text-right">{{ plan()!.total_order }} / {{ plan()!.total_box }}</td></tr>
@@ -97,7 +97,7 @@
 
         @if (previous() && !confirmed()) {
           <h3 class="mt-2 font-medium">เทียบกับแผนก่อน</h3>
-          <table class="table table-sm">
+          <table class="table">
             <thead>
               <tr><th></th><th class="text-right">ก่อน</th><th class="text-right">นี้</th></tr>
             </thead>
