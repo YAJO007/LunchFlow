@@ -13,12 +13,12 @@ import { AppData } from '../../service/app-data';
 })
 export class Owner {
   // รายการเมนูบนแถบด้านบน
-  // link = กดแล้วไปหน้าไหน, label = ข้อความที่โชว์บนปุ่ม
+  // link = กดแล้วไปหน้าไหน, label = ข้อความบนปุ่ม, icon = ไอคอนหน้าปุ่ม
   menu = [
-    { link: '/owner', label: 'ภาพรวม' },
-    { link: '/owner/customers', label: 'ลูกค้า' },
-    { link: '/owner/orders', label: 'ออเดอร์' },
-    { link: '/owner/routes', label: 'จัดเส้นทาง' },
+    { link: '/owner', label: 'ภาพรวม', icon: 'fa-solid fa-house' },
+    { link: '/owner/customers', label: 'ลูกค้า', icon: 'fa-solid fa-users' },
+    { link: '/owner/orders', label: 'ออเดอร์', icon: 'fa-solid fa-clipboard-list' },
+    { link: '/owner/routes', label: 'จัดเส้นทาง', icon: 'fa-solid fa-route' },
   ];
 
   // ทำงานทันทีตอนเปิดหน้านี้
