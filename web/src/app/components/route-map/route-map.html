@@ -1,5 +1,4 @@
-<svg [attr.viewBox]="'0 0 ' + size + ' ' + size" (click)="selectPoint($event)"
-  [class.cursor-crosshair]="selectable" [class.cursor-default]="!selectable" class="h-full w-full">
+<svg [attr.viewBox]="'0 0 ' + size + ' ' + size" class="h-full w-full">
   
   @for (t of tiles(); track t.url) {
     <image [attr.href]="t.url" [attr.x]="t.x" [attr.y]="t.y" width="256" height="256" />
@@ -7,7 +6,8 @@
 
   
   @for (job of jobs; track job.rider_no) {
-    <polyline [attr.points]="linePoints(job)" [attr.stroke]="job.color" fill="none" stroke-width="4" />
+    <polyline [attr.points]="linePoints(job)" [attr.stroke]="job.color" fill="none" stroke-width="4"
+      stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.85" />
   }
 
   
