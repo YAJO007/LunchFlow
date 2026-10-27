@@ -1,96 +1,90 @@
-<div class="text-[#202124]">
-  <h1 class="text-[28px] leading-snug font-normal">ภาพรวม</h1>
-  <p class="mt-1 text-[15px] text-[#5f6368]">
-    ออกจากร้าน <b class="font-medium text-[#202124]">{{ appData.shop().departureTime }}</b> ·
-    ต้องส่งถึงลูกค้าทุกคนก่อน <b class="font-medium text-[#202124]">{{ appData.shop().deadlineTime }}</b>
-  </p>
+<h1 class="text-3xl">ภาพรวม</h1>
+<p class="mt-1 text-base-content/70">
+  ออกจากร้าน <b>{{ appData.shop().departureTime }}</b> ·
+  ต้องส่งถึงลูกค้าทุกคนก่อน <b>{{ appData.shop().deadlineTime }}</b>
+</p>
 
-  @if (error()) {
-    <div class="mt-4 flex items-center gap-3 rounded-lg bg-[#fce8e6] px-4 py-3 text-sm text-[#d93025]">
-      <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
-      {{ error() }}
-    </div>
-  }
+@if (error()) {
+  <div class="alert alert-error mt-4">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    {{ error() }}
+  </div>
+}
 
-
-  <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fit,minmax(170px,1fr))] sm:gap-4">
-    <div class="rounded-2xl border border-[#dadce0] bg-white p-4 sm:p-5">
-      <div class="grid size-10 place-items-center rounded-full bg-[#e6f4ea] text-lg text-[#1e8e3e]">
-        <i class="fa-solid fa-users" aria-hidden="true"></i>
-      </div>
-      <div class="mt-4 text-sm text-[#5f6368]">ลูกค้า</div>
-      <div class="mt-1 text-[26px] leading-tight font-medium tabular-nums sm:text-[32px]">{{ customers().length }}</div>
-    </div>
-
-    <div class="rounded-2xl border border-[#dadce0] bg-white p-4 sm:p-5">
-      <div class="grid size-10 place-items-center rounded-full bg-[#e6f4ea] text-lg text-[#1e8e3e]">
-        <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
-      </div>
-      <div class="mt-4 text-sm text-[#5f6368]">ออเดอร์</div>
-      <div class="mt-1 text-[26px] leading-tight font-medium tabular-nums sm:text-[32px]">{{ orders().length }}</div>
-    </div>
-
-    <div class="rounded-2xl border border-[#dadce0] bg-white p-4 sm:p-5">
-      <div class="grid size-10 place-items-center rounded-full bg-[#e6f4ea] text-lg text-[#1e8e3e]">
-        <i class="fa-solid fa-bowl-rice" aria-hidden="true"></i>
-      </div>
-      <div class="mt-4 text-sm text-[#5f6368]">กล่อง</div>
-      <div class="mt-1 text-[26px] leading-tight font-medium tabular-nums sm:text-[32px]">{{ totalBox() }}</div>
-    </div>
-
-
-    <!-- ยอดขาย -->
-    <div class="col-span-2 rounded-2xl bg-[#e6f4ea] p-4 sm:col-span-1 sm:p-5">
-      <div class="grid size-10 place-items-center rounded-full bg-[#1e8e3e] text-lg text-white">
-        <i class="fa-solid fa-baht-sign" aria-hidden="true"></i>
-      </div>
-      <div class="mt-4 text-sm text-[#5f6368]">ยอดขาย (บาท)</div>
-      <div class="mt-1 text-[26px] leading-tight font-medium text-[#137333] tabular-nums sm:text-[32px]">
-        {{ totalBox() * appData.shop().pricePerBox }}
-      </div>
+<!-- ตัวเลขสรุป -->
+<div class="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+  <div class="card border border-base-300">
+    <div class="card-body">
+      <i class="fa-solid fa-users text-xl text-primary"></i>
+      <p class="text-base-content/70">ลูกค้า</p>
+      <p class="text-3xl">{{ customers().length }}</p>
     </div>
   </div>
+  <div class="card border border-base-300">
+    <div class="card-body">
+      <i class="fa-solid fa-clipboard-list text-xl text-primary"></i>
+      <p class="text-base-content/70">ออเดอร์</p>
+      <p class="text-3xl">{{ orders().length }}</p>
+    </div>
+  </div>
+  <div class="card border border-base-300">
+    <div class="card-body">
+      <i class="fa-solid fa-bowl-rice text-xl text-primary"></i>
+      <p class="text-base-content/70">กล่อง</p>
+      <p class="text-3xl">{{ totalBox() }}</p>
+    </div>
+  </div>
+  <div class="card bg-secondary text-secondary-content">
+    <div class="card-body">
+      <i class="fa-solid fa-baht-sign text-xl"></i>
+      <p>ยอดขาย (บาท)</p>
+      <p class="text-3xl">{{ totalBox() * appData.shop().pricePerBox }}</p>
+    </div>
+  </div>
+</div>
 
-  <section class="mt-6 rounded-2xl border border-[#dadce0] bg-white px-4 py-5 sm:p-6">
-    <h2 class="text-xl font-medium">แผนล่าสุดที่ยืนยันแล้ว</h2>
+<!-- แผนล่าสุด -->
+<div class="card mt-6 border border-base-300">
+  <div class="card-body">
+    <h2 class="card-title">แผนล่าสุดที่ยืนยันแล้ว</h2>
 
     @if (latestPlan()) {
-      <div class="mt-5 mb-6 grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] gap-4">
-        <div class="flex flex-col gap-1">
-          <span class="text-[13px] text-[#5f6368]">แผน</span>
-          <span class="text-lg font-medium">#{{ latestPlan()!.id }}</span>
+      <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div>
+          <p class="text-sm text-base-content/70">แผน</p>
+          <p class="text-lg">#{{ latestPlan()!.id }}</p>
         </div>
-        <div class="flex flex-col gap-1">
-          <span class="text-[13px] text-[#5f6368]">ไรเดอร์</span>
-          <span class="text-lg font-medium">{{ latestPlan()!.rider_count }} คน</span>
+        <div>
+          <p class="text-sm text-base-content/70">ไรเดอร์</p>
+          <p class="text-lg">{{ latestPlan()!.rider_count }} คน</p>
         </div>
-        <div class="flex flex-col gap-1">
-          <span class="text-[13px] text-[#5f6368]">กำไร</span>
-          <span class="text-lg font-medium text-[#137333]">{{ money(latestPlan()!.profit) }} บาท</span>
+        <div>
+          <p class="text-sm text-base-content/70">กำไร</p>
+          <p class="text-lg" [class.text-success]="latestPlan()!.profit >= 0" [class.text-error]="latestPlan()!.profit < 0">
+            {{ money(latestPlan()!.profit) }} บาท
+          </p>
         </div>
-        <div class="flex flex-col gap-1">
-          <span class="text-[13px] text-[#5f6368]">ส่งเสร็จ</span>
-          <span class="text-lg font-medium">{{ latestPlan()!.last_arrival_time }}</span>
+        <div>
+          <p class="text-sm text-base-content/70">ส่งเสร็จ</p>
+          <p class="text-lg">{{ latestPlan()!.last_arrival_time }}</p>
         </div>
       </div>
 
-      <div class="text-[13px] text-[#5f6368]">ใบงาน</div>
-      <div class="mt-2 flex flex-wrap gap-2">
+      <p class="mt-2 text-sm text-base-content/70">เลขใบงาน (กดเพื่อเปิดดู)</p>
+      <div class="flex flex-wrap gap-2">
         @for (job of latestPlan()!.jobs; track job.id) {
-          <a [routerLink]="['/rider/job', job.id]"
-            class="inline-flex h-8 items-center rounded-lg border border-[#dadce0] px-3.5 text-sm font-medium tabular-nums transition-colors hover:border-[#1e8e3e] hover:bg-[#e6f4ea] hover:text-[#137333] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1e8e3e]">
-            {{ job.id }}
-          </a>
+          <a class="btn btn-outline btn-sm" [routerLink]="['/rider/job', job.id]">{{ job.id }}</a>
         }
       </div>
     } @else {
-      <p class="mt-4 text-[#5f6368]">ยังไม่มีแผน</p>
+      <p class="text-base-content/70">ยังไม่มีแผน</p>
     }
 
-    <a routerLink="/owner/routes"
-      class="mt-6 inline-flex h-10 items-center gap-2 rounded-full bg-[#1e8e3e] px-6 text-sm font-medium text-white transition hover:bg-[#137333] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1e8e3e]">
-      ไปจัดเส้นทาง
-      <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-    </a>
-  </section>
+    <div class="card-actions mt-2">
+      <a routerLink="/owner/routes" class="btn btn-primary">
+        ไปจัดเส้นทาง
+        <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+  </div>
 </div>
