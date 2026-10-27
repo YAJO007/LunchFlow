@@ -156,27 +156,6 @@
               ]
             }
           }
-        },
-        {
-          "name": "ลบลูกค้าทั้งหมด",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/customer",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "customer"
-              ]
-            }
-          }
         }
       ]
     },
