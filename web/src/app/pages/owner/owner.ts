@@ -19,7 +19,6 @@ export class Owner {
     { link: '/owner/customers', label: 'ลูกค้า' },
     { link: '/owner/orders', label: 'ออเดอร์' },
     { link: '/owner/routes', label: 'จัดเส้นทาง' },
-    { link: '/owner/report', label: 'กำไร' },
   ];
 
   // ทำงานทันทีตอนเปิดหน้านี้

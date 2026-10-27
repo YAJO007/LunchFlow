@@ -6,7 +6,6 @@ import { Dashboard } from './pages/owner/dashboard/dashboard';
 import { Customers } from './pages/owner/customers/customers';
 import { Orders } from './pages/owner/orders/orders';
 import { RoutePlanning } from './pages/owner/route-planning/route-planning';
-import { Report } from './pages/owner/report/report';
 import { Rider } from './pages/rider/rider';
 import { RiderLogin } from './pages/rider/rider-login/rider-login';
 import { JobSheet } from './pages/rider/job-sheet/job-sheet';
@@ -25,7 +24,6 @@ export const routes: Routes = [
       { path: 'customers', component: Customers },
       { path: 'orders', component: Orders },
       { path: 'routes', component: RoutePlanning },
-      { path: 'report', component: Report },
     ],
   },
   {
