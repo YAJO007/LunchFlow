@@ -61,8 +61,8 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/simulate", async (req, res) => {
-  let connection: Awaited<ReturnType<typeof conn.getConnection>> | undefined;
   try {
+    // ไม่ส่งจำนวนมา = สุ่มจำนวนออเดอร์ 20-30 รายการ
     let amount = randomInt(MIN_SIMULATE, MAX_SIMULATE);
     if (req.body && req.body.amount != null) {
       amount = Number(req.body.amount);
@@ -75,10 +75,7 @@ router.post("/simulate", async (req, res) => {
     const [rows] = await conn.query("SELECT * FROM customer");
     const customers = rows as Customer[];
 
-    if (customers.length === 0) {
-      return res.status(400).json({ error: "ยังไม่มีลูกค้า กรุณาเพิ่มลูกค้าก่อน" });
-    }
-
+    // เลือกเฉพาะลูกค้าที่อยู่ในรัศมี 3 กม. จากร้าน
     const eligible = customers.filter((customer) =>
       getDistanceKm(SHOP.latitude, SHOP.longitude, customer.latitude, customer.longitude) <= CUSTOMER_RADIUS_KM
     );
@@ -88,36 +85,24 @@ router.post("/simulate", async (req, res) => {
       });
     }
 
-    // Shuffle once and take distinct customers so one simulation never creates
-    // multiple orders for the same customer.
-    for (let i = eligible.length - 1; i > 0; i--) {
-      const j = randomInt(0, i);
-      [eligible[i], eligible[j]] = [eligible[j], eligible[i]];
-    }
+    // สลับลำดับลูกค้าแบบสุ่ม แล้วหยิบ amount คนแรก (ลูกค้า 1 คนได้ 1 ออเดอร์)
+    eligible.sort(() => Math.random() - 0.5);
+    const chosen = eligible.slice(0, amount);
 
     let totalBox = 0;
-    connection = await conn.getConnection();
-    await connection.beginTransaction();
-    for (const customer of eligible.slice(0, amount)) {
+    for (const customer of chosen) {
       const quantity = randomInt(MIN_BOX, MAX_BOX);
       totalBox += quantity;
-      await connection.query("INSERT INTO orders (customer_id, quantity) VALUES (?, ?)", [customer.id, quantity]);
+      await conn.query("INSERT INTO orders (customer_id, quantity) VALUES (?, ?)", [
+        customer.id,
+        quantity,
+      ]);
     }
-    await connection.commit();
 
     res.status(201).json({ created_order: amount, total_box: totalBox });
   } catch (error) {
-    if (connection) {
-      try {
-        await connection.rollback();
-      } catch (rollbackError) {
-        console.error(rollbackError);
-      }
-    }
     console.error(error);
     res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
-  } finally {
-    connection?.release();
   }
 });
 
