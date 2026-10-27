@@ -38,7 +38,7 @@ export class RoutePlanning {
       this.totalOptions.set(result.total_options);
       this.confirmed.set(false);
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -68,7 +68,7 @@ export class RoutePlanning {
       this.confirmed.set(true);
       this.notify.success('ยืนยันแผน #' + saved.id + ' แล้ว');
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 }

@@ -38,7 +38,7 @@ export class JobSheet implements OnInit {
       this.job.set(job);
       this.delivered.set(this.appData.deliveredOf(job.id!));
     } catch (error: any) {
-      this.error.set(error.message);
+      this.error.set('ไม่พบใบงานนี้ หรือเชื่อมต่อ API ไม่ได้');
     }
   }
 

@@ -41,7 +41,7 @@ export class Customers {
     try {
       this.customers.set(await this.api.getCustomers());
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -58,7 +58,7 @@ export class Customers {
         }),
       );
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -67,7 +67,7 @@ export class Customers {
       const shop = this.appData.shop();
       this.customers.set(await this.api.getNearbyCustomers(shop.latitude, shop.longitude));
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -152,7 +152,7 @@ export class Customers {
       this.formOpen.set(false);
       this.loadAll();
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -171,7 +171,7 @@ export class Customers {
       this.notify.success('เพิ่มลูกค้าสุ่ม ' + count + ' คนแล้ว');
       this.loadAll();
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -188,7 +188,7 @@ export class Customers {
       this.notify.success('ลบลูกค้าทั้งหมด ' + all.length + ' คนแล้ว');
       this.loadAll();
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -201,7 +201,7 @@ export class Customers {
       this.notify.success('ลบแล้ว');
       this.loadAll();
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 }

@@ -36,7 +36,7 @@ export class Orders {
     try {
       this.orders.set(await this.api.getOrders());
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -45,7 +45,7 @@ export class Orders {
       const shop = this.appData.shop();
       this.orders.set(await this.api.getNearbyOrders(shop.latitude, shop.longitude));
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -69,7 +69,7 @@ export class Orders {
       this.notify.success('เพิ่ม ' + result.created_order + ' ออเดอร์');
       await this.load();
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -80,7 +80,7 @@ export class Orders {
     try {
       this.customers.set(await this.api.getCustomers());
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -95,7 +95,7 @@ export class Orders {
       this.addOpen.set(false);
       await this.load();
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -105,7 +105,7 @@ export class Orders {
       this.notify.success('แก้ออเดอร์ #' + o.id + ' แล้ว');
       await this.load();
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -118,7 +118,7 @@ export class Orders {
       this.notify.success('ลบแล้ว');
       await this.load();
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -131,7 +131,7 @@ export class Orders {
       this.notify.success('ล้างออเดอร์แล้ว');
       await this.load();
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 }

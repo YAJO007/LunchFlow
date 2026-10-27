@@ -16,7 +16,7 @@ export class AppData {
     private api: Api,
     private notify: Notify,
   ) {
-    this.loadRiders().catch((error: any) => this.notify.error(error.message));
+    this.loadRiders().catch((error: any) => this.notify.apiError(error));
   }
 
   async loadRiders() {

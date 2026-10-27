@@ -25,7 +25,7 @@ export class Riders {
     try {
       await this.appData.loadRiders();
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -34,7 +34,7 @@ export class Riders {
       await this.appData.updateRider(rider.no, { available: !rider.available });
       this.notify.success('อัปเดตสถานะแล้ว');
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -49,7 +49,7 @@ export class Riders {
       }
       this.notify.success('ไรเดอร์พร้อมทุกคนแล้ว');
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -66,7 +66,7 @@ export class Riders {
       this.newPhone.set('');
       this.notify.success('เพิ่มไรเดอร์แล้ว');
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 
@@ -75,7 +75,7 @@ export class Riders {
       await this.appData.deleteRider(rider.no);
       this.notify.success('ลบไรเดอร์แล้ว');
     } catch (error: any) {
-      this.notify.error(error.message);
+      this.notify.apiError(error);
     }
   }
 }

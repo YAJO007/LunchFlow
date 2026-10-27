@@ -1,4 +1,6 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { lastValueFrom } from 'rxjs';
 import { API_URL } from '../config/api';
 import { Customer } from '../model/customer';
 import { Order } from '../model/order';
@@ -6,123 +8,146 @@ import { PlanOption, RiderJob, RoutePlan } from '../model/route';
 import { Shop } from '../model/shop';
 import { Rider, RiderPostRequest, RiderPutRequest } from '../model/rider';
 
+// รวมทุกเส้น API ไว้ที่เดียว (ตามบท API Endpoint)
+// หน้าไหนอยากคุยกับหลังบ้าน ก็ inject(Api) แล้วเรียกฟังก์ชันในนี้
 @Injectable({
   providedIn: 'root',
 })
 export class Api {
-  private async request(method: string, path: string, body?: object) {
-    const response = await fetch(API_URL + path, {
-      method: method,
-      headers: { 'Content-Type': 'application/json' },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    // อ่านเป็นข้อความก่อน เพราะบางครั้งเซิร์ฟเวอร์ (เช่น Render ตอนล่มหรือรีสตาร์ท)
-    // ส่งหน้า HTML กลับมาแทน JSON ถ้าใช้ response.json() ตรง ๆ จะ error ว่า Unexpected token '<'
-    const text = await response.text();
-    let data: any;
-    try {
-      data = JSON.parse(text);
-    } catch (error) {
-      console.log(method + ' ' + path + ' ได้คำตอบเป็น:', text);
-      throw new Error('เซิร์ฟเวอร์ไม่ตอบกลับเป็น JSON (' + method + ' ' + path + ' สถานะ ' + response.status + ') ลองใหม่อีกครั้ง');
-    }
-    if (!response.ok) {
-      throw new Error(data.error);
-    }
-    return data;
+  http = inject(HttpClient);
+
+  // ---------- ลูกค้า ----------
+  async getCustomers() {
+    const url = `${API_URL}/customer`;
+    const response = await lastValueFrom(this.http.get(url));
+    return response as Customer[];
   }
 
-  getCustomers(): Promise<Customer[]> {
-    return this.request('GET', '/customer');
+  async getNearbyCustomers(lat: number, lng: number) {
+    const url = `${API_URL}/customer/nearby`;
+    const response = await lastValueFrom(this.http.get(url, { params: { lat: lat, lng: lng } }));
+    return response as Customer[];
   }
 
-  searchCustomers(firstname: string, lastname: string): Promise<Customer[]> {
-    return this.request('GET', '/customer/search?firstname=' + firstname + '&lastname=' + lastname);
+  async addCustomer(customer: object) {
+    const url = `${API_URL}/customer`;
+    const response = await lastValueFrom(this.http.post(url, customer));
+    return response;
   }
 
-  getNearbyCustomers(lat: number, lng: number): Promise<Customer[]> {
-    return this.request('GET', '/customer/nearby?lat=' + lat + '&lng=' + lng);
+  async updateCustomer(id: number, customer: object) {
+    const url = `${API_URL}/customer/${id}`;
+    const response = await lastValueFrom(this.http.put(url, customer));
+    return response;
   }
 
-  addCustomer(customer: object) {
-    return this.request('POST', '/customer', customer);
+  async deleteCustomer(id: number) {
+    const url = `${API_URL}/customer/${id}`;
+    const response = await lastValueFrom(this.http.delete(url));
+    return response;
   }
 
-  updateCustomer(id: number, customer: object) {
-    return this.request('PUT', '/customer/' + id, customer);
+  // ---------- ไรเดอร์ ----------
+  async getRiders() {
+    const url = `${API_URL}/rider`;
+    const response = await lastValueFrom(this.http.get(url));
+    return response as Rider[];
   }
 
-  deleteCustomer(id: number) {
-    return this.request('DELETE', '/customer/' + id);
+  async addRider(rider: RiderPostRequest) {
+    const url = `${API_URL}/rider`;
+    const response = await lastValueFrom(this.http.post(url, rider));
+    return response;
   }
 
-  getRiders(): Promise<Rider[]> {
-    return this.request('GET', '/rider');
+  async updateRider(no: number, rider: RiderPutRequest) {
+    const url = `${API_URL}/rider/${no}`;
+    const response = await lastValueFrom(this.http.put(url, rider));
+    return response;
   }
 
-  addRider(rider: RiderPostRequest) {
-    return this.request('POST', '/rider', rider);
+  async deleteRider(no: number) {
+    const url = `${API_URL}/rider/${no}`;
+    const response = await lastValueFrom(this.http.delete(url));
+    return response;
   }
 
-  updateRider(no: number, rider: RiderPutRequest) {
-    return this.request('PUT', '/rider/' + no, rider);
+  // ---------- ออเดอร์ ----------
+  async getOrders() {
+    const url = `${API_URL}/order`;
+    const response = await lastValueFrom(this.http.get(url));
+    return response as Order[];
   }
 
-  deleteRider(no: number) {
-    return this.request('DELETE', '/rider/' + no);
+  async getNearbyOrders(lat: number, lng: number) {
+    const url = `${API_URL}/order/nearby`;
+    const response = await lastValueFrom(this.http.get(url, { params: { lat: lat, lng: lng } }));
+    return response as Order[];
   }
 
-  getOrders(): Promise<Order[]> {
-    return this.request('GET', '/order');
+  async simulateOrders(amount: number) {
+    const url = `${API_URL}/order/simulate`;
+    const response = await lastValueFrom(this.http.post(url, { amount: amount }));
+    return response as any;
   }
 
-  getNearbyOrders(lat: number, lng: number): Promise<Order[]> {
-    return this.request('GET', '/order/nearby?lat=' + lat + '&lng=' + lng);
+  async addOrder(customerId: number, quantity: number) {
+    const url = `${API_URL}/order`;
+    const response = await lastValueFrom(this.http.post(url, { customer_id: customerId, quantity: quantity }));
+    return response;
   }
 
-  simulateOrders(amount: number) {
-    return this.request('POST', '/order/simulate', { amount: amount });
+  async updateOrder(id: number, quantity: number) {
+    const url = `${API_URL}/order/${id}`;
+    const response = await lastValueFrom(this.http.put(url, { quantity: quantity }));
+    return response;
   }
 
-  addOrder(customerId: number, quantity: number) {
-    return this.request('POST', '/order', { customer_id: customerId, quantity: quantity });
+  async deleteOrder(id: number) {
+    const url = `${API_URL}/order/${id}`;
+    const response = await lastValueFrom(this.http.delete(url));
+    return response;
   }
 
-  updateOrder(id: number, quantity: number) {
-    return this.request('PUT', '/order/' + id, { quantity: quantity });
+  async clearOrders() {
+    const url = `${API_URL}/order`;
+    const response = await lastValueFrom(this.http.delete(url));
+    return response;
   }
 
-  deleteOrder(id: number) {
-    return this.request('DELETE', '/order/' + id);
+  // ---------- จัดเส้นทาง ----------
+  async getShop() {
+    const url = `${API_URL}/route/shop`;
+    const response = await lastValueFrom(this.http.get(url));
+    return response as Shop;
   }
 
-  clearOrders() {
-    return this.request('DELETE', '/order');
+  async calculateRoute(option: number, availableRiders?: number) {
+    const url = `${API_URL}/route/calculate`;
+    const response = await lastValueFrom(
+      this.http.post(url, { option: option, available_riders: availableRiders }),
+    );
+    return response as PlanOption;
   }
 
-  getShop(): Promise<Shop> {
-    return this.request('GET', '/route/shop');
+  async confirmRoute(option: number, availableRiders?: number) {
+    const url = `${API_URL}/route/confirm`;
+    const response = await lastValueFrom(
+      this.http.post(url, { option: option, available_riders: availableRiders }),
+    );
+    return response as RoutePlan;
   }
 
-  calculateRoute(option: number, availableRiders?: number): Promise<PlanOption> {
-    return this.request('POST', '/route/calculate', {
-      option: option,
-      available_riders: availableRiders,
-    });
+  async getLatestPlan() {
+    const url = `${API_URL}/route/latest`;
+    const response = await lastValueFrom(this.http.get(url));
+    return response as RoutePlan;
   }
 
-  confirmRoute(option: number, availableRiders?: number): Promise<RoutePlan> {
-    return this.request('POST', '/route/confirm', {
-      option: option,
-      available_riders: availableRiders,
-    });
-  }
-
-  getLatestPlan(): Promise<RoutePlan> {
-    return this.request('GET', '/route/latest');
-  }
-
-  getJob(id: number): Promise<RiderJob> {
-    return this.request('GET', '/job/' + id);
+  // ---------- ใบงานไรเดอร์ ----------
+  async getJob(id: number) {
+    const url = `${API_URL}/job/${id}`;
+    const response = await lastValueFrom(this.http.get(url));
+    return response as RiderJob;
   }
 }
