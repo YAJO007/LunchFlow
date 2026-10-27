@@ -167,6 +167,18 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+// ลบลูกค้าทั้งหมด (ออเดอร์ของลูกค้าจะถูกลบตามไปด้วย เพราะตั้ง ON DELETE CASCADE ไว้)
+router.delete("/", async (req, res) => {
+  try {
+    const [result] = await conn.query("DELETE FROM customer");
+    const deleteResult = result as any;
+    res.status(200).json({ affected_row: deleteResult.affectedRows });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
+  }
+});
+
 router.delete("/:id", async (req, res) => {
   try {
     const [result] = await conn.query("DELETE FROM customer WHERE id = ?", [
