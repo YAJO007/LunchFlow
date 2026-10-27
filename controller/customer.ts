@@ -137,7 +137,8 @@ router.put("/:id", async (req, res) => {
     if (!Number.isInteger(id) || id <= 0) {
       return res.status(400).json({ error: "เลขลูกค้าไม่ถูกต้อง" });
     }
-    const customer: Partial<CustomerPostRequest> = req.body || {};
+    // ส่งมาแค่บางช่องได้ ช่องที่ไม่ส่งจะใช้ค่าเดิม (รวมด้วย ...spread ข้างล่าง)
+    const customer: CustomerPostRequest = req.body || {};
 
     const [rows] = await conn.query("SELECT * FROM customer WHERE id = ?", [id]);
     const result = rows as Customer[];
@@ -166,18 +167,6 @@ router.put("/:id", async (req, res) => {
     const updateResult = records as any;
 
     res.status(200).json({ affected_row: updateResult.affectedRows });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
-  }
-});
-
-// ลบลูกค้าทั้งหมด (ออเดอร์ของลูกค้าจะถูกลบตามไปด้วย เพราะตั้ง ON DELETE CASCADE ไว้)
-router.delete("/", async (req, res) => {
-  try {
-    const [result] = await conn.query("DELETE FROM customer");
-    const deleteResult = result as any;
-    res.status(200).json({ affected_row: deleteResult.affectedRows });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
