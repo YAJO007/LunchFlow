@@ -46,6 +46,12 @@ export class Api {
     return response;
   }
 
+  async clearCustomers() {
+    const url = `${API_URL}/customer`;
+    const response = await lastValueFrom(this.http.delete(url));
+    return response as any;
+  }
+
   // ---------- ออเดอร์ ----------
   async getOrders() {
     const url = `${API_URL}/order`;

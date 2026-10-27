@@ -164,11 +164,9 @@ export class Customers {
       return;
     }
     try {
-      let all = await this.api.getCustomers();
-      for (let i = 0; i < all.length; i++) {
-        await this.api.deleteCustomer(all[i].id);
-      }
-      this.notify.success('ลบลูกค้าทั้งหมด ' + all.length + ' คนแล้ว');
+      // เรียก API ครั้งเดียว ลบทั้งหมดในฐานข้อมูล (เร็วกว่าลบทีละคน)
+      const result = await this.api.clearCustomers();
+      this.notify.success('ลบลูกค้าทั้งหมด ' + result.affected_row + ' คนแล้ว');
       this.loadAll();
     } catch (error: any) {
       this.notify.apiError(error);
