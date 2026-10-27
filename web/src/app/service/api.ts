@@ -22,7 +22,13 @@ export class Api {
     return response as Customer[];
   }
 
-  async addCustomer(customer: object) {
+  async searchCustomers(name: string) {
+    const url = `${API_URL}/customer/search`;
+    const response = await lastValueFrom(this.http.get(url, { params: { name: name } }));
+    return response as Customer[];
+  }
+
+(customer: object) {
     const url = `${API_URL}/customer`;
     const response = await lastValueFrom(this.http.post(url, customer));
     return response;

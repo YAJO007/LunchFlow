@@ -45,18 +45,10 @@ export class Customers {
     }
   }
 
-  // ค้นจากชื่อเต็ม (ชื่อ + นามสกุล) ด้วยคำบางส่วน
-  // พิมพ์หลายคำคั่นด้วยช่องว่างได้ ต้องเจอครบทุกคำ เช่น "ชาย ดี" เจอ "สมชาย ใจดี"
+  // ค้นหาลูกค้าจากชื่อหรือนามสกุล ผ่าน API /customer/search?name=...
   async search(text: string) {
-    const words = text.trim().toLowerCase().split(/\s+/).filter((w) => w !== '');
     try {
-      const all = await this.api.getCustomers();
-      this.customers.set(
-        all.filter((c) => {
-          const fullName = (c.firstname + ' ' + c.lastname).toLowerCase();
-          return words.every((w) => fullName.includes(w));
-        }),
-      );
+      this.customers.set(await this.api.searchCustomers(text.trim()));
     } catch (error: any) {
       this.notify.apiError(error);
     }

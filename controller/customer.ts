@@ -66,12 +66,12 @@ router.get("/", async (req, res) => {
 
 router.get("/search", async (req, res) => {
   try {
-    const firstname = req.query.firstname || "";
-    const lastname = req.query.lastname || "";
+    // ค้นจากชื่อเต็ม เช่น ?name=สมชาย หรือ ?name=ใจดี
+    const name = req.query.name || "";
 
     const [rows] = await conn.query(
-      "SELECT * FROM customer WHERE firstname LIKE ? AND lastname LIKE ?",
-      ["%" + firstname + "%", "%" + lastname + "%"]
+      "SELECT * FROM customer WHERE CONCAT(firstname, ' ', lastname) LIKE ?",
+      ["%" + name + "%"]
     );
     const customers = rows as Customer[];
     res.status(200).json(customers);
