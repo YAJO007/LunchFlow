@@ -1,42 +1,33 @@
-<div class="flex min-h-screen items-start bg-[#f0f4f9] px-4 pt-8 pb-12 text-[#202124] sm:items-center sm:py-12">
-  <div class="mx-auto w-full max-w-[760px]">
-    <div class="flex items-center gap-2.5 text-[22px] font-semibold text-[#1e8e3e]">
-      <i class="fa-solid fa-bowl-rice text-[26px]" aria-hidden="true"></i>
-      <span>LunchFlow</span>
+<div class="flex min-h-screen items-center bg-base-200 px-4 py-10">
+  <div class="mx-auto w-full max-w-3xl">
+    <div class="flex items-center gap-2 text-2xl font-semibold text-primary">
+      <i class="fa-solid fa-bowl-rice"></i>
+      LunchFlow
     </div>
+    <h1 class="mt-6 text-4xl leading-tight md:text-5xl">ส่งข้าวกล่องมื้อเที่ยง<br />ให้ทันทุกบ้าน</h1>
+    <p class="mt-3 text-lg text-base-content/70">ระบบจัดเส้นทางและแบ่งงานไรเดอร์ ร้านข้าวกล่องส่งด่วนมื้อเที่ยง</p>
 
-    <h1 class="mt-6 text-[32px] leading-tight font-normal sm:mt-8 sm:text-[44px]">
-      ส่งข้าวกล่องมื้อเที่ยง<br />ให้ทันทุกบ้าน
-    </h1>
-    <p class="mt-3 text-[17px] text-[#5f6368]">ระบบจัดเส้นทางและแบ่งงานไรเดอร์ ร้านข้าวกล่องส่งด่วนมื้อเที่ยง</p>
-
-    <div class="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <a routerLink="/login"
-        class="group flex flex-col items-start rounded-3xl border border-transparent bg-white p-6 text-[#202124] transition hover:border-[#dadce0] hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1e8e3e] sm:p-7">
-        <div class="grid size-14 place-items-center rounded-2xl bg-[#e6f4ea] text-2xl text-[#1e8e3e]">
-          <i class="fa-solid fa-store" aria-hidden="true"></i>
+    <div class="mt-10 grid gap-4 md:grid-cols-2">
+      <a routerLink="/login" class="card bg-base-100 transition hover:shadow-lg">
+        <div class="card-body">
+          <i class="fa-solid fa-store text-3xl text-primary"></i>
+          <h2 class="card-title mt-2 text-2xl">เจ้าของร้าน</h2>
+          <p class="text-base-content/70">จัดการลูกค้า ออเดอร์ จัดเส้นทาง และดูกำไร</p>
+          <div class="card-actions mt-4">
+            <span class="btn btn-primary">เข้าสู่ระบบ <i class="fa-solid fa-arrow-right"></i></span>
+          </div>
         </div>
-        <h2 class="mt-5 text-[22px] font-medium">เจ้าของร้าน</h2>
-        <p class="mt-2 flex-1 text-[15px] text-[#5f6368]">จัดการลูกค้า ออเดอร์ จัดเส้นทาง และดูกำไร</p>
-        <span
-          class="mt-6 inline-flex h-10 items-center gap-2 rounded-full bg-[#1e8e3e] px-6 text-sm font-medium text-white transition group-hover:bg-[#137333]">
-          เข้าสู่ระบบ
-          <i class="fa-solid fa-arrow-right transition group-hover:translate-x-1" aria-hidden="true"></i>
-        </span>
       </a>
 
-      <a routerLink="/rider"
-        class="group flex flex-col items-start rounded-3xl border border-transparent bg-white p-6 text-[#202124] transition hover:border-[#dadce0] hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1e8e3e] sm:p-7">
-        <div class="grid size-14 place-items-center rounded-2xl bg-[#e6f4ea] text-2xl text-[#1e8e3e]">
-          <i class="fa-solid fa-motorcycle" aria-hidden="true"></i>
+      <a routerLink="/rider" class="card bg-base-100 transition hover:shadow-lg">
+        <div class="card-body">
+          <i class="fa-solid fa-motorcycle text-3xl text-primary"></i>
+          <h2 class="card-title mt-2 text-2xl">ไรเดอร์</h2>
+          <p class="text-base-content/70">กรอกเลขใบงาน แล้วออกส่งตามลำดับ</p>
+          <div class="card-actions mt-4">
+            <span class="btn btn-outline">เปิดใบงาน <i class="fa-solid fa-arrow-right"></i></span>
+          </div>
         </div>
-        <h2 class="mt-5 text-[22px] font-medium">ไรเดอร์</h2>
-        <p class="mt-2 flex-1 text-[15px] text-[#5f6368]">กรอกเลขใบงาน แล้วออกส่ง</p>
-        <span
-          class="mt-6 inline-flex h-10 items-center gap-2 rounded-full border border-[#dadce0] px-6 text-sm font-medium text-[#1e8e3e] transition group-hover:bg-[#e6f4ea]">
-          เปิดใบงาน
-          <i class="fa-solid fa-arrow-right transition group-hover:translate-x-1" aria-hidden="true"></i>
-        </span>
       </a>
     </div>
   </div>
