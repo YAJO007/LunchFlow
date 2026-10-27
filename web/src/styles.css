@@ -53,6 +53,12 @@ body {
   background-color: var(--color-base-100);
 }
 
+/* daisyUI ย่อตัวหนังสือในการ์ดและฟอร์มให้เล็กลง ปรับกลับเป็นขนาดปกติให้อ่านง่าย */
+.card-body,
+.fieldset {
+  font-size: 1rem;
+}
+
 /* ปุ่มทรงแคปซูลแบบ Google */
 .btn {
   border-radius: 9999px;
