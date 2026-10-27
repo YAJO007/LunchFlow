@@ -7,8 +7,6 @@ import { SHOP } from "../config/shop";
 
 export const router = express.Router();
 
-const NEARBY_KM = 2;
-
 const MIN_BOX = 1;
 const MAX_BOX = 3;
 
@@ -35,32 +33,6 @@ router.get("/", async (req, res) => {
     const [rows] = await conn.query(SELECT_ORDER_DETAIL + " ORDER BY orders.id");
     const orders = rows as OrderDetail[];
     res.status(200).json(orders);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
-  }
-});
-
-router.get("/nearby", async (req, res) => {
-  try {
-    const lat = Number(req.query.lat);
-    const lng = Number(req.query.lng);
-
-    if (!req.query.lat || !req.query.lng || isNaN(lat) || isNaN(lng)) {
-      return res.status(400).json({ error: "กรุณาส่งพิกัด lat และ lng" });
-    }
-
-    const [rows] = await conn.query(SELECT_ORDER_DETAIL + " ORDER BY orders.id");
-    const orders = rows as OrderDetail[];
-
-    const result = orders
-      .map((order) => {
-        const distance = getDistanceKm(lat, lng, order.latitude, order.longitude);
-        return { ...order, distance_km: +distance.toFixed(3) };
-      })
-      .filter((order) => order.distance_km <= NEARBY_KM);
-
-    res.status(200).json(result);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });

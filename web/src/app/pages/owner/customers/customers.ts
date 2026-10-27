@@ -62,15 +62,6 @@ export class Customers {
     }
   }
 
-  async nearby() {
-    try {
-      const shop = this.appData.shop();
-      this.customers.set(await this.api.getNearbyCustomers(shop.latitude, shop.longitude));
-    } catch (error: any) {
-      this.notify.apiError(error);
-    }
-  }
-
   // ล้างช่องค้นหา แล้วแสดงลูกค้าทั้งหมด
   clearSearch(input: HTMLInputElement) {
     input.value = '';

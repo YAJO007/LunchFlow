@@ -23,12 +23,6 @@ export class Api {
     return response as Customer[];
   }
 
-  async getNearbyCustomers(lat: number, lng: number) {
-    const url = `${API_URL}/customer/nearby`;
-    const response = await lastValueFrom(this.http.get(url, { params: { lat: lat, lng: lng } }));
-    return response as Customer[];
-  }
-
   async addCustomer(customer: object) {
     const url = `${API_URL}/customer`;
     const response = await lastValueFrom(this.http.post(url, customer));
@@ -76,12 +70,6 @@ export class Api {
   async getOrders() {
     const url = `${API_URL}/order`;
     const response = await lastValueFrom(this.http.get(url));
-    return response as Order[];
-  }
-
-  async getNearbyOrders(lat: number, lng: number) {
-    const url = `${API_URL}/order/nearby`;
-    const response = await lastValueFrom(this.http.get(url, { params: { lat: lat, lng: lng } }));
     return response as Order[];
   }
 

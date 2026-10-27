@@ -40,15 +40,6 @@ export class Orders {
     }
   }
 
-  async nearby() {
-    try {
-      const shop = this.appData.shop();
-      this.orders.set(await this.api.getNearbyOrders(shop.latitude, shop.longitude));
-    } catch (error: any) {
-      this.notify.apiError(error);
-    }
-  }
-
   totalBox(): number {
     let sum = 0;
     for (const o of this.orders()) {

@@ -6,7 +6,6 @@ import { SHOP } from "../config/shop";
 
 export const router = express.Router();
 
-const NEARBY_KM = 1;
 const CUSTOMER_RADIUS_KM = 3;
 
 function validateCustomer(customer: CustomerPostRequest): string | null {
@@ -76,32 +75,6 @@ router.get("/search", async (req, res) => {
     );
     const customers = rows as Customer[];
     res.status(200).json(customers);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
-  }
-});
-
-router.get("/nearby", async (req, res) => {
-  try {
-    const lat = Number(req.query.lat);
-    const lng = Number(req.query.lng);
-
-    if (!req.query.lat || !req.query.lng || isNaN(lat) || isNaN(lng)) {
-      return res.status(400).json({ error: "กรุณาส่งพิกัด lat และ lng" });
-    }
-
-    const [rows] = await conn.query("SELECT * FROM customer");
-    const customers = rows as Customer[];
-
-    const result = customers
-      .map((customer) => {
-        const distance = getDistanceKm(lat, lng, customer.latitude, customer.longitude);
-        return { ...customer, distance_km: +distance.toFixed(3) };
-      })
-      .filter((customer) => customer.distance_km <= NEARBY_KM);
-
-    res.status(200).json(result);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "เซิร์ฟเวอร์ขัดข้อง" });
