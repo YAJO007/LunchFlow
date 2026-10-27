@@ -6,11 +6,14 @@ import { Injectable, signal } from '@angular/core';
 export class Notify {
   text = signal('');
   type = signal('success');
+  timer: any;
 
   show(text: string, type: string) {
     this.text.set(text);
     this.type.set(type);
-    setTimeout(() => this.text.set(''), 3000);
+    // ยกเลิกตัวจับเวลาของข้อความเก่า ไม่งั้นมันจะลบข้อความใหม่เร็วเกินไป
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => this.text.set(''), 3000);
   }
 
   success(text: string) {
