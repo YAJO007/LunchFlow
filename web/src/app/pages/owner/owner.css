@@ -1,0 +1,5 @@
+/* เมนูที่กำลังเปิดอยู่ ให้เป็นพื้นเขียวอ่อน ตัวหนังสือเขียวเข้ม */
+.menu-link.active {
+  background-color: var(--color-secondary);
+  color: var(--color-secondary-content);
+}

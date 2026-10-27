@@ -9,8 +9,8 @@
 
       <nav class="order-last flex w-full gap-1 overflow-x-auto md:order-none md:ml-6 md:w-auto md:flex-1">
         @for (item of menu; track item.link) {
-          <a [routerLink]="item.link" routerLinkActive="btn-secondary" [routerLinkActiveOptions]="{ exact: true }"
-            class="btn btn-ghost btn-sm">
+          <a [routerLink]="item.link" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+            class="menu-link btn btn-ghost">
             <i [class]="item.icon"></i>
             {{ item.label }}
           </a>
