@@ -1,92 +1,154 @@
-<h1 class="text-2xl font-bold">จัดเส้นทาง</h1>
-
-<div class="mt-4 flex flex-wrap gap-2">
-  <button class="btn btn-primary" (click)="calculate(0)">คำนวณเส้นทาง</button>
-  @if (plan() && !confirmed()) {
-    <button class="btn" (click)="next()">คำนวณใหม่ (แผนถัดไป)</button>
-  }
+<!-- หัวข้อ + ปุ่มคำนวณ -->
+<div class="flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="text-3xl">จัดเส้นทาง</h1>
+    <p class="mt-1 text-base-content/70">
+      ไรเดอร์ 1 คนรับได้ไม่เกิน {{ appData.shop().maxOrdersPerRider }} ออเดอร์ ·
+      ออก {{ appData.shop().departureTime }} ต้องถึงก่อน {{ appData.shop().deadlineTime }}
+    </p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    @if (plan() && !confirmed()) {
+      <button class="btn btn-outline" (click)="next()">
+        <i class="fa-solid fa-rotate"></i>
+        คำนวณใหม่ (แผนถัดไป)
+      </button>
+    }
+    <button class="btn btn-primary" (click)="calculate(0)">
+      <i class="fa-solid fa-route"></i>
+      คำนวณเส้นทาง
+    </button>
+  </div>
 </div>
+
+@if (!plan()) {
+  <div class="card mt-6 border border-dashed border-base-300">
+    <div class="card-body items-center py-12 text-center text-base-content/70">
+      <i class="fa-solid fa-map-location-dot text-4xl text-primary"></i>
+      <p>กด "คำนวณเส้นทาง" ระบบจะแบ่งออเดอร์ให้ไรเดอร์ และหาเส้นทางที่สั้นที่สุดให้</p>
+    </div>
+  </div>
+}
 
 @if (plan()) {
   <p class="mt-4">
     @if (confirmed()) {
-      <b>แผน #{{ plan()!.id }} ยืนยันแล้ว</b>
+      <span class="badge badge-success">ยืนยันแล้ว</span>
+      แผน #{{ plan()!.id }} · ส่งเลขใบงานให้ไรเดอร์แต่ละคนได้เลย
     } @else {
-      แผนที่ {{ option() + 1 }} จาก {{ totalOptions() }} ({{ plan()!.strategy }})
+      <span class="badge badge-secondary">แผนที่ {{ option() + 1 }} / {{ totalOptions() }}</span>
+      {{ plan()!.strategy }}
     }
   </p>
 
-  
-  @if (!plan()!.all_on_time) {
-    <div class="alert alert-warning mt-4">
-      เสี่ยงส่งไม่ทัน: คนสุดท้ายถึง {{ plan()!.last_arrival_time }} (ต้องก่อน {{ plan()!.deadline_time }})
+  <!-- คำเตือน (ขาดทุน / ส่งไม่ทัน) -->
+  @for (warning of plan()!.warnings; track $index) {
+    <div class="alert alert-warning mt-3">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      {{ warning }}
     </div>
   }
 
-  
-  <div class="mt-4 overflow-x-auto">
-    <table class="table w-auto">
-      <tbody>
-        <tr><td>ไรเดอร์</td><td>{{ plan()!.rider_count }} คน</td></tr>
-        <tr><td>ออเดอร์ / กล่อง</td><td>{{ plan()!.total_order }} / {{ plan()!.total_box }}</td></tr>
-        <tr><td>ระยะทางรวม</td><td>{{ km(plan()!.total_distance_km) }} กม.</td></tr>
-        <tr><td>ส่งเสร็จ</td><td>{{ plan()!.last_arrival_time }}</td></tr>
-        <tr><td>ยอดขาย</td><td>{{ money(plan()!.revenue) }} บาท</td></tr>
-        <tr><td>ค่าอาหาร</td><td>{{ money(plan()!.food_cost) }} บาท</td></tr>
-        <tr><td>ค่าไรเดอร์</td><td>{{ money(plan()!.delivery_cost) }} บาท</td></tr>
-        <tr><td><b>กำไร</b></td><td><b>{{ money(plan()!.profit) }} บาท</b></td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  
-  @if (previous() && !confirmed()) {
-    <h2 class="mt-4 text-lg font-bold">เทียบกับแผนก่อน</h2>
-    <div class="overflow-x-auto">
-      <table class="table w-auto">
-        <thead>
-          <tr><th></th><th>แผนก่อน</th><th>แผนนี้</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>ไรเดอร์</td><td>{{ previous()!.rider_count }}</td><td>{{ plan()!.rider_count }}</td></tr>
-          <tr><td>ระยะทาง (กม.)</td><td>{{ km(previous()!.total_distance_km) }}</td><td>{{ km(plan()!.total_distance_km) }}</td></tr>
-          <tr><td>ค่าไรเดอร์ (บาท)</td><td>{{ money(previous()!.delivery_cost) }}</td><td>{{ money(plan()!.delivery_cost) }}</td></tr>
-          <tr><td>กำไร (บาท)</td><td>{{ money(previous()!.profit) }}</td><td>{{ money(plan()!.profit) }}</td></tr>
-          <tr><td>ส่งเสร็จ</td><td>{{ previous()!.last_arrival_time }}</td><td>{{ plan()!.last_arrival_time }}</td></tr>
-        </tbody>
-      </table>
+  <div class="mt-4 grid items-start gap-4 lg:grid-cols-3">
+    <!-- แผนที่ขนาดใหญ่ -->
+    <div class="card border border-base-300 lg:col-span-2">
+      <div class="card-body p-4">
+        <div class="aspect-square overflow-hidden rounded-box border border-base-300">
+          <app-route-map [jobs]="plan()!.jobs" [shop]="appData.shop()"></app-route-map>
+        </div>
+        <!-- สีของไรเดอร์แต่ละคน -->
+        <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          <span class="flex items-center gap-1">
+            <span class="inline-block size-3 rounded-full bg-black"></span>
+            ร้าน
+          </span>
+          @for (job of plan()!.jobs; track job.rider_no) {
+            <span class="flex items-center gap-1">
+              <span class="inline-block h-1 w-5 rounded" [style.background-color]="job.color"></span>
+              ไรเดอร์ {{ job.rider_no }}
+            </span>
+          }
+        </div>
+      </div>
     </div>
-  }
 
-  @if (!confirmed()) {
-    <button class="btn btn-primary mt-4" (click)="confirm()">ยืนยันแผนและสร้างใบงาน</button>
-  }
+    <!-- สรุปค่าใช้จ่าย กำไร และเวลา -->
+    <div class="card border border-base-300">
+      <div class="card-body">
+        <h2 class="card-title">สรุปแผนนี้</h2>
+        <table class="table table-sm">
+          <tbody>
+            <tr><td>ไรเดอร์</td><td class="text-right">{{ plan()!.rider_count }} คน</td></tr>
+            <tr><td>ออเดอร์ / กล่อง</td><td class="text-right">{{ plan()!.total_order }} / {{ plan()!.total_box }}</td></tr>
+            <tr><td>ระยะทางรวม</td><td class="text-right">{{ km(plan()!.total_distance_km) }} กม.</td></tr>
+            <tr><td>ส่งเสร็จคนสุดท้าย</td><td class="text-right">{{ plan()!.last_arrival_time }}</td></tr>
+            <tr><td>ยอดขาย</td><td class="text-right">{{ money(plan()!.revenue) }}</td></tr>
+            <tr><td>ค่าอาหาร</td><td class="text-right">- {{ money(plan()!.food_cost) }}</td></tr>
+            <tr><td>ค่าไรเดอร์</td><td class="text-right">- {{ money(plan()!.delivery_cost) }}</td></tr>
+            <tr class="text-base font-semibold" [class.text-success]="plan()!.profit >= 0" [class.text-error]="plan()!.profit < 0">
+              <td>{{ plan()!.profit >= 0 ? 'กำไร' : 'ขาดทุน' }} (บาท)</td>
+              <td class="text-right">{{ money(plan()!.profit) }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="text-xs text-base-content/70">
+          ค่าไรเดอร์ = {{ appData.shop().riderBaseFee }} + {{ appData.shop().riderFeePerKmPerBox }} × กล่อง × กม.
+        </p>
 
-  
-  <div class="mt-4 aspect-square max-w-lg border">
-    <app-route-map [jobs]="plan()!.jobs" [shop]="appData.shop()"></app-route-map>
+        @if (previous() && !confirmed()) {
+          <h3 class="mt-2 font-medium">เทียบกับแผนก่อน</h3>
+          <table class="table table-sm">
+            <thead>
+              <tr><th></th><th class="text-right">ก่อน</th><th class="text-right">นี้</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>ไรเดอร์</td><td class="text-right">{{ previous()!.rider_count }}</td><td class="text-right">{{ plan()!.rider_count }}</td></tr>
+              <tr><td>ระยะทาง</td><td class="text-right">{{ km(previous()!.total_distance_km) }}</td><td class="text-right">{{ km(plan()!.total_distance_km) }}</td></tr>
+              <tr><td>ค่าไรเดอร์</td><td class="text-right">{{ money(previous()!.delivery_cost) }}</td><td class="text-right">{{ money(plan()!.delivery_cost) }}</td></tr>
+              <tr><td>กำไร</td><td class="text-right">{{ money(previous()!.profit) }}</td><td class="text-right">{{ money(plan()!.profit) }}</td></tr>
+              <tr><td>ส่งเสร็จ</td><td class="text-right">{{ previous()!.last_arrival_time }}</td><td class="text-right">{{ plan()!.last_arrival_time }}</td></tr>
+            </tbody>
+          </table>
+        }
+
+        @if (!confirmed()) {
+          <button class="btn btn-primary mt-2 w-full" (click)="confirm()">
+            <i class="fa-solid fa-check"></i>
+            ยืนยันแผนและสร้างใบงาน
+          </button>
+        }
+      </div>
+    </div>
   </div>
 
-  
-  <h2 class="mt-6 text-lg font-bold">ใบงาน</h2>
-  <div class="mt-2 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+  <!-- ใบงานของไรเดอร์แต่ละคน -->
+  <h2 class="mt-8 text-xl">ใบงานไรเดอร์</h2>
+  <div class="mt-3 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
     @for (job of plan()!.jobs; track job.rider_no) {
-      <div class="card border-4 bg-base-100" [style.border-color]="job.color">
-        <div class="card-body">
+      <div class="card border border-base-300 border-l-8" [style.border-left-color]="job.color">
+        <div class="card-body p-5">
           <h3 class="card-title">
             {{ job.id ? 'ใบงาน ' + job.id : 'ไรเดอร์ ' + job.rider_no }}
+            @if (!job.on_time) {
+              <span class="badge badge-warning">ช้า</span>
+            }
           </h3>
-          <p>{{ job.total_box }} กล่อง · {{ km(job.distance_km) }} กม. · ค่าไรเดอร์ {{ money(job.cost) }} บาท</p>
-          <p>ส่งเสร็จ {{ job.finish_time }} {{ job.on_time ? '' : '(ช้า)' }}</p>
-          <ol class="list-decimal pl-5">
+          <p class="text-sm text-base-content/70">
+            {{ job.total_box }} กล่อง · {{ km(job.distance_km) }} กม. · ค่าไรเดอร์ {{ money(job.cost) }} บาท ·
+            ส่งเสร็จ {{ job.finish_time }}
+          </p>
+          <ol class="list-decimal pl-5 text-sm">
             @for (stop of job.stops; track stop.stop_no) {
               <li>{{ stop.customer_name }} ({{ stop.quantity }} กล่อง) ถึง {{ stop.arrival_time }}</li>
             }
           </ol>
-          <div class="card-actions">
-            <a class="btn btn-sm" [href]="job.map_url" target="_blank">เปิด Google Maps</a>
+          <div class="card-actions mt-1">
+            <a class="btn btn-outline btn-sm" [href]="job.map_url" target="_blank">
+              <i class="fa-solid fa-map"></i>
+              Google Maps
+            </a>
             @if (job.id) {
-              <a class="btn btn-sm btn-primary" [routerLink]="['/rider/job', job.id]">เปิดใบงาน</a>
+              <a class="btn btn-secondary btn-sm" [routerLink]="['/rider/job', job.id]">เปิดใบงาน</a>
             }
           </div>
         </div>
