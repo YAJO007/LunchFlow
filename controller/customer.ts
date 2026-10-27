@@ -83,9 +83,11 @@ router.get("/search", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const [rows] = await conn.query("SELECT * FROM customer WHERE id = ?", [
-      req.params.id,
-    ]);
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: "เลขลูกค้าไม่ถูกต้อง" });
+    }
+    const [rows] = await conn.query("SELECT * FROM customer WHERE id = ?", [id]);
     const customers = rows as Customer[];
 
     if (customers.length === 0) {
@@ -131,7 +133,10 @@ router.post("/", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   try {
-    const id = +req.params.id;
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: "เลขลูกค้าไม่ถูกต้อง" });
+    }
     const customer: Partial<CustomerPostRequest> = req.body || {};
 
     const [rows] = await conn.query("SELECT * FROM customer WHERE id = ?", [id]);
@@ -181,9 +186,11 @@ router.delete("/", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   try {
-    const [result] = await conn.query("DELETE FROM customer WHERE id = ?", [
-      req.params.id,
-    ]);
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: "เลขลูกค้าไม่ถูกต้อง" });
+    }
+    const [result] = await conn.query("DELETE FROM customer WHERE id = ?", [id]);
     const deleteResult = result as any;
 
     if (deleteResult.affectedRows === 0) {
