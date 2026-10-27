@@ -1,42 +1,42 @@
-<div class="page">
-  <form class="card" (ngSubmit)="login()">
-    <div class="logo">
-      <i class="fa-solid fa-bowl-rice" aria-hidden="true"></i>
-      <span>LunchFlow</span>
-    </div>
+<div class="flex min-h-screen items-center justify-center bg-base-200 px-4">
+  <form class="card w-full max-w-md bg-base-100" (ngSubmit)="login()">
+    <div class="card-body">
+      <div class="flex items-center gap-2 text-lg font-semibold text-primary">
+        <i class="fa-solid fa-bowl-rice"></i>
+        LunchFlow
+      </div>
+      <h1 class="mt-4 text-3xl">เข้าสู่ระบบ</h1>
+      <p class="text-base-content/70">ใช้บัญชีเจ้าของร้านเพื่อจัดการออเดอร์และเส้นทาง</p>
 
-    <h1>เข้าสู่ระบบ</h1>
-    <p class="subtitle">ใช้บัญชีเจ้าของร้านเพื่อจัดการออเดอร์และเส้นทาง</p>
+      <fieldset class="fieldset mt-2">
+        <legend class="fieldset-legend">ชื่อผู้ใช้</legend>
+        <input name="username" type="text" autocomplete="username" class="input w-full"
+          [class.input-error]="error()" [(ngModel)]="username" />
 
-    <div class="field" [class.invalid]="error()">
-      <input id="username" name="username" type="text" placeholder=" " autocomplete="username"
-        [(ngModel)]="username" />
-      <label for="username">ชื่อผู้ใช้</label>
-    </div>
+        <legend class="fieldset-legend">รหัสผ่าน</legend>
+        <input name="password" [type]="showPassword() ? 'text' : 'password'" autocomplete="current-password"
+          class="input w-full" [class.input-error]="error()" [(ngModel)]="password" />
 
-    <div class="field" [class.invalid]="error()">
-      <input id="password" name="password" [type]="showPassword() ? 'text' : 'password'" placeholder=" "
-        autocomplete="current-password" [(ngModel)]="password" />
-      <label for="password">รหัสผ่าน</label>
-    </div>
+        <label class="label mt-2">
+          <input type="checkbox" class="checkbox checkbox-sm" [checked]="showPassword()"
+            (change)="showPassword.set(!showPassword())" />
+          แสดงรหัสผ่าน
+        </label>
+      </fieldset>
 
-    @if (error()) {
-      <p class="error">
-        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
-        {{ error() }}
-      </p>
-    }
+      @if (error()) {
+        <p class="text-error">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          {{ error() }}
+        </p>
+      }
 
-    <label class="show-password">
-      <input type="checkbox" [checked]="showPassword()" (change)="showPassword.set(!showPassword())" />
-      แสดงรหัสผ่าน
-    </label>
+      <p class="text-sm text-base-content/70">บัญชีทดลอง: <b>owner</b> / <b>1234</b></p>
 
-    <p class="hint">บัญชีทดลอง: <b>owner</b> / <b>1234</b></p>
-
-    <div class="actions">
-      <a routerLink="/" class="text-btn">กลับหน้าแรก</a>
-      <button type="submit" class="primary-btn">ถัดไป</button>
+      <div class="card-actions mt-4 justify-between">
+        <a routerLink="/" class="btn btn-ghost">กลับหน้าแรก</a>
+        <button type="submit" class="btn btn-primary">เข้าสู่ระบบ</button>
+      </div>
     </div>
   </form>
 </div>
