@@ -28,7 +28,7 @@ export class Api {
     return response as Customer[];
   }
 
-(customer: object) {
+  async addCustomer(customer: object) {
     const url = `${API_URL}/customer`;
     const response = await lastValueFrom(this.http.post(url, customer));
     return response;
