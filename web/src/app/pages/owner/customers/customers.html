@@ -28,10 +28,6 @@
     <i class="fa-solid fa-shuffle"></i>
     สุ่มลูกค้า
   </button>
-  <button class="btn btn-ghost btn-sm text-error" (click)="removeAll()">
-    <i class="fa-solid fa-trash-can"></i>
-    ลบลูกค้าทั้งหมด
-  </button>
 </div>
 
 <!-- ฟอร์มเพิ่ม / แก้ไขลูกค้า -->
@@ -67,10 +63,9 @@
         </fieldset>
       </div>
 
-      <p class="mt-2 text-sm">หรือคลิกบนแผนที่เพื่อเลือกตำแหน่งบ้าน (ต้องอยู่ในรัศมี 3 กม. จากร้าน)</p>
+      <p class="mt-2 text-sm">ตำแหน่งบ้านบนแผนที่ (ต้องอยู่ในรัศมี 3 กม. จากร้าน)</p>
       <div class="aspect-square w-full max-w-sm overflow-hidden rounded-box border border-base-300">
-        <app-route-map [points]="selectedLocation()" [shop]="appData.shop()" [selectable]="true"
-          (pointSelected)="selectLocation($event)"></app-route-map>
+        <app-route-map [points]="selectedLocation()" [shop]="appData.shop()"></app-route-map>
       </div>
 
       <div class="card-actions mt-2 justify-end">

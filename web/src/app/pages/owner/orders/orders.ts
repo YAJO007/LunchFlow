@@ -1,8 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Customer } from '../../../model/customer';
 import { Order } from '../../../model/order';
-import { Api } from '../../../service/api';
+import { OrderApi } from '../../../services/api/order-api';
+import { CustomerApi } from '../../../services/api/customer-api';
 import { AppData } from '../../../service/app-data';
 import { Notify } from '../../../service/notify';
 import { dateTime } from '../../../utils/format';
@@ -14,6 +15,9 @@ import { dateTime } from '../../../utils/format';
   styleUrl: './orders.css',
 })
 export class Orders {
+  orderApi = inject(OrderApi);
+  customerApi = inject(CustomerApi);
+
   orders = signal<Order[]>([]);
   customers = signal<Customer[]>([]);
   simulateAmount = signal(25);
@@ -25,16 +29,17 @@ export class Orders {
   dateTime = dateTime;
 
   constructor(
-    private api: Api,
     public appData: AppData,
     private notify: Notify,
-  ) {
+  ) {}
+
+  ngOnInit() {
     this.load();
   }
 
   async load() {
     try {
-      this.orders.set(await this.api.getOrders());
+      this.orders.set(await this.orderApi.getOrders());
     } catch (error: any) {
       this.notify.apiError(error);
     }
@@ -56,7 +61,7 @@ export class Orders {
     }
 
     try {
-      const result = await this.api.simulateOrders(amount);
+      const result = await this.orderApi.simulateOrders(amount);
       this.notify.success('เพิ่ม ' + result.created_order + ' ออเดอร์');
       await this.load();
     } catch (error: any) {
@@ -69,7 +74,7 @@ export class Orders {
     this.addQuantity.set(1);
     this.addOpen.set(true);
     try {
-      this.customers.set(await this.api.getCustomers());
+      this.customers.set(await this.customerApi.getCustomers());
     } catch (error: any) {
       this.notify.apiError(error);
     }
@@ -81,7 +86,7 @@ export class Orders {
       return;
     }
     try {
-      await this.api.addOrder(Number(this.addCustomerId()), Number(this.addQuantity()));
+      await this.orderApi.addOrder(Number(this.addCustomerId()), Number(this.addQuantity()));
       this.notify.success('เพิ่มออเดอร์แล้ว');
       this.addOpen.set(false);
       await this.load();
@@ -92,7 +97,7 @@ export class Orders {
 
   async changeQuantity(o: Order, select: HTMLSelectElement) {
     try {
-      await this.api.updateOrder(o.id, Number(select.value));
+      await this.orderApi.updateOrder(o.id, Number(select.value));
       this.notify.success('แก้ออเดอร์ #' + o.id + ' แล้ว');
       await this.load();
     } catch (error: any) {
@@ -105,7 +110,7 @@ export class Orders {
       return;
     }
     try {
-      await this.api.deleteOrder(o.id);
+      await this.orderApi.deleteOrder(o.id);
       this.notify.success('ลบแล้ว');
       await this.load();
     } catch (error: any) {
@@ -118,7 +123,7 @@ export class Orders {
       return;
     }
     try {
-      await this.api.clearOrders();
+      await this.orderApi.clearOrders();
       this.notify.success('ลบออเดอร์ทั้งหมดแล้ว');
       await this.load();
     } catch (error: any) {

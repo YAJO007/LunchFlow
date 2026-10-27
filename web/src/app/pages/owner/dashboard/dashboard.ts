@@ -1,9 +1,11 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Customer } from '../../../model/customer';
 import { Order } from '../../../model/order';
 import { RoutePlan } from '../../../model/route';
-import { Api } from '../../../service/api';
+import { CustomerApi } from '../../../services/api/customer-api';
+import { OrderApi } from '../../../services/api/order-api';
+import { RouteApi } from '../../../services/api/route-api';
 import { AppData } from '../../../service/app-data';
 import { money } from '../../../utils/format';
 
@@ -16,6 +18,10 @@ import { money } from '../../../utils/format';
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
+  customerApi = inject(CustomerApi);
+  orderApi = inject(OrderApi);
+  routeApi = inject(RouteApi);
+
   // signal = กล่องเก็บค่า พอค่าในกล่องเปลี่ยน หน้าเว็บจะอัปเดตตัวเลขให้เอง
   customers = signal<Customer[]>([]); // รายชื่อลูกค้าทั้งหมด (เริ่มต้นว่าง)
   orders = signal<Order[]>([]); // ออเดอร์ทั้งหมด (เริ่มต้นว่าง)
@@ -25,11 +31,12 @@ export class Dashboard {
   // ฟังก์ชันจัดรูปตัวเลขเงิน เช่น 854.3912 → 854.39 ให้หน้า HTML เรียกใช้
   money = money;
 
-  // ทำงานทันทีตอนเปิดหน้านี้ → เริ่มโหลดข้อมูล
   constructor(
-    private api: Api, // ตัวช่วยคุยกับหลังบ้าน (Web API)
     public appData: AppData, // ข้อมูลที่ใช้ร่วมกันทุกหน้า (ข้อมูลร้าน)
-  ) {
+  ) {}
+
+  // ทำงานตอนเปิดหน้านี้ → เริ่มโหลดข้อมูล
+  ngOnInit() {
     this.load();
   }
 
@@ -38,8 +45,8 @@ export class Dashboard {
     // ขั้นที่ 1: ลูกค้า + ออเดอร์ (ข้อมูลหลัก)
     // ถ้าพัง ให้ขึ้นแถบสีแดงบอกผู้ใช้
     try {
-      this.customers.set(await this.api.getCustomers());
-      this.orders.set(await this.api.getOrders());
+      this.customers.set(await this.customerApi.getCustomers());
+      this.orders.set(await this.orderApi.getOrders());
     } catch (error: any) {
       this.error.set('เชื่อมต่อ API ไม่ได้ ถ้าใช้ Render ให้รอประมาณ 1 นาทีแล้วรีเฟรช');
     }
@@ -47,7 +54,7 @@ export class Dashboard {
     // ขั้นที่ 2: แผนส่งล่าสุด
     // ถ้ายังไม่เคยยืนยันแผนเลย API จะตอบ error → ถือว่า "ยังไม่มีแผน" ไม่ต้องเตือน
     try {
-      this.latestPlan.set(await this.api.getLatestPlan());
+      this.latestPlan.set(await this.routeApi.getLatestPlan());
     } catch (error) {
       this.latestPlan.set(undefined);
     }

@@ -1,8 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MapPoint, RouteMap } from '../../../components/route-map/route-map';
 import { Customer } from '../../../model/customer';
-import { Api } from '../../../service/api';
+import { CustomerApi } from '../../../services/api/customer-api';
 import { AppData } from '../../../service/app-data';
 import { Notify } from '../../../service/notify';
 import { randomCustomer } from '../../../utils/random-customer';
@@ -16,6 +16,8 @@ import { km } from '../../../utils/format';
   styleUrl: './customers.css',
 })
 export class Customers {
+  customerApi = inject(CustomerApi);
+
   customers = signal<Customer[]>([]);
 
   formOpen = signal(false);
@@ -30,16 +32,17 @@ export class Customers {
   randomCount = signal(5);
 
   constructor(
-    private api: Api,
     public appData: AppData,
     private notify: Notify,
-  ) {
+  ) {}
+
+  ngOnInit() {
     this.loadAll();
   }
 
   async loadAll() {
     try {
-      this.customers.set(await this.api.getCustomers());
+      this.customers.set(await this.customerApi.getCustomers());
     } catch (error: any) {
       this.notify.apiError(error);
     }
@@ -48,7 +51,7 @@ export class Customers {
   // ค้นหาลูกค้าจากชื่อหรือนามสกุล ผ่าน API /customer/search?name=...
   async search(text: string) {
     try {
-      this.customers.set(await this.api.searchCustomers(text.trim()));
+      this.customers.set(await this.customerApi.searchCustomers(text.trim()));
     } catch (error: any) {
       this.notify.apiError(error);
     }
@@ -71,10 +74,12 @@ export class Customers {
     return navigateLink(c.latitude, c.longitude);
   }
 
+  // จุดบ้านลูกค้าทุกคน เอาไปปักบนแผนที่
   points(): MapPoint[] {
     return this.customers().map((c) => ({ lat: c.latitude, lng: c.longitude, color: '#1e7a46' }));
   }
 
+  // จุดบ้านที่กำลังกรอกในฟอร์ม เอาไปปักบนแผนที่ให้เห็นว่าบ้านอยู่ตรงไหน
   selectedLocation(): MapPoint[] {
     const lat = Number(this.latitude());
     const lng = Number(this.longitude());
@@ -82,11 +87,6 @@ export class Customers {
       return [];
     }
     return [{ lat, lng, color: '#1e7a46' }];
-  }
-
-  selectLocation(point: MapPoint) {
-    this.latitude.set(point.lat.toFixed(6));
-    this.longitude.set(point.lng.toFixed(6));
   }
 
   openAdd() {
@@ -126,10 +126,10 @@ export class Customers {
     };
     try {
       if (this.editId() === 0) {
-        await this.api.addCustomer(body);
+        await this.customerApi.addCustomer(body);
         this.notify.success('เพิ่มลูกค้าแล้ว');
       } else {
-        await this.api.updateCustomer(this.editId(), body);
+        await this.customerApi.updateCustomer(this.editId(), body);
         this.notify.success('บันทึกแล้ว');
       }
       this.formOpen.set(false);
@@ -149,24 +149,9 @@ export class Customers {
     try {
       for (let i = 0; i < count; i++) {
         let customer = randomCustomer();
-        await this.api.addCustomer(customer);
+        await this.customerApi.addCustomer(customer);
       }
       this.notify.success('เพิ่มลูกค้าสุ่ม ' + count + ' คนแล้ว');
-      this.loadAll();
-    } catch (error: any) {
-      this.notify.apiError(error);
-    }
-  }
-
-  // ลบลูกค้าทุกคน (ออเดอร์ของลูกค้าจะถูกลบไปด้วย)
-  async removeAll() {
-    if (!confirm('ลบลูกค้าทั้งหมดใช่ไหม?\n\nออเดอร์ทั้งหมดของลูกค้าจะถูกลบไปด้วย และกู้คืนไม่ได้')) {
-      return;
-    }
-    try {
-      // เรียก API ครั้งเดียว ลบทั้งหมดในฐานข้อมูล (เร็วกว่าลบทีละคน)
-      const result = await this.api.clearCustomers();
-      this.notify.success('ลบลูกค้าทั้งหมด ' + result.affected_row + ' คนแล้ว');
       this.loadAll();
     } catch (error: any) {
       this.notify.apiError(error);
@@ -178,7 +163,7 @@ export class Customers {
       return;
     }
     try {
-      await this.api.deleteCustomer(c.id);
+      await this.customerApi.deleteCustomer(c.id);
       this.notify.success('ลบแล้ว');
       this.loadAll();
     } catch (error: any) {
