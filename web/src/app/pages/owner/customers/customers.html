@@ -5,11 +5,24 @@
       <h1 class="text-[28px] leading-snug font-normal">ลูกค้า</h1>
       <p class="mt-1 text-[15px] text-[#5f6368]">แสดง {{ customers().length }} คน</p>
     </div>
-    <button (click)="openAdd()"
-      class="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-[#1e8e3e] px-6 text-sm font-medium text-white transition hover:bg-[#137333] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1e8e3e]">
-      <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
-      เพิ่มลูกค้า
-    </button>
+    <div class="flex flex-wrap items-center gap-2">
+      <div class="inline-flex h-10 items-center rounded-full border border-[#dadce0] pl-4">
+        <label for="random-count" class="text-sm text-[#5f6368]">สุ่ม</label>
+        <input id="random-count" type="number" min="1" max="50" [(ngModel)]="randomCount"
+          class="w-14 bg-transparent text-center text-sm tabular-nums outline-none" />
+        <span class="text-sm text-[#5f6368]">คน</span>
+        <button (click)="addRandom()"
+          class="ml-2 inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-[#e6f4ea] px-4 text-sm font-medium text-[#137333] transition hover:bg-[#ceead6]">
+          <i class="fa-solid fa-shuffle" aria-hidden="true"></i>
+          สุ่มลูกค้า
+        </button>
+      </div>
+      <button (click)="openAdd()"
+        class="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-[#1e8e3e] px-6 text-sm font-medium text-white transition hover:bg-[#137333] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1e8e3e]">
+        <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+        เพิ่มลูกค้า
+      </button>
+    </div>
   </div>
 
   

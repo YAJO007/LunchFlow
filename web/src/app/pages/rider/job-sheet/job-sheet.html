@@ -11,9 +11,9 @@
   <p>ออกจากร้าน {{ job()!.departure_time }} · ส่งเสร็จประมาณ {{ job()!.finish_time }} (ต้องก่อน {{ job()!.deadline_time }})</p>
   <p class="mt-2">ส่งแล้ว {{ delivered().length }} / {{ job()!.stops.length }} จุด</p>
 
-  <a class="btn btn-primary mt-4 min-h-14 w-full text-lg" [href]="job()!.map_url" target="_blank" rel="noopener noreferrer">เปิด Google Maps นำทางทั้งเส้น</a>
+  <a class="btn mt-4 min-h-14 w-full text-lg border-none bg-green-700 text-white hover:bg-green-800"
+   [href]="job()!.map_url" target="_blank" rel="noopener noreferrer">เปิด Google Maps นำทางทั้งเส้น</a>
 
-  
   @for (stop of job()!.stops; track stop.stop_no) {
     <div class="card mt-4 bg-base-200" [class.opacity-50]="isDelivered(stop)">
       <div class="card-body">
@@ -31,7 +31,7 @@
     </div>
   }
 
-  
+
   <div class="mt-4 aspect-square border">
     <app-route-map [jobs]="[job()!]" [shop]="appData.shop()"></app-route-map>
   </div>

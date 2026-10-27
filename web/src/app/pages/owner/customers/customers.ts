@@ -5,6 +5,7 @@ import { Customer } from '../../../model/customer';
 import { Api } from '../../../service/api';
 import { AppData } from '../../../service/app-data';
 import { Notify } from '../../../service/notify';
+import { randomCustomer } from '../../../utils/random-customer';
 
 @Component({
   selector: 'app-customers',
@@ -23,6 +24,8 @@ export class Customers {
   address = signal('');
   latitude = signal('');
   longitude = signal('');
+
+  randomCount = signal(5);
 
   constructor(
     private api: Api,
@@ -128,6 +131,25 @@ export class Customers {
         this.notify.success('บันทึกแล้ว');
       }
       this.formOpen.set(false);
+      this.loadAll();
+    } catch (error: any) {
+      this.notify.error(error.message);
+    }
+  }
+
+  // สุ่มลูกค้าใหม่ตามจำนวนที่กรอก (1-50 คน)
+  async addRandom() {
+    let count = Number(this.randomCount());
+    if (count < 1 || count > 50) {
+      this.notify.error('จำนวนต้องอยู่ระหว่าง 1-50 คน');
+      return;
+    }
+    try {
+      for (let i = 0; i < count; i++) {
+        let customer = randomCustomer();
+        await this.api.addCustomer(customer);
+      }
+      this.notify.success('เพิ่มลูกค้าสุ่ม ' + count + ' คนแล้ว');
       this.loadAll();
     } catch (error: any) {
       this.notify.error(error.message);
