@@ -1,8 +1,15 @@
-<div class="navbar bg-base-200">
-  <a routerLink="/rider" class="btn btn-ghost gap-2 text-lg font-bold text-green-700 hover:bg-green-50">
-    LunchFlow <span class="font-normal text-base-content/70">ไรเดอร์</span>
-  </a>
-</div>
-<div class="mx-auto max-w-xl p-4">
-  <router-outlet></router-outlet>
+<div class="min-h-screen bg-base-200">
+  <header class="border-b border-base-300 bg-base-100">
+    <div class="mx-auto flex max-w-xl items-center gap-2 px-4 py-3">
+      <a routerLink="/rider" class="flex items-center gap-2 text-xl font-semibold text-primary">
+        <i class="fa-solid fa-motorcycle"></i>
+        LunchFlow
+      </a>
+      <span class="text-base-content/70">ไรเดอร์</span>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-xl p-4">
+    <router-outlet></router-outlet>
+  </main>
 </div>

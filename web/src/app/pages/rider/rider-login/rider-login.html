@@ -1,9 +1,17 @@
-<h1 class="text-2xl font-bold">ใบงานของฉัน</h1>
+<div class="card mt-6 bg-base-100">
+  <div class="card-body">
+    <h1 class="card-title text-2xl">ใบงานของฉัน</h1>
+    <p class="text-base-content/70">กรอกเลขใบงานที่ได้จากร้าน</p>
 
-<div class="mt-4 flex flex-col gap-3">
-  <input #jobNo type="number" min="1" step="1" inputmode="numeric" placeholder="เลขใบงาน เช่น 1001" class="input min-h-14 w-full text-lg" />
-  @if (error()) {
-    <p class="text-error">{{ error() }}</p>
-  }
-  <button class="btn btn-primary min-h-14 text-lg" (click)="open(jobNo)">เปิดใบงาน</button>
+    <input #jobNo type="number" min="1" inputmode="numeric" placeholder="เลขใบงาน เช่น 1001"
+      class="input input-lg mt-2 w-full" (keydown.enter)="open(jobNo)" />
+    @if (error()) {
+      <p class="text-error">{{ error() }}</p>
+    }
+
+    <button class="btn btn-primary btn-lg mt-2 w-full" (click)="open(jobNo)">
+      เปิดใบงาน
+      <i class="fa-solid fa-arrow-right"></i>
+    </button>
+  </div>
 </div>
