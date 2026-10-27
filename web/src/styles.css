@@ -2,38 +2,38 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
-/* ธีมสีของเว็บ (โทนเดียวกับ Google: พื้นขาว ขอบเทาอ่อน ปุ่มสีเขียว) */
+/* ธีมสีของเว็บ: โทนเขียวทั้งเว็บ พื้นเทาอมเขียวอ่อน ปุ่มเขียวเข้ม เตือนด้วยสีส้มอำพัน */
 @plugin "daisyui/theme" {
   name: "lunchflow";
   default: true;
   color-scheme: light;
 
   --color-base-100: #ffffff;
-  --color-base-200: #f1f3f4;
-  --color-base-300: #dadce0;
-  --color-base-content: #202124;
+  --color-base-200: #f3f6f4;
+  --color-base-300: #dde5e0;
+  --color-base-content: #1f2a24;
 
-  --color-primary: #188038;
+  --color-primary: #1e7a46;
   --color-primary-content: #ffffff;
-  --color-secondary: #e6f4ea;
-  --color-secondary-content: #137333;
-  --color-accent: #1a73e8;
-  --color-accent-content: #ffffff;
-  --color-neutral: #3c4043;
+  --color-secondary: #e2f1e7;
+  --color-secondary-content: #155e35;
+  --color-accent: #e8a33d;
+  --color-accent-content: #3d2a05;
+  --color-neutral: #34423a;
   --color-neutral-content: #ffffff;
 
-  --color-info: #1a73e8;
+  --color-info: #2f6f9f;
   --color-info-content: #ffffff;
-  --color-success: #188038;
+  --color-success: #1e7a46;
   --color-success-content: #ffffff;
-  --color-warning: #f9ab00;
-  --color-warning-content: #202124;
-  --color-error: #d93025;
+  --color-warning: #fbe7c4;
+  --color-warning-content: #6b4508;
+  --color-error: #c4392f;
   --color-error-content: #ffffff;
 
   --radius-selector: 1rem;
-  --radius-field: 0.5rem;
-  --radius-box: 1rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1.25rem;
   --border: 1px;
   --depth: 0;
   --noise: 0;

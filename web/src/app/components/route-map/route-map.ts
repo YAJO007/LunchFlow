@@ -131,6 +131,6 @@ export class RouteMap {
     const mercatorY = Math.PI - (2 * Math.PI * worldY) / worldSize;
     const lat = (180 / Math.PI) * Math.atan(Math.sinh(mercatorY));
 
-    this.pointSelected.emit({ lat, lng, color: '#1e8e3e' });
+    this.pointSelected.emit({ lat, lng, color: '#1e7a46' });
   }
 }

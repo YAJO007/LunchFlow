@@ -72,7 +72,7 @@ export class Customers {
   }
 
   points(): MapPoint[] {
-    return this.customers().map((c) => ({ lat: c.latitude, lng: c.longitude, color: '#1e8e3e' }));
+    return this.customers().map((c) => ({ lat: c.latitude, lng: c.longitude, color: '#1e7a46' }));
   }
 
   selectedLocation(): MapPoint[] {
@@ -81,7 +81,7 @@ export class Customers {
     if (!this.latitude() || !this.longitude() || !Number.isFinite(lat) || !Number.isFinite(lng)) {
       return [];
     }
-    return [{ lat, lng, color: '#1e8e3e' }];
+    return [{ lat, lng, color: '#1e7a46' }];
   }
 
   selectLocation(point: MapPoint) {
