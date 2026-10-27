@@ -52,6 +52,7 @@ CREATE TABLE `delivery_job` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `plan_id` INT NOT NULL,
   `rider_no` INT NOT NULL,
+  `rider_name` VARCHAR(100) NOT NULL DEFAULT '',
   `color` VARCHAR(20) NOT NULL,
   `total_box` INT NOT NULL,
   `distance_km` DOUBLE NOT NULL,

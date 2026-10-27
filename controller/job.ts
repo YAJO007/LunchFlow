@@ -2,6 +2,7 @@ import express from "express";
 import { conn } from "../dbconnect";
 import { RiderJob } from "../model/route";
 import { loadJobStops } from "./route";
+import { addRoadPaths } from "../utils/road-path";
 
 export const router = express.Router();
 
@@ -22,6 +23,7 @@ router.get("/:id", async (req, res) => {
     const job = jobs[0];
     job.stops = await loadJobStops(job.id);
     job.on_time = Boolean(job.on_time);
+    await addRoadPaths([job]);
 
     res.status(200).json(job as RiderJob);
   } catch (error) {

@@ -4,6 +4,7 @@ import { SHOP } from "../config/shop";
 import { OrderDetail } from "../model/order";
 import { RiderJob, RoutePlan, RouteStop } from "../model/route";
 import { calculatePlans, planWarnings } from "../utils/route-planner";
+import { addRoadPaths } from "../utils/road-path";
 import { SELECT_ORDER_DETAIL } from "./order";
 
 export const router = express.Router();
@@ -88,11 +89,12 @@ async function savePlan(plan: RoutePlan): Promise<number> {
 
   for (const job of plan.jobs) {
     const [jobResult] = await conn.query(
-      "INSERT INTO delivery_job (plan_id, rider_no, color, total_box, distance_km, duration_min, " +
-        "cost, finish_time, on_time, map_url) VALUES (?,?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO delivery_job (plan_id, rider_no, rider_name, color, total_box, distance_km, duration_min, " +
+        "cost, finish_time, on_time, map_url) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
       [
         planId,
         job.rider_no,
+        job.rider_name || "",
         job.color,
         job.total_box,
         job.distance_km,
@@ -143,6 +145,7 @@ router.post("/calculate", async (req, res) => {
     if (!result) {
       return res.status(400).json({ error: "ยังไม่มีออเดอร์ กรุณาเพิ่มหรือสุ่มออเดอร์ก่อน" });
     }
+    await addRoadPaths(result.plan.jobs);
     res.status(200).json(result);
   } catch (error) {
     console.error(error);
@@ -162,8 +165,16 @@ router.post("/confirm", async (req, res) => {
       return res.status(400).json({ error: "ยังไม่มีออเดอร์ กรุณาเพิ่มหรือสุ่มออเดอร์ก่อน" });
     }
 
+    // ชื่อไรเดอร์ที่กรอกมา เรียงตามไรเดอร์คนที่ 1, 2, 3, ... (ไม่กรอกก็ได้)
+    const riderNames = (req.body && req.body.rider_names) || [];
+    for (let i = 0; i < result.plan.jobs.length; i++) {
+      const name = riderNames[i];
+      result.plan.jobs[i].rider_name = typeof name === "string" ? name.trim() : "";
+    }
+
     const planId = await savePlan(result.plan);
     const saved = await loadSavedPlan(planId);
+    await addRoadPaths(saved!.jobs);
     res.status(201).json(saved);
   } catch (error) {
     console.error(error);
@@ -179,6 +190,7 @@ router.get("/latest", async (req, res) => {
       return res.status(404).json({ error: "ยังไม่มีแผนที่ยืนยัน" });
     }
     const plan = await loadSavedPlan(plans[0].id);
+    await addRoadPaths(plan!.jobs);
     res.status(200).json(plan);
   } catch (error) {
     console.error(error);

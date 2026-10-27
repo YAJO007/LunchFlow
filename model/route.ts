@@ -23,6 +23,8 @@ export interface RiderJob {
   on_time: boolean;
   map_url: string;
   stops: RouteStop[];
+  rider_name?: string; // ชื่อไรเดอร์ที่เจ้าของร้านกรอกตอนยืนยันแผน
+  path?: number[][]; // เส้นทางตามถนน [[ละติจูด, ลองจิจูด], ...] ไว้วาดบนแผนที่
 }
 
 export interface RoutePlan {
