@@ -128,11 +128,19 @@
       <div class="card border border-base-300 border-l-8" [style.border-left-color]="job.color">
         <div class="card-body p-5">
           <h3 class="card-title">
-            {{ job.id ? 'ใบงาน ' + job.id : 'ไรเดอร์ ' + job.rider_no }}
+            @if (job.id) {
+              ใบงาน {{ job.id }} · {{ riderName(job) }}
+            } @else {
+              ไรเดอร์ {{ job.rider_no }}
+            }
             @if (!job.on_time) {
               <span class="badge badge-warning">ช้า</span>
             }
           </h3>
+          @if (!job.id) {
+            <input #nameInput type="text" class="input w-full" placeholder="ชื่อไรเดอร์ (ไม่กรอกก็ได้)"
+              [value]="typedName(job.rider_no)" (input)="setRiderName(job.rider_no, nameInput.value)" />
+          }
           <p class="text-sm text-base-content/70">
             {{ job.total_box }} กล่อง · {{ km(job.distance_km) }} กม. · ค่าไรเดอร์ {{ money(job.cost) }} บาท ·
             ส่งเสร็จ {{ job.finish_time }}

@@ -25,6 +25,8 @@ export interface RiderJob {
   on_time: boolean;
   map_url: string;
   stops: RouteStop[];
+  rider_name?: string; // ชื่อไรเดอร์ (กรอกตอนยืนยันแผน)
+  path?: number[][]; // เส้นทางตามถนน [[ละติจูด, ลองจิจูด], ...]
   created_at?: string;
   departure_time?: string;
   deadline_time?: string;

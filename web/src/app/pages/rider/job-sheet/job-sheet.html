@@ -11,6 +11,7 @@
   <div class="card bg-base-100">
     <div class="card-body">
       <h1 class="card-title text-2xl">ใบงาน {{ job()!.id }}</h1>
+      <p class="text-lg">ไรเดอร์: <b>{{ riderName(job()!) }}</b></p>
       <div class="rounded-box bg-secondary p-4 text-secondary-content">
         <p>วันนี้ต้องหยิบข้าวกล่อง</p>
         <p class="text-4xl font-semibold">{{ job()!.total_box }} กล่อง</p>

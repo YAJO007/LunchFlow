@@ -1,10 +1,10 @@
-import { Component, input, signal, OnInit } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { RouteMap } from '../../../components/route-map/route-map';
 import { RiderJob } from '../../../model/route';
-import { Api } from '../../../service/api';
+import { RouteApi } from '../../../services/api/route-api';
 import { AppData } from '../../../service/app-data';
-import { km } from '../../../utils/format';
+import { km, riderName } from '../../../utils/format';
 import { navigateLink } from '../../../utils/geo';
 
 @Component({
@@ -13,17 +13,19 @@ import { navigateLink } from '../../../utils/geo';
   templateUrl: './job-sheet.html',
   styleUrl: './job-sheet.css',
 })
-export class JobSheet implements OnInit {
+export class JobSheet {
+  routeApi = inject(RouteApi);
+
   id = input.required<string>();
 
   job = signal<RiderJob | undefined>(undefined);
   error = signal('');
 
   km = km;
+  riderName = riderName;
   navigateLink = navigateLink;
 
   constructor(
-    private api: Api,
     public appData: AppData,
   ) {}
 
@@ -33,7 +35,7 @@ export class JobSheet implements OnInit {
 
   async load() {
     try {
-      const job = await this.api.getJob(Number(this.id()));
+      const job = await this.routeApi.getJob(Number(this.id()));
       this.job.set(job);
     } catch (error: any) {
       this.error.set('ไม่พบใบงานนี้ หรือเชื่อมต่อ API ไม่ได้');
