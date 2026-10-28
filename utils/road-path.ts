@@ -1,12 +1,11 @@
 import { SHOP } from "../config/shop";
 import { RiderJob } from "../model/route";
 
-// ขอเส้นทางตามถนนจริงจากบริการ OSRM (ฟรี ไม่ต้องสมัคร)
-// ส่งพิกัด ร้าน → จุดที่ 1 → จุดที่ 2 → ... ไป แล้วได้จุดบนถนนกลับมาหลายสิบจุด เอาไปวาดเส้นบนแผนที่
-// ได้กลับเป็น [[ละติจูด, ลองจิจูด], ...] ถ้าขอไม่สำเร็จจะได้ [] (หน้าเว็บจะวาดเส้นตรงแทน)
+// ขอเส้นตามถนนจาก OSRM
+// ได้ [[lat, lng], ...] ถ้าพลาดได้ [] (วาดเส้นตรงแทน)
 export async function getRoadPath(job: RiderJob): Promise<number[][]> {
   try {
-    // OSRM ใช้ลำดับ ลองจิจูด,ละติจูด และคั่นแต่ละจุดด้วย ;
+    // OSRM ใช้ lng,lat คั่นด้วย ;
     let points = SHOP.longitude + "," + SHOP.latitude;
     for (const stop of job.stops) {
       points += ";" + stop.longitude + "," + stop.latitude;
@@ -20,7 +19,7 @@ export async function getRoadPath(job: RiderJob): Promise<number[][]> {
       return [];
     }
 
-    // OSRM ส่งมาเป็น [ลองจิจูด, ละติจูด] สลับเป็น [ละติจูด, ลองจิจูด] ให้เหมือนที่อื่นในโปรเจกต์
+    // สลับเป็น [lat, lng]
     const coordinates = data.routes[0].geometry.coordinates as number[][];
     return coordinates.map((c) => [c[1], c[0]]);
   } catch (error) {
@@ -29,8 +28,8 @@ export async function getRoadPath(job: RiderJob): Promise<number[][]> {
   }
 }
 
-// ใส่เส้นทางถนน (path) ให้ใบงานทุกใบ
-// เริ่มขอทุกใบพร้อมกันก่อน แล้วค่อยรอผลทีละใบ จะได้ไม่ต้องรอนานเท่าจำนวนไรเดอร์
+// ใส่เส้นถนนให้ทุกใบงาน
+// ขอพร้อมกันทุกใบ
 export async function addRoadPaths(jobs: RiderJob[]) {
   const requests = jobs.map((job) => getRoadPath(job));
   for (let i = 0; i < jobs.length; i++) {

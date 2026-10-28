@@ -62,7 +62,7 @@ router.get("/:id", async (req, res) => {
 
 router.post("/simulate", async (req, res) => {
   try {
-    // ไม่ส่งจำนวนมา = สุ่มจำนวนออเดอร์ 20-30 รายการ
+    // ไม่ส่งจำนวน = สุ่ม 20-30
     let amount = randomInt(MIN_SIMULATE, MAX_SIMULATE);
     if (req.body && req.body.amount != null) {
       amount = Number(req.body.amount);
@@ -75,7 +75,7 @@ router.post("/simulate", async (req, res) => {
     const [rows] = await conn.query("SELECT * FROM customer");
     const customers = rows as Customer[];
 
-    // เลือกเฉพาะลูกค้าที่อยู่ในรัศมี 3 กม. จากร้าน
+    // เฉพาะลูกค้าในรัศมี 3 กม.
     const eligible = customers.filter((customer) =>
       getDistanceKm(SHOP.latitude, SHOP.longitude, customer.latitude, customer.longitude) <= CUSTOMER_RADIUS_KM
     );
@@ -85,7 +85,7 @@ router.post("/simulate", async (req, res) => {
       });
     }
 
-    // สลับลำดับลูกค้าแบบสุ่ม แล้วหยิบ amount คนแรก (ลูกค้า 1 คนได้ 1 ออเดอร์)
+    // สุ่มลำดับแล้วหยิบ amount คนแรก
     eligible.sort(() => Math.random() - 0.5);
     const chosen = eligible.slice(0, amount);
 

@@ -77,7 +77,7 @@
       </div>
     </div>
 
-    <!-- สรุปค่าใช้จ่าย กำไร และเวลา (ติดอยู่ข้างแผนที่ตอนเลื่อนจอ) -->
+    <!-- สรุปค่าใช้จ่าย กำไร เวลา -->
     <div class="card border border-base-300 lg:sticky lg:top-20">
       <div class="card-body">
         <h2 class="card-title">สรุปแผนนี้</h2>
@@ -89,7 +89,7 @@
                 @if (confirmed()) {
                   {{ plan()!.rider_count }} คน
                 } @else {
-                  <!-- ปุ่ม − / + เพิ่มลดจำนวนไรเดอร์ แล้วระบบแบ่งออเดอร์ใหม่ -->
+                  <!-- ปุ่ม ± ไรเดอร์ -->
                   <div class="join">
                     <button class="btn btn-sm join-item" (click)="changeRiders(-1)"
                       [disabled]="busy() || plan()!.rider_count <= minRiders()" title="ลดไรเดอร์ 1 คน">−</button>

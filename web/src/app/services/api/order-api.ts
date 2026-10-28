@@ -19,7 +19,7 @@ export class OrderApi {
     return response as Order[];
   }
 
-  // สุ่มออเดอร์ 20-30 รายการ เพื่อทดสอบระบบ
+  // สุ่ม 20-30 ออเดอร์
   public async simulateOrders(amount: number) {
     const url = `${this.apiEndpoint}/order/simulate`;
     const response = await lastValueFrom(this.http.post(url, { amount: amount }));

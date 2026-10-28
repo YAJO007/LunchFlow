@@ -19,7 +19,7 @@ function test(name: string, fn: () => void) {
   }
 }
 
-// สุ่มตัวเลขแบบกำหนด seed ได้ เพื่อให้รันเทสต์กี่ครั้งก็ได้ผลเหมือนเดิม
+// สุ่มแบบมี seed ผลเหมือนเดิมทุกครั้ง
 function makeRandom(seed: number) {
   let value = seed;
   return () => {
@@ -32,7 +32,7 @@ function makeOrders(count: number, seed: number): OrderDetail[] {
   const random = makeRandom(seed);
   const orders: OrderDetail[] = [];
   for (let i = 1; i <= count; i++) {
-    // สุ่มพิกัดในรัศมี 3 กม. จากร้าน (1 องศาละติจูด ประมาณ 111 กม.)
+    // พิกัดสุ่มในรัศมี 3 กม.
     const radiusKm = 0.3 + random() * 2.7;
     const angle = random() * 2 * Math.PI;
     orders.push({
@@ -112,7 +112,7 @@ test("สถานะส่งทันคำนวณถูกต้อง", ()
 
 test("สถานะส่งไม่ทันเมื่อบ้านอยู่ไกลเกินเวลา", () => {
   const far = makeOrders(1, 1);
-  // ห่างจากร้านประมาณ 40 กม. ความเร็ว 30 กม./ชม. ใช้เวลาเกิน 1 ชั่วโมง
+  // ห่าง 40 กม. ส่งไม่ทันแน่
   far[0].latitude = SHOP.latitude + 40 / 111;
   far[0].longitude = SHOP.longitude;
   const plan = calculatePlans(far)[0];
@@ -146,7 +146,7 @@ test("ค่าส่งของแผนเท่ากับผลรวม�
     let sum = 0;
     for (const job of plan.jobs) {
       const expected = riderCost(job.total_box, job.distance_km);
-      // distance_km ถูกปัดเป็นทศนิยม 2 ตำแหน่ง จึงยอมให้ต่างกันได้ไม่เกินผลของการปัดเศษ
+      // เผื่อผลจากการปัดทศนิยม
       const tolerance = SHOP.riderFeePerKmPerBox * job.total_box * 0.005 + 0.01;
       assert.ok(Math.abs(job.cost - expected) <= tolerance, "ไรเดอร์คนที่ " + job.rider_no + " ค่าส่งไม่ตรงสูตร");
       sum += job.cost;

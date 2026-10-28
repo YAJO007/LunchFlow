@@ -3,28 +3,28 @@ import { OrderDetail } from "../model/order";
 import { RiderJob, RoutePlan, RouteStop } from "../model/route";
 import { getDistanceKm } from "./distance";
 
-// ปัดเศษทศนิยม 2 ตำแหน่ง เช่น 1.23456 → 1.23
+// ปัดทศนิยม 2 ตำแหน่ง
 function round2(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-// ระยะทาง (กม.) จากร้านถึงบ้านลูกค้า
+// ระยะร้าน → บ้าน (กม.)
 function distanceFromShop(order: OrderDetail): number {
   return getDistanceKm(SHOP.latitude, SHOP.longitude, order.latitude, order.longitude);
 }
 
-// ระยะทาง (กม.) ระหว่างบ้านลูกค้า 2 หลัง
+// ระยะบ้าน → บ้าน (กม.)
 function distanceBetween(a: OrderDetail, b: OrderDetail): number {
   return getDistanceKm(a.latitude, a.longitude, b.latitude, b.longitude);
 }
 
-// แปลงเวลา "11:30" เป็นนาที (11 × 60 + 30 = 690) จะได้บวกลบกันง่าย
+// "11:30" → 690 นาที
 function timeToMinutes(time: string): number {
   const [hour, minute] = time.split(":");
   return Number(hour) * 60 + Number(minute);
 }
 
-// แปลงนาทีกลับเป็นเวลา เช่น 690 → "11:30"
+// 690 นาที → "11:30"
 function minutesToTime(totalMinutes: number): string {
   const rounded = Math.ceil(totalMinutes);
   const hour = Math.floor(rounded / 60);
@@ -32,9 +32,8 @@ function minutesToTime(totalMinutes: number): string {
   return String(hour).padStart(2, "0") + ":" + String(minute).padStart(2, "0");
 }
 
-// วิธีที่ 1 "กวาดรอบร้าน": เรียงบ้านตามทิศรอบร้านเหมือนเข็มนาฬิกา
-// แล้วตัดเป็นกลุ่ม กลุ่มละไม่เกิน 3 ออเดอร์ บ้านที่อยู่ทิศเดียวกันจะได้ไรเดอร์คนเดียวกัน
-// startIndex = เริ่มตัดกลุ่มจากบ้านหลังที่เท่าไร (เปลี่ยนค่าแล้วได้แผนต่างกัน)
+// วิธีที่ 1 กวาดรอบร้าน: เรียงตามทิศ แล้วตัดกลุ่มละ 3
+// startIndex = จุดเริ่มตัด (เปลี่ยนแล้วได้แผนใหม่)
 function groupBySweep(orders: OrderDetail[], startIndex: number): OrderDetail[][] {
 
   const angleOf = (order: OrderDetail) =>
@@ -51,9 +50,8 @@ function groupBySweep(orders: OrderDetail[], startIndex: number): OrderDetail[][
   return groups;
 }
 
-// วิธีที่ 3 "กวาดรอบร้านแบ่งเท่าๆ กัน": ใช้ตอนเจ้าของร้านเลือกจำนวนไรเดอร์เอง (riderCount คน)
-// เรียงบ้านตามทิศรอบร้านเหมือนวิธีที่ 1 แล้วแบ่งให้ไรเดอร์ riderCount คน คนละจำนวนใกล้ๆ กัน
-// เช่น 25 ออเดอร์ 12 คน → 1 คนได้ 3 ออเดอร์ อีก 11 คนได้ 2 ออเดอร์
+// วิธีที่ 3 กวาดรอบร้าน แบ่งให้ riderCount คนเท่าๆ กัน
+// เช่น 25 ออเดอร์ 12 คน → 3, 2, 2, ...
 function groupBySweepEven(orders: OrderDetail[], riderCount: number, startIndex: number): OrderDetail[][] {
   const angleOf = (order: OrderDetail) =>
     Math.atan2(order.longitude - SHOP.longitude, order.latitude - SHOP.latitude);
@@ -64,7 +62,7 @@ function groupBySweepEven(orders: OrderDetail[], riderCount: number, startIndex:
   const groups: OrderDetail[][] = [];
   let index = 0;
   for (let i = 0; i < riderCount; i++) {
-    // ทุกคนได้เท่ากันก่อน แล้วเศษที่เหลือแจกให้คนแรกๆ คนละ 1
+    // แบ่งเท่ากัน เศษให้คนแรกๆ
     let size = Math.floor(orders.length / riderCount);
     if (i < orders.length % riderCount) {
       size++;
@@ -75,7 +73,7 @@ function groupBySweepEven(orders: OrderDetail[], riderCount: number, startIndex:
   return groups;
 }
 
-// จำนวนไรเดอร์ที่เลือกได้: น้อยสุด = ออเดอร์ ÷ 3 ปัดขึ้น (คนละไม่เกิน 3), มากสุด = 1 คน 1 ออเดอร์
+// ไรเดอร์น้อยสุด = ออเดอร์ ÷ 3 ปัดขึ้น, มากสุด = จำนวนออเดอร์
 export function minRiders(orderCount: number): number {
   return Math.ceil(orderCount / SHOP.maxOrdersPerRider);
 }
@@ -84,8 +82,8 @@ export function maxRiders(orderCount: number): number {
   return orderCount;
 }
 
-// วิธีที่ 2 "จับกลุ่มเพื่อนบ้าน": เลือกบ้านตั้งต้น 1 หลัง (ไกลสุดหรือใกล้สุดจากร้าน)
-// แล้วหยิบบ้านที่ใกล้บ้านตั้งต้นที่สุดมาเข้ากลุ่มจนครบ 3 ออเดอร์ ทำซ้ำจนครบทุกออเดอร์
+// วิธีที่ 2 จับกลุ่มเพื่อนบ้าน: เริ่มจากบ้านไกลสุด/ใกล้สุด
+// แล้วหยิบบ้านที่ใกล้ที่สุดจนครบ 3
 function groupByNearest(orders: OrderDetail[], startFromFarthest: boolean): OrderDetail[][] {
   const remaining = [...orders];
   const groups: OrderDetail[][] = [];
@@ -118,8 +116,7 @@ function groupByNearest(orders: OrderDetail[], startFromFarthest: boolean): Orde
   return groups;
 }
 
-// หาลำดับการส่งทุกแบบ เช่น [A, B, C] → ABC, ACB, BAC, BCA, CAB, CBA
-// (ไรเดอร์มีไม่เกิน 3 จุด จึงมีอย่างมาก 6 แบบ ลองครบทุกแบบได้)
+// ทุกลำดับที่เป็นไปได้ (3 จุด = 6 แบบ)
 function allOrderings(items: OrderDetail[]): OrderDetail[][] {
   if (items.length <= 1) {
     return [items];
@@ -134,7 +131,7 @@ function allOrderings(items: OrderDetail[]): OrderDetail[][] {
   return result;
 }
 
-// ระยะทางรวมถ้าวิ่งตามลำดับนี้: ร้าน → จุดที่ 1 → จุดที่ 2 → ...
+// ระยะรวม ร้าน → จุด 1 → จุด 2 → ...
 function routeDistance(stops: OrderDetail[]): number {
   let total = distanceFromShop(stops[0]);
   for (let i = 1; i < stops.length; i++) {
@@ -143,7 +140,7 @@ function routeDistance(stops: OrderDetail[]): number {
   return total;
 }
 
-// เลือกลำดับการส่งที่ระยะทางสั้นที่สุด
+// ลำดับที่สั้นที่สุด
 function bestOrdering(group: OrderDetail[]): OrderDetail[] {
   let best = group;
   for (const ordering of allOrderings(group)) {
@@ -154,13 +151,13 @@ function bestOrdering(group: OrderDetail[]): OrderDetail[] {
   return best;
 }
 
-// ระยะทางของกลุ่มนี้ เมื่อวิ่งตามลำดับที่ดีที่สุด
+// ระยะของกลุ่มเมื่อวิ่งลำดับที่ดีที่สุด
 function groupDistance(group: OrderDetail[]): number {
   return routeDistance(bestOrdering(group));
 }
 
-// ลองสลับออเดอร์ระหว่าง 2 กลุ่ม (หรือย้ายออเดอร์ไปกลุ่มที่ยังไม่เต็ม)
-// ถ้าระยะทางรวมสั้นลง ก็เปลี่ยนตามนั้นแล้วตอบ true
+// สลับ/ย้ายออเดอร์ระหว่าง 2 กลุ่ม
+// สั้นลง = เก็บไว้ แล้วตอบ true
 function tryImprovePair(a: OrderDetail[], b: OrderDetail[]): boolean {
   const before = groupDistance(a) + groupDistance(b);
 
@@ -192,7 +189,7 @@ function tryImprovePair(a: OrderDetail[], b: OrderDetail[]): boolean {
   return false;
 }
 
-// ลองสลับออเดอร์ระหว่างทุกคู่กลุ่มไปเรื่อย ๆ จนสลับแล้วไม่สั้นลงอีก (ทำไม่เกิน 50 รอบ)
+// สลับทุกคู่จนไม่สั้นลง (ไม่เกิน 50 รอบ)
 function improveBySwap(groups: OrderDetail[][]): OrderDetail[][] {
   const result = groups.map((group) => [...group]);
   let improved = true;
@@ -212,13 +209,13 @@ function improveBySwap(groups: OrderDetail[][]): OrderDetail[][] {
   return result;
 }
 
-// ค่าไรเดอร์ 1 คน = 15 + 2 × จำนวนกล่อง × กม.
-// เช่น ถือ 6 กล่อง วิ่ง 2 กม. = 15 + 2 × 6 × 2 = 39 บาท
+// ค่าไรเดอร์ = 15 + 2 × กล่อง × กม.
+// เช่น 6 กล่อง 2 กม. = 39 บาท
 export function riderCost(totalBox: number, distanceKm: number): number {
   return SHOP.riderBaseFee + SHOP.riderFeePerKmPerBox * totalBox * distanceKm;
 }
 
-// สร้างลิงก์ Google Maps นำทางจากร้าน ผ่านทุกจุดตามลำดับ
+// ลิงก์ Google Maps ผ่านทุกจุด
 function makeMapUrl(stops: RouteStop[]): string {
   const origin = SHOP.latitude + "," + SHOP.longitude;
   const last = stops[stops.length - 1];
@@ -238,7 +235,7 @@ function makeMapUrl(stops: RouteStop[]): string {
   return url;
 }
 
-// สร้างใบงานของไรเดอร์ 1 คน: เรียงจุดส่ง คิดระยะทาง เวลาถึงแต่ละจุด และค่าไรเดอร์
+// ใบงาน 1 คน: ลำดับ ระยะ เวลาถึง ค่าไรเดอร์
 function buildJob(group: OrderDetail[], riderNo: number): RiderJob {
   const ordered = bestOrdering(group);
   const startMinutes = timeToMinutes(SHOP.departureTime);
@@ -273,8 +270,8 @@ function buildJob(group: OrderDetail[], riderNo: number): RiderJob {
     previous = order;
   }
 
-  // ลูกค้าได้ของตอนไรเดอร์ถึงบ้าน จึงไม่นับเวลาแวะของจุดสุดท้าย
-  // และตัดสินส่งทันจากเวลาถึงของทุกจุด ซึ่งเป็นเวลาเดียวกับที่แสดงบนใบงาน
+  // ไม่นับเวลาแวะจุดสุดท้าย
+  // ส่งทัน = ทุกจุดถึงก่อนเส้นตาย
   const lastStop = stops[stops.length - 1];
   const durationMinutes = timeToMinutes(lastStop.arrival_time) - startMinutes;
   const onTime = stops.every((stop) => timeToMinutes(stop.arrival_time) <= deadlineMinutes);
@@ -295,7 +292,7 @@ function buildJob(group: OrderDetail[], riderNo: number): RiderJob {
   };
 }
 
-// รวมคำเตือนของแผน เช่น ขาดทุน หรือมีจุดที่ส่งไม่ทันเวลา
+// คำเตือน: ขาดทุน / ส่งไม่ทัน
 export function planWarnings(plan: RoutePlan): string[] {
   const warnings: string[] = [];
 
@@ -320,7 +317,7 @@ export function planWarnings(plan: RoutePlan): string[] {
   return warnings;
 }
 
-// สร้างแผนทั้งหมดจากกลุ่มออเดอร์: รวมยอดขาย ต้นทุน ค่าไรเดอร์ และกำไร
+// รวมยอดขาย ต้นทุน ค่าไรเดอร์ กำไร
 function buildPlan(groups: OrderDetail[][], strategy: string): RoutePlan {
   const jobs = groups.map((group, index) => buildJob(group, index + 1));
 
@@ -368,7 +365,7 @@ function buildPlan(groups: OrderDetail[][], strategy: string): RoutePlan {
   return plan;
 }
 
-// ทำรหัสของการแบ่งกลุ่ม เอาไว้เช็กว่าแผนไหนแบ่งกลุ่มซ้ำกัน จะได้ตัดทิ้ง
+// รหัสการแบ่งกลุ่ม ไว้ตัดแผนซ้ำ
 function groupsKey(groups: OrderDetail[][]): string {
   return groups
     .map((group) => group.map((order) => order.id).sort((a, b) => a - b).join("-"))
@@ -376,9 +373,9 @@ function groupsKey(groups: OrderDetail[][]): string {
     .join("|");
 }
 
-// ฟังก์ชันหลัก: ลองแบ่งงานหลายวิธี แล้วเรียงแผนจากดีที่สุดไปแย่สุด
-// (ส่งทันทุกบ้านมาก่อน แล้วค่าไรเดอร์ถูกสุดมาก่อน)
-// riderCount = จำนวนไรเดอร์ที่เจ้าของร้านเลือกเอง (ไม่ส่งมา = ให้ระบบเลือกให้)
+// ฟังก์ชันหลัก: ลองหลายวิธี เรียงแผนดีสุดก่อน
+// (ส่งทันก่อน แล้วค่าไรเดอร์ถูกสุด)
+// riderCount ไม่ส่ง = ระบบเลือกให้
 export function calculatePlans(orders: OrderDetail[], riderCount?: number): RoutePlan[] {
   if (orders.length === 0) {
     return [];
@@ -392,7 +389,7 @@ export function calculatePlans(orders: OrderDetail[], riderCount?: number): Rout
     { name: "จับกลุ่มเพื่อนบ้าน (เริ่มจากบ้านใกล้สุด)", groups: groupByNearest(orders, false) },
   ];
 
-  // เลือกจำนวนไรเดอร์เอง: ใช้วิธีที่ 3 แทน โดยลองเริ่มแบ่งจากบ้านต่างกัน 5 แบบ
+  // เลือกจำนวนไรเดอร์เอง = วิธีที่ 3 (ลอง 5 จุดเริ่ม)
   if (riderCount !== undefined) {
     baseCandidates = [];
     for (let start = 0; start < 5 && start < orders.length; start++) {

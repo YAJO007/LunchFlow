@@ -14,8 +14,7 @@ const places = [
   'หอพักในมหาวิทยาลัย', 'คอนโดใกล้ประตูโขง', 'คณะวิทยาการสารสนเทศ', 'อาคารเรียนรวม',
 ];
 
-// จุดบ้านที่อยู่บนบกจริง (เอามาจากข้อมูลลูกค้าตัวอย่าง)
-// จะสุ่มตำแหน่งรอบ ๆ จุดพวกนี้ หมุดจะได้ไม่ตกน้ำ
+// จุดบ้านบนบก สุ่มรอบๆ จุดนี้ หมุดไม่ตกน้ำ
 const homes = [
   { lat: 16.245607, lng: 103.246601 },
   { lat: 16.245941, lng: 103.259627 },
@@ -42,18 +41,18 @@ const homes = [
   { lat: 16.227734, lng: 103.233106 },
 ];
 
-// สุ่มเลขจำนวนเต็มตั้งแต่ min ถึง max
+// สุ่ม min ถึง max
 function randomNumber(min: number, max: number) {
   return min + Math.floor(Math.random() * (max - min + 1));
 }
 
-// สุ่มเลือกของ 1 ชิ้นจากรายการ
+// สุ่ม 1 ชิ้น
 function randomItem(list: any[]) {
   let index = randomNumber(0, list.length - 1);
   return list[index];
 }
 
-// สุ่มเบอร์โทร 10 หลัก ขึ้นต้นด้วย 08
+// เบอร์ 08 + 8 หลัก
 function randomPhone() {
   let phone = '08';
   for (let i = 0; i < 8; i++) {
@@ -66,7 +65,7 @@ function randomPhone() {
 export function randomCustomer() {
   let home = randomItem(homes);
 
-  // ขยับจากจุดบ้านไปไม่เกินประมาณ 50 เมตร
+  // ขยับไม่เกิน ~50 ม.
   let latitude = home.lat + (Math.random() - 0.5) * 0.001;
   let longitude = home.lng + (Math.random() - 0.5) * 0.001;
 

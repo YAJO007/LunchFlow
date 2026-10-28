@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { DEFAULT_SHOP } from '../config/shop';
 import { Shop } from '../model/shop';
 
-// ข้อมูลที่ทุกหน้าใช้ร่วมกัน (ตามบท Data Sharing)
+// ข้อมูลกลาง (บท Data Sharing)
 @Injectable({
   providedIn: 'root',
 })

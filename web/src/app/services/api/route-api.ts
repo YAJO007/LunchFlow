@@ -5,7 +5,7 @@ import { Api } from '../../config/api';
 import { PlanOption, RiderJob, RoutePlan } from '../../model/route';
 import { Shop } from '../../model/shop';
 
-// เรียก API จัดเส้นทาง (/route) และใบงานไรเดอร์ (/job)
+// เรียก /route และ /job
 @Injectable({
   providedIn: 'root',
 })
@@ -14,15 +14,15 @@ export class RouteApi {
   api = inject(Api);
   apiEndpoint = this.api.API_ENDPOINT;
 
-  // ข้อมูลร้าน เช่น พิกัดร้าน ราคาต่อกล่อง เวลาออกส่ง
+  // ข้อมูลร้าน
   public async getShop() {
     const url = `${this.apiEndpoint}/route/shop`;
     const response = await lastValueFrom(this.http.get(url));
     return response as Shop;
   }
 
-  // คำนวณเส้นทาง option = แผนที่ 0, 1, 2, ... (ยังไม่บันทึก)
-  // riderCount = จำนวนไรเดอร์ที่เลือกเอง (ไม่ส่ง = ให้ระบบเลือกให้)
+  // คำนวณแผนที่ option (ยังไม่บันทึก)
+  // riderCount ไม่ส่ง = ระบบเลือก
   public async calculateRoute(option: number, riderCount?: number) {
     const url = `${this.apiEndpoint}/route/calculate`;
     const response = await lastValueFrom(
@@ -31,8 +31,7 @@ export class RouteApi {
     return response as PlanOption;
   }
 
-  // ยืนยันแผน = บันทึกลงฐานข้อมูลและออกเลขใบงาน
-  // riderNames = ชื่อไรเดอร์คนที่ 1, 2, 3, ... (ช่องไหนไม่กรอกส่งเป็น '' ได้)
+  // ยืนยัน = บันทึก + ออกเลขใบงาน
   public async confirmRoute(option: number, riderNames: string[], riderCount?: number) {
     const url = `${this.apiEndpoint}/route/confirm`;
     const response = await lastValueFrom(

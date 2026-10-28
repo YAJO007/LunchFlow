@@ -17,7 +17,7 @@ function readOption(body: any): number | null {
   return option;
 }
 
-// อ่านจำนวนไรเดอร์ที่เลือกเอง ไม่ส่งมา = undefined (ให้ระบบเลือก), ส่งมาผิด = null
+// ไม่ส่ง = undefined, ผิด = null
 function readRiderCount(body: any): number | undefined | null {
   if (body.rider_count === undefined || body.rider_count === null || body.rider_count === "") {
     return undefined;
@@ -29,8 +29,7 @@ function readRiderCount(body: any): number | undefined | null {
   return riderCount;
 }
 
-// คำนวณแผนทั้งหมด แล้วหยิบแผนที่ option ออกมา
-// ถ้ามีปัญหาจะได้ { error: "ข้อความ" } กลับไป
+// คำนวณทุกแผนแล้วหยิบแผนที่ option
 async function getPlanOption(option: number, riderCount?: number) {
   const [rows] = await conn.query(SELECT_ORDER_DETAIL + " ORDER BY orders.id");
   const orders = rows as OrderDetail[];
@@ -201,7 +200,7 @@ router.post("/confirm", async (req, res) => {
       return res.status(400).json({ error: result.error });
     }
 
-    // ชื่อไรเดอร์ที่กรอกมา เรียงตามไรเดอร์คนที่ 1, 2, 3, ... (ไม่กรอกก็ได้)
+    // ชื่อไรเดอร์ตามลำดับ (ไม่กรอกก็ได้)
     const riderNames = (req.body && req.body.rider_names) || [];
     for (let i = 0; i < result.plan.jobs.length; i++) {
       const name = riderNames[i];

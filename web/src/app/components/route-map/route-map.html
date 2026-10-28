@@ -15,14 +15,6 @@
   <circle [attr.cx]="x(p.lng)" [attr.cy]="y(p.lat)" r="5" [attr.fill]="p.color" stroke="white" stroke-width="1.5" />
   }
 
-  @for (job of jobs; track job.rider_no) {
-  @for (stop of job.stops; track stop.stop_no) {
-  <circle [attr.cx]="x(stop.longitude)" [attr.cy]="y(stop.latitude)" r="9" [attr.fill]="job.color" stroke="white"
-    stroke-width="2" />
-  <text [attr.x]="x(stop.longitude)" [attr.y]="y(stop.latitude) + 4" text-anchor="middle" font-size="11"
-    font-weight="bold" fill="white">{{ stop.stop_no }}</text>
-  }
-  }
 
   @for (job of jobs; track job.rider_no) {
   @for (stop of job.stops; track stop.stop_no) {

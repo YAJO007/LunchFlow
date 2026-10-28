@@ -22,11 +22,11 @@ export class RoutePlanning {
   totalOptions = signal(0);
   confirmed = signal(false);
 
-  // กำลังรอ API อยู่ไหม (ระหว่างนี้ล็อกปุ่ม กันกดซ้ำแล้วได้แผนซ้อนกันหลายแผน)
+  // รอ API อยู่ (ล็อกปุ่มกันกดซ้ำ)
   calculating = signal(false);
   saving = signal(false);
 
-  // จำนวนไรเดอร์ที่เลือกเอง (undefined = ให้ระบบเลือกให้)
+  // undefined = ระบบเลือกให้
   riderCount = signal<number | undefined>(undefined);
   minRiders = signal(0);
   maxRiders = signal(0);
@@ -35,8 +35,7 @@ export class RoutePlanning {
   km = km;
   riderName = riderName;
 
-  // ชื่อไรเดอร์ที่กรอกไว้ ช่องที่ 0 = ไรเดอร์คนที่ 1
-  // กดคำนวณใหม่แล้วชื่อยังอยู่ ไม่ต้องกรอกซ้ำ
+  // ชื่อไรเดอร์ ช่อง 0 = คนที่ 1
   riderNames: string[] = [];
 
   constructor(
@@ -45,7 +44,7 @@ export class RoutePlanning {
     private router: Router,
   ) {}
 
-  // ปุ่มทุกปุ่มในหน้านี้ต้องล็อกไหม
+  // ล็อกปุ่มไหม
   busy(): boolean {
     return this.calculating() || this.saving();
   }
@@ -74,13 +73,13 @@ export class RoutePlanning {
     this.calculate(this.option() + 1);
   }
 
-  // ปุ่ม "คำนวณเส้นทาง": ให้ระบบเลือกจำนวนไรเดอร์ให้เอง
+  // คำนวณ (ระบบเลือกจำนวนไรเดอร์)
   calculateAuto() {
     this.riderCount.set(undefined);
     this.calculate(0);
   }
 
-  // ปุ่ม + / − : เพิ่มหรือลดไรเดอร์ 1 คน แล้วแบ่งออเดอร์ใหม่
+  // ± ไรเดอร์ 1 คน แล้วคำนวณใหม่
   changeRiders(change: number) {
     const count = this.plan()!.rider_count + change;
     if (count < this.minRiders() || count > this.maxRiders()) {
@@ -90,12 +89,12 @@ export class RoutePlanning {
     this.calculate(0);
   }
 
-  // พิมพ์ชื่อในช่องของไรเดอร์คนที่ riderNo
+  // ตั้งชื่อไรเดอร์
   setRiderName(riderNo: number, name: string) {
     this.riderNames[riderNo - 1] = name;
   }
 
-  // ชื่อที่กรอกไว้ของไรเดอร์คนที่ riderNo (ยังไม่กรอก = '')
+  // ชื่อที่กรอกไว้
   typedName(riderNo: number): string {
     return this.riderNames[riderNo - 1] || '';
   }
@@ -106,13 +105,13 @@ export class RoutePlanning {
     }
     this.saving.set(true);
     try {
-      // ส่งชื่อให้ครบทุกคน ช่องไหนยังไม่กรอกส่งเป็น ''
+      // ช่องว่างส่งเป็น ''
       const names = this.plan()!.jobs.map((job) => this.typedName(job.rider_no));
       const saved = await this.routeApi.confirmRoute(this.option(), names, this.riderCount());
       this.plan.set(saved);
       this.confirmed.set(true);
       this.notify.success('ยืนยันแผน #' + saved.id + ' แล้ว');
-      // ยืนยันเสร็จ ไปดูกำไรของแผนนี้ต่อเลย
+      // เสร็จแล้วไปหน้ากำไร
       this.router.navigate(['/owner/profit']);
     } catch (error: any) {
       this.notify.apiError(error);

@@ -48,7 +48,7 @@ export class Customers {
     }
   }
 
-  // ค้นหาลูกค้าจากชื่อหรือนามสกุล ผ่าน API /customer/search?name=...
+  // ค้นหาจากชื่อ
   async search(text: string) {
     try {
       this.customers.set(await this.customerApi.searchCustomers(text.trim()));
@@ -57,29 +57,29 @@ export class Customers {
     }
   }
 
-  // ล้างช่องค้นหา แล้วแสดงลูกค้าทั้งหมด
+  // ล้างค้นหา
   clearSearch(input: HTMLInputElement) {
     input.value = '';
     this.loadAll();
   }
 
-  // ระยะจากร้านถึงบ้านลูกค้า (กม.) เช่น "0.63"
+  // ระยะจากร้าน (กม.)
   distanceFromShop(c: Customer): string {
     let shop = this.appData.shop();
     return km(distanceKm(shop.latitude, shop.longitude, c.latitude, c.longitude));
   }
 
-  // ลิงก์เปิด Google Maps ไปบ้านลูกค้า
+  // ลิงก์ Google Maps
   mapLink(c: Customer): string {
     return navigateLink(c.latitude, c.longitude);
   }
 
-  // จุดบ้านลูกค้าทุกคน เอาไปปักบนแผนที่
+  // จุดบ้านทุกคน
   points(): MapPoint[] {
     return this.customers().map((c) => ({ lat: c.latitude, lng: c.longitude, color: '#1e7a46' }));
   }
 
-  // จุดบ้านที่กำลังกรอกในฟอร์ม เอาไปปักบนแผนที่ให้เห็นว่าบ้านอยู่ตรงไหน
+  // จุดบ้านในฟอร์ม
   selectedLocation(): MapPoint[] {
     const lat = Number(this.latitude());
     const lng = Number(this.longitude());
@@ -139,7 +139,7 @@ export class Customers {
     }
   }
 
-  // สุ่มลูกค้าใหม่ตามจำนวนที่กรอก (1-50 คน)
+  // สุ่มลูกค้า 1-50 คน
   async addRandom() {
     let count = Number(this.randomCount());
     if (count < 1 || count > 50) {

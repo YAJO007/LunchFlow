@@ -4,7 +4,7 @@ import { RoutePlan } from '../../../model/route';
 import { RouteApi } from '../../../services/api/route-api';
 import { dateTime, km, money, riderName } from '../../../utils/format';
 
-// หน้า "ไรเดอร์" = ไรเดอร์ทุกคนในแผนล่าสุดที่ยืนยันแล้ว พร้อมใบงานของแต่ละคน
+// หน้าไรเดอร์ของแผนล่าสุด
 @Component({
   selector: 'app-riders',
   imports: [RouterModule],
@@ -14,7 +14,7 @@ import { dateTime, km, money, riderName } from '../../../utils/format';
 export class Riders {
   routeApi = inject(RouteApi);
 
-  plan = signal<RoutePlan | undefined>(undefined); // แผนล่าสุด (ยังไม่มี = undefined)
+  plan = signal<RoutePlan | undefined>(undefined); // แผนล่าสุด
   loading = signal(true);
   error = signal('');
 
@@ -33,13 +33,13 @@ export class Riders {
     try {
       this.plan.set(await this.routeApi.getLatestPlan());
     } catch (error) {
-      // ยังไม่เคยยืนยันแผน API จะตอบ 404 ถือว่า "ยังไม่มีไรเดอร์ออกงาน"
+      // ยังไม่มีแผน (404)
       this.plan.set(undefined);
     }
     this.loading.set(false);
   }
 
-  // กรอกเลขใบงานแล้วเปิดดูใบงานนั้น (ใบงานของแผนเก่าก็เปิดได้)
+  // เปิดใบงานตามเลข
   open(jobNo: HTMLInputElement) {
     const id = Number(jobNo.value);
     if (!Number.isInteger(id) || id <= 0) {

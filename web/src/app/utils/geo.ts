@@ -2,7 +2,7 @@ export function navigateLink(lat: number, lng: number): string {
   return 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng;
 }
 
-// ระยะทางเป็นเส้นตรง (กม.) ระหว่าง 2 จุด สูตรเดียวกับฝั่ง API (utils/distance.ts)
+// ระยะเส้นตรง (กม.) สูตรเดียวกับ API
 export function distanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   let earthRadiusKm = 6371;
   let dLat = ((lat2 - lat1) * Math.PI) / 180;

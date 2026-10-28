@@ -66,7 +66,7 @@ router.get("/", async (req, res) => {
 
 router.get("/search", async (req, res) => {
   try {
-    // ค้นจากชื่อเต็ม เช่น ?name=สมชาย หรือ ?name=ใจดี
+    // ค้นจากชื่อเต็ม
     const name = req.query.name || "";
 
     const [rows] = await conn.query(
@@ -137,7 +137,7 @@ router.put("/:id", async (req, res) => {
     if (!Number.isInteger(id) || id <= 0) {
       return res.status(400).json({ error: "เลขลูกค้าไม่ถูกต้อง" });
     }
-    // ส่งมาแค่บางช่องได้ ช่องที่ไม่ส่งจะใช้ค่าเดิม (รวมด้วย ...spread ข้างล่าง)
+    // ช่องที่ไม่ส่งมาใช้ค่าเดิม
     const customer: CustomerPostRequest = req.body || {};
 
     const [rows] = await conn.query("SELECT * FROM customer WHERE id = ?", [id]);

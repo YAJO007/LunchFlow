@@ -7,7 +7,7 @@ export function km(value: number): string {
   return Number(value).toFixed(2);
 }
 
-// ชื่อที่ใช้แสดงของไรเดอร์ ถ้าเจ้าของร้านไม่ได้กรอกชื่อ จะแสดงเป็น "ไรเดอร์ 1"
+// ชื่อไรเดอร์ (ไม่กรอก = "ไรเดอร์ 1")
 export function riderName(job: RiderJob): string {
   if (job.rider_name) {
     return job.rider_name;

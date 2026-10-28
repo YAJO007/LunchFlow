@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 
-// ที่อยู่ของ Web API (ตามบท Api Endpoint)
 @Injectable({
   providedIn: 'root',
 })

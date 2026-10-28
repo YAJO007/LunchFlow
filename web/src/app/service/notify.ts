@@ -11,7 +11,7 @@ export class Notify {
   show(text: string, type: string) {
     this.text.set(text);
     this.type.set(type);
-    // ยกเลิกตัวจับเวลาของข้อความเก่า ไม่งั้นมันจะลบข้อความใหม่เร็วเกินไป
+    // ล้างตัวจับเวลาเก่า
     clearTimeout(this.timer);
     this.timer = setTimeout(() => this.text.set(''), 3000);
   }
@@ -24,8 +24,8 @@ export class Notify {
     this.show(text, 'error');
   }
 
-  // แสดงข้อความ error ที่ API ส่งกลับมา เช่น { error: "ไม่พบลูกค้า" }
-  // ถ้าเชื่อมต่อ API ไม่ได้เลย จะไม่มีข้อความจาก API ให้บอกผู้ใช้แทน
+  // แสดง error จาก API
+  // ต่อ API ไม่ได้ ใช้ข้อความแทน
   apiError(error: any) {
     if (error.error && error.error.error) {
       this.error(error.error.error);
